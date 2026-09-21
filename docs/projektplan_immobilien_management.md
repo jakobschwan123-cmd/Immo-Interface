@@ -56,6 +56,10 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
 
 ## 🧭 Backlog / Für später
 
+*   **Privacy-Modus:** Umschalter, der alle Geldbeträge/Werte unkenntlich macht
+    (z. B. verblurrt oder als „••••"), damit man den Bildschirm zeigen kann, ohne
+    Zahlen preiszugeben. Idealerweise pro Gerät gemerkt (localStorage).
+
 *   **Rechtsträger-Gruppierung (wichtig für den Jahresabschluss):**
     Immobilien gehören verschiedenen **Rechtsträgern** — es kann mehrere gleicher Art
     geben (z. B. zwei GbRs, eine GmbH, Privatpersonen). Ziel: Immobilien einem
