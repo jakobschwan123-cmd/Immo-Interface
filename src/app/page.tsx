@@ -18,6 +18,7 @@ import type { Property, Entity } from "@/lib/types";
 import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
 import { EntityManagerDialog } from "@/components/entity-manager-dialog";
+import { PortfolioCharts } from "@/components/portfolio-charts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -278,6 +279,11 @@ export default function Dashboard() {
             value={formatEuro(totals.annualSurplusCents)}
           />
         </div>
+
+        {/* Diagramme */}
+        {!dataLoading && properties.length > 0 && (
+          <PortfolioCharts properties={properties} entities={entities} />
+        )}
 
         {/* Gruppen nach Rechtsträger */}
         {dataLoading ? (
