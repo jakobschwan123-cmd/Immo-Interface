@@ -30,7 +30,13 @@ import {
 
 import { addProperty, updateProperty } from "@/lib/properties";
 import { euroInputToCents, centsToEuroInput } from "@/lib/money";
-import { LEGAL_FORMS, type LegalForm, type Property } from "@/lib/types";
+import {
+  LEGAL_FORMS,
+  RENTAL_TYPES,
+  type LegalForm,
+  type RentalType,
+  type Property,
+} from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 
 // Formularzustand: alle Geldfelder als String (in Euro).
@@ -38,6 +44,9 @@ type FormState = {
   name: string;
   address: string;
   legalForm: LegalForm;
+  rentalType: RentalType;
+  area: string;
+  units: string;
   purchaseDate: string;
   purchasePrice: string;
   landValue: string;
@@ -52,6 +61,9 @@ const EMPTY: FormState = {
   name: "",
   address: "",
   legalForm: "Privat",
+  rentalType: "Dauervermietung",
+  area: "",
+  units: "",
   purchaseDate: "",
   purchasePrice: "",
   landValue: "",
@@ -68,6 +80,9 @@ function formFromProperty(p: Property): FormState {
     name: p.name,
     address: p.address ?? "",
     legalForm: p.legalForm,
+    rentalType: p.rentalType ?? "Dauervermietung",
+    area: p.areaSqm != null ? String(p.areaSqm) : "",
+    units: p.units != null ? String(p.units) : "",
     purchaseDate: p.purchaseDate ?? "",
     purchasePrice: centsToEuroInput(p.purchasePriceCents),
     landValue: centsToEuroInput(p.landValueCents),
@@ -115,6 +130,9 @@ export function PropertyDialog({
       name: form.name.trim(),
       address: form.address.trim() || undefined,
       legalForm: form.legalForm,
+      rentalType: form.rentalType,
+      areaSqm: form.area ? Number(form.area.replace(",", ".")) || undefined : undefined,
+      units: form.units ? Number(form.units) || undefined : undefined,
       purchaseDate: form.purchaseDate,
       purchasePriceCents: euroInputToCents(form.purchasePrice),
       landValueCents: euroInputToCents(form.landValue),
@@ -195,6 +213,48 @@ export function PropertyDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Vermietungstyp + m² + Einheiten */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-1.5">
+                <Label>Vermietungstyp</Label>
+                <Select
+                  value={form.rentalType}
+                  onValueChange={(v) => set("rentalType", v as RentalType)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RENTAL_TYPES.map((rt) => (
+                      <SelectItem key={rt} value={rt}>
+                        {rt}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="area">Fläche (m²)</Label>
+                  <Input
+                    id="area"
+                    inputMode="decimal"
+                    value={form.area}
+                    onChange={(e) => set("area", e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="units">Einheiten</Label>
+                  <Input
+                    id="units"
+                    inputMode="numeric"
+                    value={form.units}
+                    onChange={(e) => set("units", e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 

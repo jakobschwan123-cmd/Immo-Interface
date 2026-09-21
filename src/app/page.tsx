@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Trash2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -182,7 +183,12 @@ export default function Dashboard() {
                     return (
                       <TableRow key={p.id}>
                         <TableCell className="font-medium">
-                          {p.name}
+                          <Link
+                            href={`/immobilie/${p.id}`}
+                            className="hover:underline"
+                          >
+                            {p.name}
+                          </Link>
                           {p.address && (
                             <span className="block text-xs text-muted-foreground">
                               {p.address}

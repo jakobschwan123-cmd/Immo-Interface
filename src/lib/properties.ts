@@ -41,6 +41,25 @@ export function subscribeProperties(
   );
 }
 
+// Echtzeit-Abo auf EINE Immobilie (fuer die Detailseite).
+// onData bekommt null, wenn das Dokument nicht existiert.
+export function subscribeProperty(
+  id: string,
+  onData: (property: Property | null) => void,
+  onError?: (error: Error) => void,
+): () => void {
+  return onSnapshot(
+    doc(db, COLLECTION, id),
+    (snap) =>
+      onData(
+        snap.exists()
+          ? ({ id: snap.id, ...(snap.data() as Omit<Property, "id">) })
+          : null,
+      ),
+    (err) => onError?.(err),
+  );
+}
+
 // Neue Immobilie anlegen. createdAt setzt der Server.
 export async function addProperty(input: PropertyInput): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTION), {

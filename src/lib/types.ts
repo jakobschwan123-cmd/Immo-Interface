@@ -9,6 +9,18 @@ export type LegalForm = "Privat" | "GbR" | "GmbH";
 
 export const LEGAL_FORMS: LegalForm[] = ["Privat", "GbR", "GmbH"];
 
+// Vermietungsart. Wichtig fuer das Ferienhaus der Eltern:
+// - Dauervermietung: feste Kaltmiete pro Monat
+// - Ferienvermietung: nur zeitweise vermietet, Einnahmen kommen aus Buchungen (Phase 2b)
+// - Eigennutzung: selbst genutzt / leer, keine Mieteinnahmen
+export type RentalType = "Dauervermietung" | "Ferienvermietung" | "Eigennutzung";
+
+export const RENTAL_TYPES: RentalType[] = [
+  "Dauervermietung",
+  "Ferienvermietung",
+  "Eigennutzung",
+];
+
 // Kategorien fuer Buchungen (Phase 2b). Fest definiert, damit der
 // Jahresabschluss (Phase 4) sauber gruppieren kann.
 export type TransactionCategory =
@@ -38,6 +50,9 @@ export type Property = {
   name: string; // Bezeichnung, z.B. "Musterstraße 1, Karlsruhe"
   address?: string;
   legalForm: LegalForm;
+  rentalType: RentalType; // Art der Nutzung/Vermietung
+  areaSqm?: number; // Wohnflaeche in m²
+  units?: number; // Anzahl Wohnungen/Einheiten
   purchaseDate: string; // ISO-Datum "YYYY-MM-DD"
 
   // --- Kaufpreis-Aufteilung (Cent) ---
