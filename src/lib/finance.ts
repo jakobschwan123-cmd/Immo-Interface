@@ -54,6 +54,7 @@ export function sumKpis(properties: Property[]) {
       const k = calculateKpis(p);
       acc.totalPurchaseCents += p.purchasePriceCents;
       acc.totalMarketValueCents += p.marketValueCents ?? 0;
+      acc.totalLoanRemainingCents += p.loanRemainingCents ?? 0;
       acc.annualRentCents += k.annualRentCents;
       acc.annualCostsCents += k.annualCostsCents;
       acc.annualAfaCents += k.annualAfaCents;
@@ -63,6 +64,7 @@ export function sumKpis(properties: Property[]) {
     {
       totalPurchaseCents: 0,
       totalMarketValueCents: 0,
+      totalLoanRemainingCents: 0,
       annualRentCents: 0,
       annualCostsCents: 0,
       annualAfaCents: 0,

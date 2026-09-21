@@ -60,6 +60,10 @@ type FormState = {
   monthlyRent: string;
   monthlyCosts: string;
   marketValue: string;
+  loanRemaining: string;
+  loanRate: string;
+  loanMonthly: string;
+  loanEndDate: string;
 };
 
 const EMPTY: FormState = {
@@ -78,6 +82,10 @@ const EMPTY: FormState = {
   monthlyRent: "",
   monthlyCosts: "",
   marketValue: "",
+  loanRemaining: "",
+  loanRate: "",
+  loanMonthly: "",
+  loanEndDate: "",
 };
 
 // Bestehende Immobilie -> Formularwerte (Cent -> Euro-String).
@@ -98,6 +106,15 @@ function formFromProperty(p: Property): FormState {
     monthlyRent: centsToEuroInput(p.monthlyRentCents),
     monthlyCosts: centsToEuroInput(p.monthlyCostsCents),
     marketValue: p.marketValueCents != null ? centsToEuroInput(p.marketValueCents) : "",
+    loanRemaining:
+      p.loanRemainingCents != null ? centsToEuroInput(p.loanRemainingCents) : "",
+    loanRate:
+      p.loanInterestRatePercent != null ? String(p.loanInterestRatePercent) : "",
+    loanMonthly:
+      p.loanMonthlyPaymentCents != null
+        ? centsToEuroInput(p.loanMonthlyPaymentCents)
+        : "",
+    loanEndDate: p.loanEndDate ?? "",
   };
 }
 
@@ -153,6 +170,16 @@ export function PropertyDialog({
       marketValueCents: form.marketValue
         ? euroInputToCents(form.marketValue)
         : undefined,
+      loanRemainingCents: form.loanRemaining
+        ? euroInputToCents(form.loanRemaining)
+        : undefined,
+      loanInterestRatePercent: form.loanRate
+        ? Number(form.loanRate.replace(",", ".")) || undefined
+        : undefined,
+      loanMonthlyPaymentCents: form.loanMonthly
+        ? euroInputToCents(form.loanMonthly)
+        : undefined,
+      loanEndDate: form.loanEndDate || undefined,
     };
 
     setSaving(true);
@@ -370,6 +397,53 @@ export function PropertyDialog({
                   value={form.monthlyCosts}
                   onChange={(e) => set("monthlyCosts", e.target.value)}
                 />
+              </div>
+            </div>
+
+            {/* Finanzierung / Kredit (optional) */}
+            <div className="border-t pt-3">
+              <p className="mb-2 text-sm font-medium">Finanzierung (optional)</p>
+              <div className="grid gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="loanRemaining">Restschuld (€)</Label>
+                    <Input
+                      id="loanRemaining"
+                      inputMode="decimal"
+                      value={form.loanRemaining}
+                      onChange={(e) => set("loanRemaining", e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="loanRate">Zinssatz (% p.a.)</Label>
+                    <Input
+                      id="loanRate"
+                      inputMode="decimal"
+                      value={form.loanRate}
+                      onChange={(e) => set("loanRate", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="loanMonthly">Rate / Monat (€)</Label>
+                    <Input
+                      id="loanMonthly"
+                      inputMode="decimal"
+                      value={form.loanMonthly}
+                      onChange={(e) => set("loanMonthly", e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="loanEndDate">Abbezahlt bis</Label>
+                    <Input
+                      id="loanEndDate"
+                      type="date"
+                      value={form.loanEndDate}
+                      onChange={(e) => set("loanEndDate", e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -162,6 +162,37 @@ export default function PropertyDetail() {
       ? property.marketValueCents - property.purchasePriceCents
       : null;
 
+  // Finanzierung
+  const hasLoan =
+    property.loanRemainingCents != null ||
+    property.loanMonthlyPaymentCents != null ||
+    property.loanInterestRatePercent != null ||
+    !!property.loanEndDate;
+  const annualInterestCents =
+    property.loanRemainingCents != null &&
+    property.loanInterestRatePercent != null
+      ? Math.round(
+          (property.loanRemainingCents * property.loanInterestRatePercent) / 100,
+        )
+      : null;
+  // Restlaufzeit in Monaten bis loanEndDate.
+  let monthsRemaining: number | null = null;
+  if (property.loanEndDate) {
+    const end = new Date(property.loanEndDate);
+    if (!Number.isNaN(end.getTime())) {
+      const now = new Date();
+      monthsRemaining =
+        (end.getFullYear() - now.getFullYear()) * 12 +
+        (end.getMonth() - now.getMonth());
+    }
+  }
+  const restlaufzeitText =
+    monthsRemaining != null && monthsRemaining > 0
+      ? `noch ${Math.floor(monthsRemaining / 12)} J. ${monthsRemaining % 12} Mon.`
+      : monthsRemaining != null
+        ? "abbezahlt"
+        : "–";
+
   return (
     <main className="flex flex-1 flex-col bg-muted/30">
       <AppHeader />
@@ -275,6 +306,57 @@ export default function PropertyDetail() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Finanzierung / Kredit */}
+        {hasLoan && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-base">Finanzierung</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y">
+              <Row
+                label="Restschuld"
+                value={
+                  property.loanRemainingCents != null
+                    ? formatEuro(property.loanRemainingCents)
+                    : "–"
+                }
+              />
+              <Row
+                label="Zinssatz"
+                value={
+                  property.loanInterestRatePercent != null
+                    ? `${property.loanInterestRatePercent} % p.a.`
+                    : "–"
+                }
+              />
+              <Row
+                label="Rate / Monat"
+                value={
+                  property.loanMonthlyPaymentCents != null
+                    ? formatEuro(property.loanMonthlyPaymentCents)
+                    : "–"
+                }
+              />
+              <Row
+                label="Zinsen / Jahr (ca.)"
+                value={
+                  annualInterestCents != null
+                    ? formatEuro(annualInterestCents)
+                    : "–"
+                }
+              />
+              <Row
+                label="Abbezahlt bis"
+                value={
+                  property.loanEndDate
+                    ? `${property.loanEndDate} (${restlaufzeitText})`
+                    : "–"
+                }
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Buchungen (Einnahmen/Ausgaben) */}
         <Card className="mt-6">

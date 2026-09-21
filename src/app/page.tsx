@@ -228,6 +228,8 @@ export default function Dashboard() {
 
   const totals = sumKpis(properties);
   const wertzuwachsCents = totals.totalMarketValueCents - totals.totalPurchaseCents;
+  // Eigenkapital (grob): aktueller Marktwert minus Restschulden.
+  const equityCents = totals.totalMarketValueCents - totals.totalLoanRemainingCents;
 
   // Immobilien nach Rechtsträger gruppieren.
   const entityMap = new Map(entities.map((e) => [e.id, e]));
@@ -272,6 +274,8 @@ export default function Dashboard() {
           <KpiCard label="Kaufpreis gesamt" value={formatEuro(totals.totalPurchaseCents)} />
           <KpiCard label="Marktwert gesamt" value={formatEuro(totals.totalMarketValueCents)} />
           <KpiCard label="Wertzuwachs" value={formatEuro(wertzuwachsCents)} />
+          <KpiCard label="Restschuld gesamt" value={formatEuro(totals.totalLoanRemainingCents)} />
+          <KpiCard label="Eigenkapital (Marktwert − Restschuld)" value={formatEuro(equityCents)} />
           <KpiCard label="Mieteinnahmen / Jahr" value={formatEuro(totals.annualRentCents)} />
           <KpiCard label="AfA / Jahr" value={formatEuro(totals.annualAfaCents)} />
           <KpiCard
