@@ -156,15 +156,23 @@ export default function PropertyDetail() {
   const expenseCents = transactions
     .filter((t) => t.type === "expense")
     .reduce((s, t) => s + t.amountCents, 0);
+  const repaymentCents = transactions
+    .filter((t) => t.type === "repayment")
+    .reduce((s, t) => s + t.amountCents, 0);
   const saldoCents = incomeCents - expenseCents;
+
+  // Sondertilgungen fuer die Kreditberechnung.
+  const repayments = transactions
+    .filter((t) => t.type === "repayment")
+    .map((t) => ({ amountCents: t.amountCents, date: t.date }));
 
   const wertzuwachsCents =
     property.marketValueCents != null
       ? property.marketValueCents - property.purchasePriceCents
       : null;
 
-  // Finanzierung (berechnet aus den Kreditdaten)
-  const loan = computeLoan(property);
+  // Finanzierung (berechnet aus den Kreditdaten + Sondertilgungen)
+  const loan = computeLoan(property, repayments);
   const restlaufzeitText =
     loan.monthsRemaining != null && loan.monthsRemaining > 0
       ? `noch ${Math.floor(loan.monthsRemaining / 12)} J. ${loan.monthsRemaining % 12} Mon.`
@@ -309,6 +317,12 @@ export default function PropertyDetail() {
                 label="davon Zins / Tilgung (akt.)"
                 value={`${formatEuro(loan.monthlyInterestCents)} / ${formatEuro(loan.monthlyPrincipalCents)}`}
               />
+              {repaymentCents > 0 && (
+                <Row
+                  label="Sondertilgungen (gesamt)"
+                  value={formatEuro(repaymentCents)}
+                />
+              )}
               <Row
                 label="Restschuld (heute)"
                 value={
@@ -358,6 +372,14 @@ export default function PropertyDetail() {
                   {formatEuro(saldoCents)}
                 </span>
               </span>
+              {repaymentCents > 0 && (
+                <span>
+                  Sondertilgungen:{" "}
+                  <span className="font-medium tabular-nums">
+                    {formatEuro(repaymentCents)}
+                  </span>
+                </span>
+              )}
             </div>
 
             {transactions.length === 0 ? (
@@ -383,7 +405,15 @@ export default function PropertyDetail() {
                         <TableRow key={t.id}>
                           <TableCell className="tabular-nums">{t.date}</TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{t.category}</Badge>
+                            <Badge
+                              variant={
+                                t.type === "repayment" ? "outline" : "secondary"
+                              }
+                            >
+                              {t.type === "repayment"
+                                ? "Sondertilgung"
+                                : t.category}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {t.description ?? "–"}

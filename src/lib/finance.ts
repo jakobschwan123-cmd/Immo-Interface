@@ -2,7 +2,7 @@
 // Alle Geldwerte in Cent rein und raus. Prozentwerte als "echte" Prozentzahl
 // (z.B. 3.46 fuer 3,46 %), passend zu formatPercent().
 
-import type { Property } from "./types";
+import type { Property, Transaction } from "./types";
 import { computeLoan } from "./loan";
 
 export type PropertyKpis = {
@@ -49,13 +49,17 @@ export function calculateKpis(p: Property): PropertyKpis {
 }
 
 // Summiert Kennzahlen ueber mehrere Immobilien (fuer die Dashboard-Uebersicht).
-export function sumKpis(properties: Property[]) {
+// transactions optional -> nur fuer die Restschuld (Sondertilgungen) noetig.
+export function sumKpis(properties: Property[], transactions: Transaction[] = []) {
   return properties.reduce(
     (acc, p) => {
       const k = calculateKpis(p);
+      const repayments = transactions
+        .filter((t) => t.type === "repayment" && t.propertyId === p.id)
+        .map((t) => ({ amountCents: t.amountCents, date: t.date }));
       acc.totalPurchaseCents += p.purchasePriceCents;
       acc.totalMarketValueCents += p.marketValueCents ?? 0;
-      acc.totalLoanRemainingCents += computeLoan(p).remainingCents;
+      acc.totalLoanRemainingCents += computeLoan(p, repayments).remainingCents;
       acc.annualRentCents += k.annualRentCents;
       acc.annualCostsCents += k.annualCostsCents;
       acc.annualAfaCents += k.annualAfaCents;

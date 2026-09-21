@@ -7,6 +7,9 @@
 
 import type { Property } from "./types";
 
+// Eine Sondertilgung: Betrag (Cent) an einem Datum.
+export type Repayment = { amountCents: number; date: string };
+
 export type LoanState = {
   configured: boolean; // sind alle Kreditdaten gesetzt?
   remainingCents: number; // aktuelle Restschuld
@@ -27,7 +30,10 @@ const NOT_CONFIGURED: LoanState = {
   payable: false,
 };
 
-export function computeLoan(p: Property): LoanState {
+export function computeLoan(
+  p: Property,
+  repayments: Repayment[] = [],
+): LoanState {
   if (
     p.loanOriginalCents == null ||
     p.loanMonthlyPaymentCents == null ||
@@ -44,20 +50,39 @@ export function computeLoan(p: Property): LoanState {
   const payment = p.loanMonthlyPaymentCents;
   const now = new Date();
 
+  // Sondertilgungen je Kalendermonat "YYYY-MM" aufsummieren.
+  const repayByMonth = new Map<string, number>();
+  for (const r of repayments) {
+    const key = (r.date ?? "").slice(0, 7); // "YYYY-MM"
+    if (key) repayByMonth.set(key, (repayByMonth.get(key) ?? 0) + r.amountCents);
+  }
+
   // Wie viele volle Monate sind seit Kreditbeginn vergangen?
   let monthsElapsed =
     (now.getFullYear() - start.getFullYear()) * 12 +
     (now.getMonth() - start.getMonth());
   if (monthsElapsed < 0) monthsElapsed = 0;
 
-  // Tilgungsverlauf bis heute simulieren.
+  // Tilgungsverlauf bis heute simulieren (inkl. Sondertilgungen).
   let balance = p.loanOriginalCents;
-  for (let m = 0; m < monthsElapsed && balance > 0; m++) {
-    const interest = Math.round(balance * monthlyRate);
-    const principal = payment - interest;
-    if (principal <= 0) break; // Rate deckt Zinsen nicht -> keine Tilgung
-    balance -= principal;
-    if (balance < 0) balance = 0;
+  for (let m = 0; m <= monthsElapsed && balance > 0; m++) {
+    if (m > 0) {
+      // regulaere Rate: Zins + Tilgung
+      const interest = Math.round(balance * monthlyRate);
+      const principal = payment - interest;
+      if (principal > 0) {
+        balance -= principal;
+        if (balance < 0) balance = 0;
+      }
+    }
+    // Sondertilgungen dieses Kalendermonats abziehen.
+    const d = new Date(start.getFullYear(), start.getMonth() + m, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const extra = repayByMonth.get(key);
+    if (extra) {
+      balance -= extra;
+      if (balance < 0) balance = 0;
+    }
   }
   const remaining = Math.max(0, balance);
 

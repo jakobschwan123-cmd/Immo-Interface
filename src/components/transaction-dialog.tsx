@@ -67,7 +67,8 @@ export function TransactionDialog({
         type,
         amountCents,
         date,
-        category,
+        // Sondertilgung braucht keine EÜR-Kategorie.
+        category: type === "repayment" ? "Sonstiges" : category,
         description: description.trim() || undefined,
         createdBy: user.uid,
       });
@@ -109,6 +110,7 @@ export function TransactionDialog({
                   <SelectContent>
                     <SelectItem value="income">Einnahme</SelectItem>
                     <SelectItem value="expense">Ausgabe</SelectItem>
+                    <SelectItem value="repayment">Sondertilgung</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -133,26 +135,28 @@ export function TransactionDialog({
                   onChange={(e) => setDate(e.target.value)}
                 />
               </div>
-              <div className="grid gap-1.5">
-                <Label>Kategorie</Label>
-                <Select
-                  value={category}
-                  onValueChange={(v) =>
-                    setCategory((v as TransactionCategory) ?? "Sonstiges")
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRANSACTION_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {type !== "repayment" && (
+                <div className="grid gap-1.5">
+                  <Label>Kategorie</Label>
+                  <Select
+                    value={category}
+                    onValueChange={(v) =>
+                      setCategory((v as TransactionCategory) ?? "Sonstiges")
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TRANSACTION_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="grid gap-1.5">

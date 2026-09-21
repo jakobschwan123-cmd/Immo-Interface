@@ -44,9 +44,11 @@ export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   "Sonstiges",
 ];
 
-// Einnahme oder Ausgabe. Der Betrag wird immer POSITIV gespeichert;
-// das Vorzeichen ergibt sich aus dem Typ.
-export type TransactionType = "income" | "expense";
+// Einnahme, Ausgabe oder Sondertilgung. Der Betrag wird immer POSITIV
+// gespeichert; das Vorzeichen ergibt sich aus dem Typ.
+// "repayment" (Sondertilgung): reduziert die Restschuld, ist aber KEINE
+// steuerlich absetzbare Ausgabe -> taucht NICHT in der EÜR auf.
+export type TransactionType = "income" | "expense" | "repayment";
 
 // Eine Buchung (Einnahme/Ausgabe), gehoert zu genau einer Immobilie.
 export type Transaction = {
@@ -63,7 +65,7 @@ export type Transaction = {
 
 export type TransactionInput = Omit<Transaction, "id" | "createdAt">;
 
-// Vorzeichenbehafteter Betrag in Cent (Einnahme +, Ausgabe -).
+// Vorzeichenbehafteter Betrag in Cent (Einnahme +, Ausgabe/Sondertilgung -).
 export function signedAmountCents(t: Transaction): number {
   return t.type === "income" ? t.amountCents : -t.amountCents;
 }

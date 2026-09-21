@@ -11,10 +11,18 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { subscribeProperties, deleteProperty } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
+import { subscribeAllTransactions } from "@/lib/transactions";
 import { calculateKpis, sumKpis } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
-import type { Property, Entity } from "@/lib/types";
+import type { Property, Entity, Transaction } from "@/lib/types";
+
+// Sondertilgungen einer Immobilie aus der Buchungsliste ziehen.
+function repaymentsFor(propertyId: string, transactions: Transaction[]) {
+  return transactions
+    .filter((t) => t.type === "repayment" && t.propertyId === propertyId)
+    .map((t) => ({ amountCents: t.amountCents, date: t.date }));
+}
 
 import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
@@ -51,14 +59,16 @@ function KpiCard({ label, value }: { label: string; value: string }) {
 // Tabelle der Immobilien einer Gruppe inkl. Summenzeile.
 function PropertyTable({
   props,
+  transactions,
   onEdit,
   onDelete,
 }: {
   props: Property[];
+  transactions: Transaction[];
   onEdit: (p: Property) => void;
   onDelete: (p: Property) => void;
 }) {
-  const totals = sumKpis(props);
+  const totals = sumKpis(props, transactions);
   const monthlyRentSum = props.reduce((s, p) => s + p.monthlyRentCents, 0);
   const grossYield =
     totals.totalPurchaseCents > 0
@@ -99,7 +109,10 @@ function PropertyTable({
                   {formatEuro(p.purchasePriceCents)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {formatEuro(computeLoan(p).remainingCents)}
+                  {formatEuro(
+                    computeLoan(p, repaymentsFor(p.id, transactions))
+                      .remainingCents,
+                  )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatEuro(p.monthlyRentCents)}
@@ -174,6 +187,7 @@ export default function Dashboard() {
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [entities, setEntities] = useState<Entity[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -209,9 +223,13 @@ export default function Dashboard() {
     const unsubEntities = subscribeEntities(setEntities, (err) =>
       console.error("[Entities laden]", err),
     );
+    const unsubTx = subscribeAllTransactions(setTransactions, (err) =>
+      console.error("[Transactions laden]", err),
+    );
     return () => {
       unsubProps();
       unsubEntities();
+      unsubTx();
     };
   }, [user]);
 
@@ -234,7 +252,7 @@ export default function Dashboard() {
     );
   }
 
-  const totals = sumKpis(properties);
+  const totals = sumKpis(properties, transactions);
   // Gesamtvermögen (grob): aktueller Marktwert minus Restschulden.
   const netWorthCents = totals.totalMarketValueCents - totals.totalLoanRemainingCents;
 
@@ -326,6 +344,7 @@ export default function Dashboard() {
                 <CardContent className="px-0 pb-0">
                   <PropertyTable
                     props={g.props}
+                    transactions={transactions}
                     onEdit={openEdit}
                     onDelete={handleDelete}
                   />
