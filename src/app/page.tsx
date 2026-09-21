@@ -28,6 +28,7 @@ import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
 import { EntityManagerDialog } from "@/components/entity-manager-dialog";
 import { PortfolioCharts } from "@/components/portfolio-charts";
+import { StatCardArea } from "@/components/stat-card-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -259,6 +260,16 @@ export default function Dashboard() {
   // Gesamtvermögen (grob): aktueller Marktwert minus Restschulden.
   const netWorthCents = totals.totalMarketValueCents - totals.totalLoanRemainingCents;
 
+  // Monatliche gebuchte Einnahmen des laufenden Jahres (fuer die Area-Karte).
+  const currentYear = new Date().getFullYear();
+  const monthlyIncome: number[] = Array(12).fill(0);
+  for (const t of transactions) {
+    if (t.type === "income" && t.date.startsWith(String(currentYear))) {
+      const m = Number(t.date.slice(5, 7)) - 1;
+      if (m >= 0 && m < 12) monthlyIncome[m] += t.amountCents;
+    }
+  }
+
   // Immobilien nach Rechtsträger gruppieren.
   const entityMap = new Map(entities.map((e) => [e.id, e]));
   const groups: { entity: Entity | null; props: Property[] }[] = [];
@@ -300,7 +311,12 @@ export default function Dashboard() {
         {/* Gesamt-Kennzahlen */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard label="Gesamtwert (Marktwert)" value={formatEuro(totals.totalMarketValueCents)} />
-          <KpiCard label="Einkommen / Jahr (Miete)" value={formatEuro(totals.annualRentCents)} />
+          <StatCardArea
+            label="Einkommen / Jahr (Miete)"
+            value={formatEuro(totals.annualRentCents)}
+            data={monthlyIncome}
+            caption={`Gebuchte Einnahmen ${currentYear}`}
+          />
           <KpiCard label="Kaufpreis gesamt" value={formatEuro(totals.totalPurchaseCents)} />
           <KpiCard label="Restschuld gesamt" value={formatEuro(totals.totalLoanRemainingCents)} />
           <KpiCard label="Gesamtvermögen (Marktwert − Restschuld)" value={formatEuro(netWorthCents)} />
