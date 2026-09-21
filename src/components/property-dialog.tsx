@@ -58,8 +58,16 @@ type FormState = {
   buildingValue: string;
   afaRate: string;
   monthlyRent: string;
-  monthlyCosts: string;
   marketValue: string;
+  // Kostenpositionen (Euro-Strings)
+  costElectricity: string;
+  costWater: string;
+  costInternet: string;
+  costInsurance: string;
+  costPropertyTax: string;
+  costHausgeld: string;
+  hausgeldOwnerPct: string;
+  costOther: string;
   loanOriginal: string;
   loanRate: string;
   loanMonthly: string;
@@ -80,8 +88,15 @@ const EMPTY: FormState = {
   buildingValue: "",
   afaRate: "2",
   monthlyRent: "",
-  monthlyCosts: "",
   marketValue: "",
+  costElectricity: "",
+  costWater: "",
+  costInternet: "",
+  costInsurance: "",
+  costPropertyTax: "",
+  costHausgeld: "",
+  hausgeldOwnerPct: "50",
+  costOther: "",
   loanOriginal: "",
   loanRate: "",
   loanMonthly: "",
@@ -104,8 +119,15 @@ function formFromProperty(p: Property): FormState {
     buildingValue: centsToEuroInput(p.buildingValueCents),
     afaRate: String(p.afaRatePercent),
     monthlyRent: centsToEuroInput(p.monthlyRentCents),
-    monthlyCosts: centsToEuroInput(p.monthlyCostsCents),
     marketValue: p.marketValueCents != null ? centsToEuroInput(p.marketValueCents) : "",
+    costElectricity: p.costElectricityCents != null ? centsToEuroInput(p.costElectricityCents) : "",
+    costWater: p.costWaterCents != null ? centsToEuroInput(p.costWaterCents) : "",
+    costInternet: p.costInternetCents != null ? centsToEuroInput(p.costInternetCents) : "",
+    costInsurance: p.costInsuranceCents != null ? centsToEuroInput(p.costInsuranceCents) : "",
+    costPropertyTax: p.costPropertyTaxCents != null ? centsToEuroInput(p.costPropertyTaxCents) : "",
+    costHausgeld: p.costHausgeldTotalCents != null ? centsToEuroInput(p.costHausgeldTotalCents) : "",
+    hausgeldOwnerPct: p.hausgeldOwnerPercent != null ? String(p.hausgeldOwnerPercent) : "50",
+    costOther: p.costOtherCents != null ? centsToEuroInput(p.costOtherCents) : "",
     loanOriginal:
       p.loanOriginalCents != null ? centsToEuroInput(p.loanOriginalCents) : "",
     loanRate:
@@ -166,10 +188,30 @@ export function PropertyDialog({
       buildingValueCents: euroInputToCents(form.buildingValue),
       afaRatePercent: Number(form.afaRate.replace(",", ".")) || 0,
       monthlyRentCents: euroInputToCents(form.monthlyRent),
-      monthlyCostsCents: euroInputToCents(form.monthlyCosts),
+      monthlyCostsCents: 0, // Legacy; Kosten kommen jetzt aus den Einzelpositionen
       marketValueCents: form.marketValue
         ? euroInputToCents(form.marketValue)
         : undefined,
+      costElectricityCents: form.costElectricity
+        ? euroInputToCents(form.costElectricity)
+        : undefined,
+      costWaterCents: form.costWater ? euroInputToCents(form.costWater) : undefined,
+      costInternetCents: form.costInternet
+        ? euroInputToCents(form.costInternet)
+        : undefined,
+      costInsuranceCents: form.costInsurance
+        ? euroInputToCents(form.costInsurance)
+        : undefined,
+      costPropertyTaxCents: form.costPropertyTax
+        ? euroInputToCents(form.costPropertyTax)
+        : undefined,
+      costHausgeldTotalCents: form.costHausgeld
+        ? euroInputToCents(form.costHausgeld)
+        : undefined,
+      hausgeldOwnerPercent: form.costHausgeld
+        ? Number(form.hausgeldOwnerPct.replace(",", ".")) || 50
+        : undefined,
+      costOtherCents: form.costOther ? euroInputToCents(form.costOther) : undefined,
       loanOriginalCents: form.loanOriginal
         ? euroInputToCents(form.loanOriginal)
         : undefined,
@@ -379,25 +421,93 @@ export function PropertyDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5">
-                <Label htmlFor="monthlyRent">Kaltmiete / Monat (€)</Label>
-                <Input
-                  id="monthlyRent"
-                  inputMode="decimal"
-                  value={form.monthlyRent}
-                  onChange={(e) => set("monthlyRent", e.target.value)}
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="monthlyCosts">Kosten / Monat (€)</Label>
-                <Input
-                  id="monthlyCosts"
-                  inputMode="decimal"
-                  value={form.monthlyCosts}
-                  onChange={(e) => set("monthlyCosts", e.target.value)}
-                />
-              </div>
+            {/* Einnahmen */}
+            <div className="grid gap-1.5">
+              <Label htmlFor="monthlyRent">
+                {form.rentalType === "Dauervermietung"
+                  ? "Kaltmiete / Monat (€)"
+                  : "Einnahmen / Monat (€)"}
+              </Label>
+              <Input
+                id="monthlyRent"
+                inputMode="decimal"
+                value={form.monthlyRent}
+                onChange={(e) => set("monthlyRent", e.target.value)}
+              />
+            </div>
+
+            {/* Kosten pro Monat (abhaengig von der Vermietungsart) */}
+            <div className="border-t pt-3">
+              <p className="mb-2 text-sm font-medium">Kosten pro Monat</p>
+
+              {form.rentalType === "Dauervermietung" ? (
+                <div className="grid gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Strom, Wasser & Internet zahlt der Mieter – hier nur deine
+                    Eigentümer-Kosten.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costInsurance">Gebäudeversicherung (€)</Label>
+                      <Input id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costPropertyTax">Grundsteuer (€)</Label>
+                      <Input id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costHausgeld">Hausgeld gesamt (€)</Label>
+                      <Input id="costHausgeld" inputMode="decimal" value={form.costHausgeld} onChange={(e) => set("costHausgeld", e.target.value)} />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="hausgeldOwnerPct">davon Eigentümer (%)</Label>
+                      <Input id="hausgeldOwnerPct" inputMode="decimal" value={form.hausgeldOwnerPct} onChange={(e) => set("hausgeldOwnerPct", e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="costOther">Sonstiges (€)</Label>
+                    <Input id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Du trägst alle laufenden Kosten selbst.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costElectricity">Strom (€)</Label>
+                      <Input id="costElectricity" inputMode="decimal" value={form.costElectricity} onChange={(e) => set("costElectricity", e.target.value)} />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costWater">Wasser (€)</Label>
+                      <Input id="costWater" inputMode="decimal" value={form.costWater} onChange={(e) => set("costWater", e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costInternet">Internet (€)</Label>
+                      <Input id="costInternet" inputMode="decimal" value={form.costInternet} onChange={(e) => set("costInternet", e.target.value)} />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costInsurance">Gebäudeversicherung (€)</Label>
+                      <Input id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costPropertyTax">Grundsteuer (€)</Label>
+                      <Input id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="costOther">Sonstiges (€)</Label>
+                      <Input id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Finanzierung / Kredit (optional) */}

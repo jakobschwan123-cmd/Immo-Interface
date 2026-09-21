@@ -16,7 +16,7 @@ import {
   subscribeTransactionsForProperty,
   deleteTransaction,
 } from "@/lib/transactions";
-import { calculateKpis } from "@/lib/finance";
+import { calculateKpis, effectiveMonthlyCostsCents } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
 import {
@@ -279,8 +279,18 @@ export default function PropertyDetail() {
               <CardTitle className="text-base">Kennzahlen (pro Jahr)</CardTitle>
             </CardHeader>
             <CardContent className="divide-y">
-              <Row label="Kaltmiete / Monat" value={formatEuro(property.monthlyRentCents)} />
-              <Row label="Kosten / Monat" value={formatEuro(property.monthlyCostsCents)} />
+              <Row
+                label={
+                  property.rentalType === "Ferienvermietung"
+                    ? "Einnahmen / Monat"
+                    : "Kaltmiete / Monat"
+                }
+                value={formatEuro(property.monthlyRentCents)}
+              />
+              <Row
+                label="Kosten / Monat"
+                value={formatEuro(effectiveMonthlyCostsCents(property))}
+              />
               <Row label="Mieteinnahmen / Jahr" value={formatEuro(k.annualRentCents)} />
               <Row label="Kosten / Jahr" value={formatEuro(k.annualCostsCents)} />
               <Row label="AfA / Jahr" value={formatEuro(k.annualAfaCents)} />

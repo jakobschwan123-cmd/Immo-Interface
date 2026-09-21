@@ -102,9 +102,25 @@ export type Property = {
   afaRatePercent: number; // Abschreibungssatz p.a., meist 2 (%)
 
   // --- laufende Werte (Cent) ---
-  monthlyRentCents: number; // erwartete Kaltmiete pro Monat
-  monthlyCostsCents: number; // laufende, nicht umlegbare Kosten pro Monat
+  monthlyRentCents: number; // erwartete Einnahmen/Kaltmiete pro Monat
+  monthlyCostsCents: number; // LEGACY: einfaches Sammelfeld (Fallback, wenn keine
+  // Einzelpositionen gesetzt sind). Neue Daten nutzen die Positionen unten.
   marketValueCents?: number; // aktueller Marktwert (optional)
+
+  // --- Kostenpositionen pro Monat (Cent, optional) ---
+  // Welche davon als Eigentuemer-Kosten zaehlen, haengt vom rentalType ab
+  // (siehe effectiveMonthlyCostsCents in lib/finance.ts):
+  //  - Dauervermietung: Versicherung + Grundsteuer + Hausgeld-Anteil + Sonstiges
+  //    (Strom/Wasser/Internet = Mietersache)
+  //  - Ferien/Eigennutzung: zusaetzlich Strom + Wasser + Internet
+  costElectricityCents?: number; // Strom
+  costWaterCents?: number; // Wasser
+  costInternetCents?: number; // Internet
+  costInsuranceCents?: number; // Gebaeudeversicherung
+  costPropertyTaxCents?: number; // Grundsteuer (anteilig pro Monat)
+  costHausgeldTotalCents?: number; // Hausgeld gesamt pro Monat
+  hausgeldOwnerPercent?: number; // Anteil, den der Eigentuemer traegt (%), Default 50
+  costOtherCents?: number; // Sonstiges
 
   // --- Finanzierung / Kredit (optional, Annuitätendarlehen) ---
   // Restschuld & Enddatum werden daraus BERECHNET (siehe lib/loan.ts).

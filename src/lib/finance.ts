@@ -14,9 +14,42 @@ export type PropertyKpis = {
   netYieldPercent: number; // Netto-Mietrendite ((Miete - Kosten) / Kaufpreis)
 };
 
+// Effektive monatliche Eigentuemer-Kosten aus den Einzelpositionen,
+// abhaengig von der Vermietungsart. Fallback: altes Sammelfeld.
+export function effectiveMonthlyCostsCents(p: Property): number {
+  const hasItemized =
+    p.costElectricityCents != null ||
+    p.costWaterCents != null ||
+    p.costInternetCents != null ||
+    p.costInsuranceCents != null ||
+    p.costPropertyTaxCents != null ||
+    p.costHausgeldTotalCents != null ||
+    p.costOtherCents != null;
+
+  if (!hasItemized) return p.monthlyCostsCents ?? 0;
+
+  const insurance = p.costInsuranceCents ?? 0;
+  const propertyTax = p.costPropertyTaxCents ?? 0;
+  const other = p.costOtherCents ?? 0;
+  const hausgeldOwner = Math.round(
+    ((p.costHausgeldTotalCents ?? 0) * (p.hausgeldOwnerPercent ?? 50)) / 100,
+  );
+
+  let total = insurance + propertyTax + other + hausgeldOwner;
+
+  // Strom/Wasser/Internet nur, wenn NICHT dauervermietet (dann Mietersache).
+  if (p.rentalType !== "Dauervermietung") {
+    total +=
+      (p.costElectricityCents ?? 0) +
+      (p.costWaterCents ?? 0) +
+      (p.costInternetCents ?? 0);
+  }
+  return total;
+}
+
 export function calculateKpis(p: Property): PropertyKpis {
   const annualRentCents = p.monthlyRentCents * 12;
-  const annualCostsCents = p.monthlyCostsCents * 12;
+  const annualCostsCents = effectiveMonthlyCostsCents(p) * 12;
 
   // AfA: Abschreibungssatz auf den GEBAEUDEanteil (Grundstueck wird nicht
   // abgeschrieben). afaRatePercent ist z.B. 2 -> 2 % pro Jahr.
