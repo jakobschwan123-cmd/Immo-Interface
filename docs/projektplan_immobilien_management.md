@@ -65,6 +65,20 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
     im Dashboard, Filter/Summen pro Rechtsträger. Ersetzt langfristig das einfache
     Feld `legalForm`.
 
+*   **Zusätzliche Stammdaten-Felder:**
+    *   Wohnfläche in **m²**
+    *   **Anzahl Wohnungen/Einheiten** pro Objekt
+
+*   **Vermietungstyp (wichtig fürs Ferienhaus):**
+    Nicht jede Immobilie hat eine feste Monatsmiete. Feld `rentalType`:
+    `Dauervermietung` | `Ferienvermietung` | `Eigennutzung/leer`.
+    Bei **Ferienvermietung** (z. B. Ferienhaus der Eltern, nur zeitweise vermietet)
+    kommen die Einnahmen aus **einzelnen Buchungen** (Phase 2b), nicht aus einer
+    Monats-Kaltmiete. Die Kennzahlen (Rendite etc.) müssen das berücksichtigen.
+
+*   **Bilder zu Immobilien:** Foto-Upload pro Objekt → braucht Firebase Storage,
+    daher zusammen mit Phase 3 (Belege) umsetzen.
+
 ---
 
 ## 📅 Meilensteine & Phasen
