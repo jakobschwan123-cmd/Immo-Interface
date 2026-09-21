@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { subscribeProperties, deleteProperty } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
 import { calculateKpis, sumKpis } from "@/lib/finance";
+import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
 import type { Property, Entity } from "@/lib/types";
 
@@ -71,6 +72,7 @@ function PropertyTable({
           <TableRow>
             <TableHead>Objekt</TableHead>
             <TableHead className="text-right">Kaufpreis</TableHead>
+            <TableHead className="text-right">Restschuld</TableHead>
             <TableHead className="text-right">Miete / Monat</TableHead>
             <TableHead className="text-right">Rendite (brutto)</TableHead>
             <TableHead className="text-right">AfA / Jahr</TableHead>
@@ -95,6 +97,9 @@ function PropertyTable({
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatEuro(p.purchasePriceCents)}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {formatEuro(computeLoan(p).remainingCents)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatEuro(p.monthlyRentCents)}
@@ -138,6 +143,9 @@ function PropertyTable({
               <TableCell className="font-medium">Summe</TableCell>
               <TableCell className="text-right tabular-nums">
                 {formatEuro(totals.totalPurchaseCents)}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                {formatEuro(totals.totalLoanRemainingCents)}
               </TableCell>
               <TableCell className="text-right tabular-nums">
                 {formatEuro(monthlyRentSum)}
