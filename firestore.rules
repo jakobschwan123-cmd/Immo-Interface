@@ -36,6 +36,9 @@ service cloud.firestore {
     }
 
     // --- Fachdaten: nur fuer freigeschaltete Nutzer, volle Rechte ---
+    match /entities/{id} {
+      allow read, write: if isAllowed();
+    }
     match /properties/{id} {
       allow read, write: if isAllowed();
     }

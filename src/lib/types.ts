@@ -44,11 +44,25 @@ export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   "Sonstiges",
 ];
 
+// Ein Rechtsträger (Besitzer): z.B. "Schwan GmbH", "Familie Schwan GbR",
+// "Papa privat". Immobilien werden einem Rechtsträger zugeordnet und im
+// Dashboard danach gruppiert. Der Jahresabschluss laeuft pro Rechtsträger.
+export type Entity = {
+  id: string;
+  name: string;
+  legalForm: LegalForm;
+  createdBy: string;
+  createdAt?: Timestamp;
+};
+
+export type EntityInput = Omit<Entity, "id" | "createdAt">;
+
 // Eine Immobilie (Stammdaten + Kennzahlen-Basiswerte).
 export type Property = {
   id: string;
   name: string; // Bezeichnung, z.B. "Musterstraße 1, Karlsruhe"
   address?: string;
+  entityId?: string; // zugeordneter Rechtsträger (Entity.id)
   legalForm: LegalForm;
   rentalType: RentalType; // Art der Nutzung/Vermietung
   areaSqm?: number; // Wohnflaeche in m²

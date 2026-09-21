@@ -11,9 +11,10 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { subscribeProperty } from "@/lib/properties";
+import { subscribeEntities } from "@/lib/entities";
 import { calculateKpis } from "@/lib/finance";
 import { formatEuro, formatPercent } from "@/lib/money";
-import type { Property } from "@/lib/types";
+import type { Property, Entity } from "@/lib/types";
 
 import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
@@ -38,12 +39,22 @@ export default function PropertyDetail() {
   const id = params.id;
 
   const [property, setProperty] = useState<Property | null>(null);
+  const [entities, setEntities] = useState<Entity[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
+
+  // Rechtsträger fuer Anzeige + Bearbeiten-Dialog laden.
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeEntities(setEntities, (err) =>
+      console.error("[Entities laden]", err),
+    );
+    return () => unsubscribe();
+  }, [user]);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -90,6 +101,7 @@ export default function PropertyDetail() {
   }
 
   const k = calculateKpis(property);
+  const entity = entities.find((e) => e.id === property.entityId) ?? null;
   const wertzuwachsCents =
     property.marketValueCents != null
       ? property.marketValueCents - property.purchasePriceCents
@@ -117,7 +129,10 @@ export default function PropertyDetail() {
               <p className="text-sm text-muted-foreground">{property.address}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-2">
-              <Badge variant="secondary">{property.legalForm}</Badge>
+              <Badge variant="secondary">
+                {entity ? entity.name : "Ohne Rechtsträger"}
+              </Badge>
+              <Badge variant="outline">{property.legalForm}</Badge>
               <Badge variant="outline">
                 {property.rentalType ?? "Dauervermietung"}
               </Badge>
@@ -212,6 +227,7 @@ export default function PropertyDetail() {
         open={editOpen}
         onOpenChange={setEditOpen}
         property={property}
+        entities={entities}
       />
     </main>
   );

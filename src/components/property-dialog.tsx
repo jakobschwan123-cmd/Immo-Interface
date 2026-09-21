@@ -36,13 +36,18 @@ import {
   type LegalForm,
   type RentalType,
   type Property,
+  type Entity,
 } from "@/lib/types";
+
+// Sentinel-Wert fuer "kein Rechtsträger" (leerer String macht im Select Probleme).
+const NO_ENTITY = "__none__";
 import { useAuth } from "@/lib/auth-context";
 
 // Formularzustand: alle Geldfelder als String (in Euro).
 type FormState = {
   name: string;
   address: string;
+  entityId: string; // Entity.id oder NO_ENTITY
   legalForm: LegalForm;
   rentalType: RentalType;
   area: string;
@@ -60,6 +65,7 @@ type FormState = {
 const EMPTY: FormState = {
   name: "",
   address: "",
+  entityId: NO_ENTITY,
   legalForm: "Privat",
   rentalType: "Dauervermietung",
   area: "",
@@ -79,6 +85,7 @@ function formFromProperty(p: Property): FormState {
   return {
     name: p.name,
     address: p.address ?? "",
+    entityId: p.entityId ?? NO_ENTITY,
     legalForm: p.legalForm,
     rentalType: p.rentalType ?? "Dauervermietung",
     area: p.areaSqm != null ? String(p.areaSqm) : "",
@@ -98,10 +105,12 @@ export function PropertyDialog({
   open,
   onOpenChange,
   property,
+  entities,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   property?: Property | null;
+  entities: Entity[];
 }) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
@@ -129,6 +138,7 @@ export function PropertyDialog({
     const data = {
       name: form.name.trim(),
       address: form.address.trim() || undefined,
+      entityId: form.entityId === NO_ENTITY ? undefined : form.entityId,
       legalForm: form.legalForm,
       rentalType: form.rentalType,
       areaSqm: form.area ? Number(form.area.replace(",", ".")) || undefined : undefined,
@@ -185,6 +195,27 @@ export function PropertyDialog({
                 onChange={(e) => set("name", e.target.value)}
                 placeholder="z. B. Musterstraße 1, Karlsruhe"
               />
+            </div>
+
+            {/* Rechtsträger (Besitzer) */}
+            <div className="grid gap-1.5">
+              <Label>Rechtsträger</Label>
+              <Select
+                value={form.entityId}
+                onValueChange={(v) => set("entityId", v ?? NO_ENTITY)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_ENTITY}>Ohne Rechtsträger</SelectItem>
+                  {entities.map((en) => (
+                    <SelectItem key={en.id} value={en.id}>
+                      {en.name} ({en.legalForm})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
