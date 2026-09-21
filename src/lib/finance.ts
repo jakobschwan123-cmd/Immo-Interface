@@ -47,8 +47,16 @@ export function effectiveMonthlyCostsCents(p: Property): number {
   return total;
 }
 
+// Effektive Monatsmiete: Summe der Einheiten, sonst das Einzelfeld.
+export function effectiveMonthlyRentCents(p: Property): number {
+  if (p.unitRents && p.unitRents.length > 0) {
+    return p.unitRents.reduce((s, u) => s + (u.rentCents || 0), 0);
+  }
+  return p.monthlyRentCents;
+}
+
 export function calculateKpis(p: Property): PropertyKpis {
-  const annualRentCents = p.monthlyRentCents * 12;
+  const annualRentCents = effectiveMonthlyRentCents(p) * 12;
   const annualCostsCents = effectiveMonthlyCostsCents(p) * 12;
 
   // AfA: Abschreibungssatz auf den GEBAEUDEanteil (Grundstueck wird nicht

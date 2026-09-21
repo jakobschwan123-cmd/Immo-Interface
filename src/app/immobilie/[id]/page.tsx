@@ -16,7 +16,11 @@ import {
   subscribeTransactionsForProperty,
   deleteTransaction,
 } from "@/lib/transactions";
-import { calculateKpis, effectiveMonthlyCostsCents } from "@/lib/finance";
+import {
+  calculateKpis,
+  effectiveMonthlyCostsCents,
+  effectiveMonthlyRentCents,
+} from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
 import {
@@ -285,8 +289,15 @@ export default function PropertyDetail() {
                     ? "Einnahmen / Monat"
                     : "Kaltmiete / Monat"
                 }
-                value={formatEuro(property.monthlyRentCents)}
+                value={formatEuro(effectiveMonthlyRentCents(property))}
               />
+              {property.unitRents?.map((u, i) => (
+                <Row
+                  key={i}
+                  label={`↳ ${u.label}`}
+                  value={formatEuro(u.rentCents)}
+                />
+              ))}
               <Row
                 label="Kosten / Monat"
                 value={formatEuro(effectiveMonthlyCostsCents(property))}

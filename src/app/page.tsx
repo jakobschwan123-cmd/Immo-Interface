@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { subscribeProperties, deleteProperty } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
 import { subscribeAllTransactions } from "@/lib/transactions";
-import { calculateKpis, sumKpis } from "@/lib/finance";
+import { calculateKpis, sumKpis, effectiveMonthlyRentCents } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
 import type { Property, Entity, Transaction } from "@/lib/types";
@@ -69,7 +69,10 @@ function PropertyTable({
   onDelete: (p: Property) => void;
 }) {
   const totals = sumKpis(props, transactions);
-  const monthlyRentSum = props.reduce((s, p) => s + p.monthlyRentCents, 0);
+  const monthlyRentSum = props.reduce(
+    (s, p) => s + effectiveMonthlyRentCents(p),
+    0,
+  );
   const grossYield =
     totals.totalPurchaseCents > 0
       ? (totals.annualRentCents / totals.totalPurchaseCents) * 100
@@ -115,7 +118,7 @@ function PropertyTable({
                   )}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {formatEuro(p.monthlyRentCents)}
+                  {formatEuro(effectiveMonthlyRentCents(p))}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatPercent(k.grossYieldPercent)}
@@ -296,11 +299,11 @@ export default function Dashboard() {
 
         {/* Gesamt-Kennzahlen */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <KpiCard label="Gesamtwert (Marktwert)" value={formatEuro(totals.totalMarketValueCents)} />
+          <KpiCard label="Einkommen / Jahr (Miete)" value={formatEuro(totals.annualRentCents)} />
           <KpiCard label="Kaufpreis gesamt" value={formatEuro(totals.totalPurchaseCents)} />
-          <KpiCard label="Marktwert gesamt" value={formatEuro(totals.totalMarketValueCents)} />
           <KpiCard label="Restschuld gesamt" value={formatEuro(totals.totalLoanRemainingCents)} />
           <KpiCard label="Gesamtvermögen (Marktwert − Restschuld)" value={formatEuro(netWorthCents)} />
-          <KpiCard label="Mieteinnahmen / Jahr" value={formatEuro(totals.annualRentCents)} />
           <KpiCard label="AfA / Jahr" value={formatEuro(totals.annualAfaCents)} />
           <KpiCard
             label="Überschuss / Jahr (vor Steuer)"

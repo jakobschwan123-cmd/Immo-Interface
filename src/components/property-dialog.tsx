@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,7 @@ type FormState = {
   buildingValue: string;
   afaRate: string;
   monthlyRent: string;
+  unitRents: { label: string; rent: string }[];
   marketValue: string;
   // Kostenpositionen (Euro-Strings)
   costElectricity: string;
@@ -88,6 +90,7 @@ const EMPTY: FormState = {
   buildingValue: "",
   afaRate: "2",
   monthlyRent: "",
+  unitRents: [],
   marketValue: "",
   costElectricity: "",
   costWater: "",
@@ -119,6 +122,10 @@ function formFromProperty(p: Property): FormState {
     buildingValue: centsToEuroInput(p.buildingValueCents),
     afaRate: String(p.afaRatePercent),
     monthlyRent: centsToEuroInput(p.monthlyRentCents),
+    unitRents: (p.unitRents ?? []).map((u) => ({
+      label: u.label,
+      rent: centsToEuroInput(u.rentCents),
+    })),
     marketValue: p.marketValueCents != null ? centsToEuroInput(p.marketValueCents) : "",
     costElectricity: p.costElectricityCents != null ? centsToEuroInput(p.costElectricityCents) : "",
     costWater: p.costWaterCents != null ? centsToEuroInput(p.costWaterCents) : "",
@@ -165,6 +172,20 @@ export function PropertyDialog({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  // --- Einheiten-Zeilen (Miete je Einheit) ---
+  function addUnit() {
+    setForm((f) => ({ ...f, unitRents: [...f.unitRents, { label: "", rent: "" }] }));
+  }
+  function updateUnit(i: number, key: "label" | "rent", value: string) {
+    setForm((f) => ({
+      ...f,
+      unitRents: f.unitRents.map((u, idx) => (idx === i ? { ...u, [key]: value } : u)),
+    }));
+  }
+  function removeUnit(i: number) {
+    setForm((f) => ({ ...f, unitRents: f.unitRents.filter((_, idx) => idx !== i) }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -172,6 +193,15 @@ export function PropertyDialog({
       toast.error("Bitte eine Bezeichnung eingeben.");
       return;
     }
+
+    // Einheiten mit Betrag bereinigen (leere Zeilen ignorieren).
+    const unitRentsClean = form.unitRents
+      .filter((u) => u.rent.trim() !== "" || u.label.trim() !== "")
+      .map((u, i) => ({
+        label: u.label.trim() || `Einheit ${i + 1}`,
+        rentCents: euroInputToCents(u.rent),
+      }));
+    const hasUnits = unitRentsClean.length > 0;
 
     // Gemeinsame Felder (ohne createdBy) aus dem Formular bauen.
     const data = {
@@ -181,13 +211,21 @@ export function PropertyDialog({
       legalForm: form.legalForm,
       rentalType: form.rentalType,
       areaSqm: form.area ? Number(form.area.replace(",", ".")) || undefined : undefined,
-      units: form.units ? Number(form.units) || undefined : undefined,
+      // Bei erfassten Einheiten die Anzahl daraus ableiten.
+      units: hasUnits
+        ? unitRentsClean.length
+        : form.units
+          ? Number(form.units) || undefined
+          : undefined,
       purchaseDate: form.purchaseDate,
       purchasePriceCents: euroInputToCents(form.purchasePrice),
       landValueCents: euroInputToCents(form.landValue),
       buildingValueCents: euroInputToCents(form.buildingValue),
       afaRatePercent: Number(form.afaRate.replace(",", ".")) || 0,
-      monthlyRentCents: euroInputToCents(form.monthlyRent),
+      monthlyRentCents: hasUnits
+        ? unitRentsClean.reduce((s, u) => s + u.rentCents, 0)
+        : euroInputToCents(form.monthlyRent),
+      unitRents: hasUnits ? unitRentsClean : undefined,
       monthlyCostsCents: 0, // Legacy; Kosten kommen jetzt aus den Einzelpositionen
       marketValueCents: form.marketValue
         ? euroInputToCents(form.marketValue)
@@ -421,19 +459,73 @@ export function PropertyDialog({
               </div>
             </div>
 
-            {/* Einnahmen */}
-            <div className="grid gap-1.5">
-              <Label htmlFor="monthlyRent">
-                {form.rentalType === "Dauervermietung"
-                  ? "Kaltmiete / Monat (€)"
-                  : "Einnahmen / Monat (€)"}
-              </Label>
-              <Input
-                id="monthlyRent"
-                inputMode="decimal"
-                value={form.monthlyRent}
-                onChange={(e) => set("monthlyRent", e.target.value)}
-              />
+            {/* Einnahmen (Einzelfeld nur, wenn keine Einheiten erfasst) */}
+            {form.unitRents.length === 0 && (
+              <div className="grid gap-1.5">
+                <Label htmlFor="monthlyRent">
+                  {form.rentalType === "Dauervermietung"
+                    ? "Kaltmiete / Monat (€)"
+                    : "Einnahmen / Monat (€)"}
+                </Label>
+                <Input
+                  id="monthlyRent"
+                  inputMode="decimal"
+                  value={form.monthlyRent}
+                  onChange={(e) => set("monthlyRent", e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Einheiten & Mieten (optional, z.B. Mehrfamilienhaus) */}
+            <div>
+              <div className="flex items-center justify-between">
+                <Label>Einheiten &amp; Mieten (optional)</Label>
+                <Button type="button" variant="ghost" size="sm" onClick={addUnit}>
+                  <Plus /> Einheit
+                </Button>
+              </div>
+              {form.unitRents.length > 0 && (
+                <div className="mt-2 grid gap-2">
+                  {form.unitRents.map((u, i) => (
+                    <div key={i} className="flex items-end gap-2">
+                      <div className="grid flex-1 gap-1.5">
+                        <Label htmlFor={`unit-label-${i}`} className="text-xs">
+                          Bezeichnung
+                        </Label>
+                        <Input
+                          id={`unit-label-${i}`}
+                          value={u.label}
+                          placeholder={`Einheit ${i + 1}`}
+                          onChange={(e) => updateUnit(i, "label", e.target.value)}
+                        />
+                      </div>
+                      <div className="grid w-32 gap-1.5">
+                        <Label htmlFor={`unit-rent-${i}`} className="text-xs">
+                          Miete/Monat (€)
+                        </Label>
+                        <Input
+                          id={`unit-rent-${i}`}
+                          inputMode="decimal"
+                          value={u.rent}
+                          onChange={(e) => updateUnit(i, "rent", e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeUnit(i)}
+                        aria-label="Einheit entfernen"
+                      >
+                        <Trash2 className="text-muted-foreground" />
+                      </Button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-muted-foreground">
+                    Gesamtmiete = Summe der Einheiten (das Einzelfeld oben entfällt).
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Kosten pro Monat (abhaengig von der Vermietungsart) */}

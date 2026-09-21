@@ -102,7 +102,10 @@ export type Property = {
   afaRatePercent: number; // Abschreibungssatz p.a., meist 2 (%)
 
   // --- laufende Werte (Cent) ---
-  monthlyRentCents: number; // erwartete Einnahmen/Kaltmiete pro Monat
+  monthlyRentCents: number; // Gesamt-Monatsmiete (bei Einheiten = Summe von unitRents)
+  // Optional: Miete je Einheit (z.B. Mehrfamilienhaus). Wenn gesetzt, ist
+  // monthlyRentCents die Summe daraus.
+  unitRents?: { label: string; rentCents: number }[];
   monthlyCostsCents: number; // LEGACY: einfaches Sammelfeld (Fallback, wenn keine
   // Einzelpositionen gesetzt sind). Neue Daten nutzen die Positionen unten.
   marketValueCents?: number; // aktueller Marktwert (optional)
