@@ -17,6 +17,7 @@ import {
   deleteTransaction,
 } from "@/lib/transactions";
 import { calculateKpis } from "@/lib/finance";
+import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
 import {
   signedAmountCents,
@@ -162,36 +163,14 @@ export default function PropertyDetail() {
       ? property.marketValueCents - property.purchasePriceCents
       : null;
 
-  // Finanzierung
-  const hasLoan =
-    property.loanRemainingCents != null ||
-    property.loanMonthlyPaymentCents != null ||
-    property.loanInterestRatePercent != null ||
-    !!property.loanEndDate;
-  const annualInterestCents =
-    property.loanRemainingCents != null &&
-    property.loanInterestRatePercent != null
-      ? Math.round(
-          (property.loanRemainingCents * property.loanInterestRatePercent) / 100,
-        )
-      : null;
-  // Restlaufzeit in Monaten bis loanEndDate.
-  let monthsRemaining: number | null = null;
-  if (property.loanEndDate) {
-    const end = new Date(property.loanEndDate);
-    if (!Number.isNaN(end.getTime())) {
-      const now = new Date();
-      monthsRemaining =
-        (end.getFullYear() - now.getFullYear()) * 12 +
-        (end.getMonth() - now.getMonth());
-    }
-  }
+  // Finanzierung (berechnet aus den Kreditdaten)
+  const loan = computeLoan(property);
   const restlaufzeitText =
-    monthsRemaining != null && monthsRemaining > 0
-      ? `noch ${Math.floor(monthsRemaining / 12)} J. ${monthsRemaining % 12} Mon.`
-      : monthsRemaining != null
+    loan.monthsRemaining != null && loan.monthsRemaining > 0
+      ? `noch ${Math.floor(loan.monthsRemaining / 12)} J. ${loan.monthsRemaining % 12} Mon.`
+      : loan.monthsRemaining === 0
         ? "abbezahlt"
-        : "–";
+        : "läuft (Rate deckt Zinsen nicht)";
 
   return (
     <main className="flex flex-1 flex-col bg-muted/30">
@@ -307,51 +286,43 @@ export default function PropertyDetail() {
           </Card>
         </div>
 
-        {/* Finanzierung / Kredit */}
-        {hasLoan && (
+        {/* Finanzierung / Kredit (berechnet) */}
+        {loan.configured && (
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="text-base">Finanzierung</CardTitle>
             </CardHeader>
             <CardContent className="divide-y">
               <Row
-                label="Restschuld"
-                value={
-                  property.loanRemainingCents != null
-                    ? formatEuro(property.loanRemainingCents)
-                    : "–"
-                }
+                label="Darlehenssumme"
+                value={formatEuro(property.loanOriginalCents ?? 0)}
               />
               <Row
                 label="Zinssatz"
-                value={
-                  property.loanInterestRatePercent != null
-                    ? `${property.loanInterestRatePercent} % p.a.`
-                    : "–"
-                }
+                value={`${property.loanInterestRatePercent} % p.a.`}
               />
               <Row
                 label="Rate / Monat"
-                value={
-                  property.loanMonthlyPaymentCents != null
-                    ? formatEuro(property.loanMonthlyPaymentCents)
-                    : "–"
-                }
+                value={formatEuro(property.loanMonthlyPaymentCents ?? 0)}
               />
               <Row
-                label="Zinsen / Jahr (ca.)"
+                label="davon Zins / Tilgung (akt.)"
+                value={`${formatEuro(loan.monthlyInterestCents)} / ${formatEuro(loan.monthlyPrincipalCents)}`}
+              />
+              <Row
+                label="Restschuld (heute)"
                 value={
-                  annualInterestCents != null
-                    ? formatEuro(annualInterestCents)
-                    : "–"
+                  <span className="font-semibold">
+                    {formatEuro(loan.remainingCents)}
+                  </span>
                 }
               />
               <Row
                 label="Abbezahlt bis"
                 value={
-                  property.loanEndDate
-                    ? `${property.loanEndDate} (${restlaufzeitText})`
-                    : "–"
+                  loan.payoffMonth
+                    ? `${loan.payoffMonth} (${restlaufzeitText})`
+                    : restlaufzeitText
                 }
               />
             </CardContent>

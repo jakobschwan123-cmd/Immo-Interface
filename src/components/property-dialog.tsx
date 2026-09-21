@@ -60,10 +60,10 @@ type FormState = {
   monthlyRent: string;
   monthlyCosts: string;
   marketValue: string;
-  loanRemaining: string;
+  loanOriginal: string;
   loanRate: string;
   loanMonthly: string;
-  loanEndDate: string;
+  loanStart: string;
 };
 
 const EMPTY: FormState = {
@@ -82,10 +82,10 @@ const EMPTY: FormState = {
   monthlyRent: "",
   monthlyCosts: "",
   marketValue: "",
-  loanRemaining: "",
+  loanOriginal: "",
   loanRate: "",
   loanMonthly: "",
-  loanEndDate: "",
+  loanStart: "",
 };
 
 // Bestehende Immobilie -> Formularwerte (Cent -> Euro-String).
@@ -106,15 +106,15 @@ function formFromProperty(p: Property): FormState {
     monthlyRent: centsToEuroInput(p.monthlyRentCents),
     monthlyCosts: centsToEuroInput(p.monthlyCostsCents),
     marketValue: p.marketValueCents != null ? centsToEuroInput(p.marketValueCents) : "",
-    loanRemaining:
-      p.loanRemainingCents != null ? centsToEuroInput(p.loanRemainingCents) : "",
+    loanOriginal:
+      p.loanOriginalCents != null ? centsToEuroInput(p.loanOriginalCents) : "",
     loanRate:
       p.loanInterestRatePercent != null ? String(p.loanInterestRatePercent) : "",
     loanMonthly:
       p.loanMonthlyPaymentCents != null
         ? centsToEuroInput(p.loanMonthlyPaymentCents)
         : "",
-    loanEndDate: p.loanEndDate ?? "",
+    loanStart: p.loanStartDate ?? "",
   };
 }
 
@@ -170,8 +170,8 @@ export function PropertyDialog({
       marketValueCents: form.marketValue
         ? euroInputToCents(form.marketValue)
         : undefined,
-      loanRemainingCents: form.loanRemaining
-        ? euroInputToCents(form.loanRemaining)
+      loanOriginalCents: form.loanOriginal
+        ? euroInputToCents(form.loanOriginal)
         : undefined,
       loanInterestRatePercent: form.loanRate
         ? Number(form.loanRate.replace(",", ".")) || undefined
@@ -179,7 +179,7 @@ export function PropertyDialog({
       loanMonthlyPaymentCents: form.loanMonthly
         ? euroInputToCents(form.loanMonthly)
         : undefined,
-      loanEndDate: form.loanEndDate || undefined,
+      loanStartDate: form.loanStart || undefined,
     };
 
     setSaving(true);
@@ -403,15 +403,18 @@ export function PropertyDialog({
             {/* Finanzierung / Kredit (optional) */}
             <div className="border-t pt-3">
               <p className="mb-2 text-sm font-medium">Finanzierung (optional)</p>
+              <p className="mb-2 text-xs text-muted-foreground">
+                Restschuld & Enddatum werden daraus automatisch berechnet.
+              </p>
               <div className="grid gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="loanRemaining">Restschuld (€)</Label>
+                    <Label htmlFor="loanOriginal">Darlehenssumme (€)</Label>
                     <Input
-                      id="loanRemaining"
+                      id="loanOriginal"
                       inputMode="decimal"
-                      value={form.loanRemaining}
-                      onChange={(e) => set("loanRemaining", e.target.value)}
+                      value={form.loanOriginal}
+                      onChange={(e) => set("loanOriginal", e.target.value)}
                     />
                   </div>
                   <div className="grid gap-1.5">
@@ -435,12 +438,12 @@ export function PropertyDialog({
                     />
                   </div>
                   <div className="grid gap-1.5">
-                    <Label htmlFor="loanEndDate">Abbezahlt bis</Label>
+                    <Label htmlFor="loanStart">Kreditbeginn</Label>
                     <Input
-                      id="loanEndDate"
+                      id="loanStart"
                       type="date"
-                      value={form.loanEndDate}
-                      onChange={(e) => set("loanEndDate", e.target.value)}
+                      value={form.loanStart}
+                      onChange={(e) => set("loanStart", e.target.value)}
                     />
                   </div>
                 </div>

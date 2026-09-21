@@ -104,11 +104,12 @@ export type Property = {
   monthlyCostsCents: number; // laufende, nicht umlegbare Kosten pro Monat
   marketValueCents?: number; // aktueller Marktwert (optional)
 
-  // --- Finanzierung / Kredit (optional) ---
-  loanRemainingCents?: number; // aktuelle Restschuld
+  // --- Finanzierung / Kredit (optional, Annuitätendarlehen) ---
+  // Restschuld & Enddatum werden daraus BERECHNET (siehe lib/loan.ts).
+  loanOriginalCents?: number; // ursprüngliche Darlehenssumme
   loanInterestRatePercent?: number; // Zinssatz p.a. in %
   loanMonthlyPaymentCents?: number; // monatliche Rate (Zins + Tilgung)
-  loanEndDate?: string; // voraussichtlich abbezahlt bis (ISO "YYYY-MM-DD")
+  loanStartDate?: string; // Kreditbeginn (ISO "YYYY-MM-DD")
 
   createdBy: string; // uid des Anlegers
   createdAt?: Timestamp; // Server-Zeitstempel

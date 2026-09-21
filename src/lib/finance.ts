@@ -3,6 +3,7 @@
 // (z.B. 3.46 fuer 3,46 %), passend zu formatPercent().
 
 import type { Property } from "./types";
+import { computeLoan } from "./loan";
 
 export type PropertyKpis = {
   annualRentCents: number; // Jahres-Kaltmiete
@@ -54,7 +55,7 @@ export function sumKpis(properties: Property[]) {
       const k = calculateKpis(p);
       acc.totalPurchaseCents += p.purchasePriceCents;
       acc.totalMarketValueCents += p.marketValueCents ?? 0;
-      acc.totalLoanRemainingCents += p.loanRemainingCents ?? 0;
+      acc.totalLoanRemainingCents += computeLoan(p).remainingCents;
       acc.annualRentCents += k.annualRentCents;
       acc.annualCostsCents += k.annualCostsCents;
       acc.annualAfaCents += k.annualAfaCents;
