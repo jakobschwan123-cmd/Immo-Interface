@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// =============================================================================
+//  Firestore Security Rules  -  die VERBINDLICHE Zugriffssperre.
+//  (Die Whitelist im Browser ist nur Komfort; DIESE Regeln zaehlen wirklich.)
+//
+//  Modell: GEMEINSAMER Haushalt. Alle freigeschalteten Nutzer (du + Eltern)
+//  duerfen dieselben Immobilien/Buchungen lesen & schreiben.
+//
+//  Die erlaubten E-Mails stehen NICHT hier im Code (landet sonst auf GitHub),
+//  sondern in einem geschuetzten Dokument:  /config/allowlist  { emails: [...] }
+//  Dieses Dokument legst du einmalig in der Firebase Console an (siehe Anleitung).
+// =============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Liste der erlaubten E-Mails aus /config/allowlist.
+    // get() in Rules darf dieses Dokument lesen, auch wenn Clients es nicht duerfen.
+    function allowlist() {
+      return get(/databases/$(database)/documents/config/allowlist).data.emails;
+    }
+
+    // true, wenn ein eingeloggter Nutzer mit verifizierter, freigeschalteter
+    // E-Mail zugreift.
+    function isAllowed() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in allowlist();
+    }
+
+    // Konfiguration (u.a. die Allowlist): vom Client komplett gesperrt.
+    // Bearbeitet wird sie nur ueber die Firebase Console (Admin).
+    match /config/{document} {
+      allow read, write: if false;
+    }
+
+    // --- Fachdaten: nur fuer freigeschaltete Nutzer, volle Rechte ---
+    match /properties/{id} {
+      allow read, write: if isAllowed();
+    }
+    match /transactions/{id} {
+      allow read, write: if isAllowed();
+    }
+    match /documents/{id} {
+      allow read, write: if isAllowed();
+    }
+
+    // Alles andere ist verboten (sicherer Default).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

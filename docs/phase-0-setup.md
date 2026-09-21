@@ -92,12 +92,12 @@ ALLOWED_EMAILS=deine@gmail.com,mutter@gmail.com,vater@gmail.com
 
 ## Checkliste
 
-- [ ] 1. Firebase-Projekt erstellt
-- [ ] 2. Web-App registriert (6 Config-Werte notiert)
-- [ ] 3. Authentication → Google aktiviert
-- [ ] 4. Firestore aktiviert (europe-west3, Produktionsmodus)
-- [ ] 5. Storage aktiviert
-- [ ] 6. Gemini API-Key erstellt
-- [ ] 7. Vercel-Account (mit GitHub)
-- [ ] 8. Erlaubte E-Mails notiert
-- [ ] 9. `.env.local` angelegt und befüllt
+- [x] 1. Firebase-Projekt erstellt
+- [x] 2. Web-App registriert (6 Config-Werte in .env.local)
+- [x] 3. Authentication → Google aktiviert (Login getestet ✅)
+- [x] 4. Firestore aktiviert (Standardversion, europe-west3, Produktionsmodus)
+- [ ] 5. Storage aktiviert  → **auf Phase 3 verschoben** (braucht Blaze-Tarif)
+- [ ] 6. Gemini API-Key erstellt  → wird erst in Phase 3 gebraucht
+- [ ] 7. Vercel-Account (mit GitHub)  → für Deployment
+- [x] 8. Erlaubte E-Mails notiert (Whitelist gesetzt)
+- [x] 9. `.env.local` angelegt und befüllt (Firebase + Whitelist)

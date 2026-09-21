@@ -1,59 +1,213 @@
 "use client";
 
-// Startseite. Zeigt je nach Login-Status entweder eine Begruessung mit
-// Logout-Button (eingeloggt) oder leitet zur Login-Seite (nicht eingeloggt).
+// Dashboard: Uebersicht aller Immobilien mit Kennzahlen.
+// Liest die Daten in Echtzeit aus Firestore (nur fuer eingeloggte, freigeschaltete Nutzer).
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-export default function Home() {
-  const { user, loading, logout } = useAuth();
+import { useAuth } from "@/lib/auth-context";
+import { subscribeProperties, deleteProperty } from "@/lib/properties";
+import { calculateKpis, sumKpis } from "@/lib/finance";
+import { formatEuro, formatPercent } from "@/lib/money";
+import type { Property } from "@/lib/types";
+
+import { AppHeader } from "@/components/app-header";
+import { AddPropertyDialog } from "@/components/add-property-dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+// Eine kleine Kennzahl-Kachel fuer die obere Uebersicht.
+function KpiCard({ label, value }: { label: string; value: string }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {label}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-semibold tabular-nums">{value}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Dashboard() {
+  const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Nicht eingeloggte Nutzer auf die Login-Seite schicken.
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  // Nicht eingeloggte Nutzer zur Login-Seite schicken.
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  // Ladezustand, solange der Login-Status geprueft wird.
+  // Echtzeit-Abo auf die Immobilien, solange ein Nutzer eingeloggt ist.
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeProperties(
+      (data) => {
+        setProperties(data);
+        setDataLoading(false);
+      },
+      (err) => {
+        console.error("[Properties laden]", err);
+        toast.error("Daten konnten nicht geladen werden.");
+        setDataLoading(false);
+      },
+    );
+    return () => unsubscribe();
+  }, [user]);
+
+  async function handleDelete(p: Property) {
+    if (!confirm(`„${p.name}" wirklich löschen?`)) return;
+    try {
+      await deleteProperty(p.id);
+      toast.success("Immobilie gelöscht.");
+    } catch (err) {
+      console.error("[Loeschen]", err);
+      toast.error("Löschen fehlgeschlagen.");
+    }
+  }
+
   if (loading || !user) {
     return (
-      <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-sm text-zinc-500">Lade …</p>
+      <main className="flex flex-1 items-center justify-center">
+        <p className="text-sm text-muted-foreground">Lade …</p>
       </main>
     );
   }
 
-  return (
-    <main className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      {/* Kopfzeile mit Nutzerinfo + Logout */}
-      <header className="flex items-center justify-between border-b border-black/10 bg-white px-6 py-4 dark:border-white/10 dark:bg-zinc-900">
-        <span className="font-semibold text-black dark:text-zinc-50">Immo-Interface</span>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-600 dark:text-zinc-400">
-            {user.displayName ?? user.email}
-          </span>
-          <button
-            type="button"
-            onClick={logout}
-            className="rounded-full border border-black/10 px-4 py-1.5 text-sm font-medium transition-colors hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
-          >
-            Abmelden
-          </button>
-        </div>
-      </header>
+  const totals = sumKpis(properties);
 
-      {/* Platzhalter-Inhalt – hier entsteht in Phase 2 das Dashboard. */}
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
-            Willkommen{user.displayName ? `, ${user.displayName}` : ""} 👋
-          </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Login funktioniert. Das Dashboard bauen wir in Phase 2.
-          </p>
+  return (
+    <main className="flex flex-1 flex-col bg-muted/30">
+      <AppHeader />
+
+      <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
+        {/* Titelzeile mit Aktion */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Übersicht</h1>
+            <p className="text-sm text-muted-foreground">
+              {properties.length}{" "}
+              {properties.length === 1 ? "Immobilie" : "Immobilien"}
+            </p>
+          </div>
+          <AddPropertyDialog />
         </div>
+
+        {/* Kennzahlen-Kacheln */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard
+            label="Kaufpreis gesamt"
+            value={formatEuro(totals.totalPurchaseCents)}
+          />
+          <KpiCard
+            label="Marktwert gesamt"
+            value={formatEuro(totals.totalMarketValueCents)}
+          />
+          <KpiCard
+            label="Mieteinnahmen / Jahr"
+            value={formatEuro(totals.annualRentCents)}
+          />
+          <KpiCard
+            label="Überschuss / Jahr (vor Steuer)"
+            value={formatEuro(totals.annualSurplusCents)}
+          />
+        </div>
+
+        {/* Immobilien-Tabelle */}
+        {dataLoading ? (
+          <p className="text-sm text-muted-foreground">Lade Immobilien …</p>
+        ) : properties.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+              <p className="text-muted-foreground">
+                Noch keine Immobilien erfasst.
+              </p>
+              <AddPropertyDialog />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Objekt</TableHead>
+                    <TableHead>Rechtsform</TableHead>
+                    <TableHead className="text-right">Kaufpreis</TableHead>
+                    <TableHead className="text-right">Miete / Monat</TableHead>
+                    <TableHead className="text-right">Rendite (brutto)</TableHead>
+                    <TableHead className="text-right">AfA / Jahr</TableHead>
+                    <TableHead className="text-right">Überschuss / Jahr</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {properties.map((p) => {
+                    const k = calculateKpis(p);
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">
+                          {p.name}
+                          {p.address && (
+                            <span className="block text-xs text-muted-foreground">
+                              {p.address}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{p.legalForm}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatEuro(p.purchasePriceCents)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatEuro(p.monthlyRentCents)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatPercent(k.grossYieldPercent)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatEuro(k.annualAfaCents)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatEuro(k.annualSurplusCents)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(p)}
+                            aria-label="Löschen"
+                          >
+                            <Trash2 className="text-muted-foreground" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        )}
       </div>
     </main>
   );
