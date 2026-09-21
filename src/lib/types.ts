@@ -44,6 +44,30 @@ export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
   "Sonstiges",
 ];
 
+// Einnahme oder Ausgabe. Der Betrag wird immer POSITIV gespeichert;
+// das Vorzeichen ergibt sich aus dem Typ.
+export type TransactionType = "income" | "expense";
+
+// Eine Buchung (Einnahme/Ausgabe), gehoert zu genau einer Immobilie.
+export type Transaction = {
+  id: string;
+  propertyId: string;
+  type: TransactionType;
+  amountCents: number; // immer positiv
+  date: string; // ISO-Datum "YYYY-MM-DD"
+  category: TransactionCategory;
+  description?: string;
+  createdBy: string;
+  createdAt?: Timestamp;
+};
+
+export type TransactionInput = Omit<Transaction, "id" | "createdAt">;
+
+// Vorzeichenbehafteter Betrag in Cent (Einnahme +, Ausgabe -).
+export function signedAmountCents(t: Transaction): number {
+  return t.type === "income" ? t.amountCents : -t.amountCents;
+}
+
 // Ein Rechtsträger (Besitzer): z.B. "Schwan GmbH", "Familie Schwan GbR",
 // "Papa privat". Immobilien werden einem Rechtsträger zugeordnet und im
 // Dashboard danach gruppiert. Der Jahresabschluss laeuft pro Rechtsträger.

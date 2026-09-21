@@ -6,21 +6,39 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { subscribeProperty } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
+import {
+  subscribeTransactionsForProperty,
+  deleteTransaction,
+} from "@/lib/transactions";
 import { calculateKpis } from "@/lib/finance";
 import { formatEuro, formatPercent } from "@/lib/money";
-import type { Property, Entity } from "@/lib/types";
+import {
+  signedAmountCents,
+  type Property,
+  type Entity,
+  type Transaction,
+} from "@/lib/types";
 
 import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
+import { TransactionDialog } from "@/components/transaction-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Eine Zeile "Bezeichnung ... Wert" in den Detail-Karten.
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -40,8 +58,10 @@ export default function PropertyDetail() {
 
   const [property, setProperty] = useState<Property | null>(null);
   const [entities, setEntities] = useState<Entity[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [txOpen, setTxOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -73,6 +93,31 @@ export default function PropertyDetail() {
     return () => unsubscribe();
   }, [user, id]);
 
+  // Buchungen dieser Immobilie laden.
+  useEffect(() => {
+    if (!user || !id) return;
+    const unsubscribe = subscribeTransactionsForProperty(
+      id,
+      setTransactions,
+      (err) => {
+        console.error("[Buchungen laden]", err);
+        toast.error("Buchungen konnten nicht geladen werden.");
+      },
+    );
+    return () => unsubscribe();
+  }, [user, id]);
+
+  async function handleDeleteTransaction(t: Transaction) {
+    if (!confirm("Diese Buchung wirklich löschen?")) return;
+    try {
+      await deleteTransaction(t.id);
+      toast.success("Buchung gelöscht.");
+    } catch (err) {
+      console.error("[Buchung loeschen]", err);
+      toast.error("Löschen fehlgeschlagen.");
+    }
+  }
+
   if (loading || !user || dataLoading) {
     return (
       <main className="flex flex-1 items-center justify-center">
@@ -102,6 +147,16 @@ export default function PropertyDetail() {
 
   const k = calculateKpis(property);
   const entity = entities.find((e) => e.id === property.entityId) ?? null;
+
+  // Zusammenfassung der erfassten Buchungen (gesamt, ueber alle Jahre).
+  const incomeCents = transactions
+    .filter((t) => t.type === "income")
+    .reduce((s, t) => s + t.amountCents, 0);
+  const expenseCents = transactions
+    .filter((t) => t.type === "expense")
+    .reduce((s, t) => s + t.amountCents, 0);
+  const saldoCents = incomeCents - expenseCents;
+
   const wertzuwachsCents =
     property.marketValueCents != null
       ? property.marketValueCents - property.purchasePriceCents
@@ -220,7 +275,99 @@ export default function PropertyDetail() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Buchungen (Einnahmen/Ausgaben) */}
+        <Card className="mt-6">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Buchungen</CardTitle>
+            <Button size="sm" onClick={() => setTxOpen(true)}>
+              <Plus /> Buchung
+            </Button>
+          </CardHeader>
+          <CardContent className="px-0">
+            {/* Zusammenfassung */}
+            <div className="mb-2 flex flex-wrap gap-x-8 gap-y-1 px-6 text-sm">
+              <span>
+                Einnahmen:{" "}
+                <span className="font-medium tabular-nums text-emerald-600">
+                  {formatEuro(incomeCents)}
+                </span>
+              </span>
+              <span>
+                Ausgaben:{" "}
+                <span className="font-medium tabular-nums text-rose-600">
+                  {formatEuro(expenseCents)}
+                </span>
+              </span>
+              <span>
+                Saldo:{" "}
+                <span className="font-medium tabular-nums">
+                  {formatEuro(saldoCents)}
+                </span>
+              </span>
+            </div>
+
+            {transactions.length === 0 ? (
+              <p className="px-6 py-4 text-sm text-muted-foreground">
+                Noch keine Buchungen erfasst.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Datum</TableHead>
+                      <TableHead>Kategorie</TableHead>
+                      <TableHead>Zweck</TableHead>
+                      <TableHead className="text-right">Betrag</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.map((t) => {
+                      const signed = signedAmountCents(t);
+                      return (
+                        <TableRow key={t.id}>
+                          <TableCell className="tabular-nums">{t.date}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{t.category}</Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {t.description ?? "–"}
+                          </TableCell>
+                          <TableCell
+                            className={`text-right tabular-nums ${
+                              signed < 0 ? "text-rose-600" : "text-emerald-600"
+                            }`}
+                          >
+                            {formatEuro(signed)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTransaction(t)}
+                              aria-label="Löschen"
+                            >
+                              <Trash2 className="text-muted-foreground" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      <TransactionDialog
+        open={txOpen}
+        onOpenChange={setTxOpen}
+        propertyId={property.id}
+      />
 
       <PropertyDialog
         key={editOpen ? property.id : "closed"}
