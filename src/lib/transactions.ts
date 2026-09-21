@@ -44,6 +44,19 @@ export function subscribeTransactionsForProperty(
   );
 }
 
+// Echtzeit-Abo auf ALLE Buchungen (fuer den Jahresabschluss).
+// Sortierung/Filterung nach Jahr passiert clientseitig.
+export function subscribeAllTransactions(
+  onData: (transactions: Transaction[]) => void,
+  onError?: (error: Error) => void,
+): () => void {
+  return onSnapshot(
+    collection(db, COLLECTION),
+    (snap) => onData(snap.docs.map(toTransaction)),
+    (err) => onError?.(err),
+  );
+}
+
 export async function addTransaction(input: TransactionInput): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTION), {
     ...input,
