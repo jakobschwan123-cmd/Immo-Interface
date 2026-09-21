@@ -4,7 +4,11 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import {
+  initializeFirestore,
+  getFirestore,
+  type Firestore,
+} from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -34,7 +38,23 @@ const app: FirebaseApp | undefined = isFirebaseConfigured
 // solange Firebase nicht konfiguriert ist – und in dem Fall greift der ganze
 // App-Code sowieso erst nach der Pruefung `isFirebaseConfigured` darauf zu.
 export const auth: Auth = (app ? getAuth(app) : undefined) as Auth;
-export const db: Firestore = (app ? getFirestore(app) : undefined) as Firestore;
+
+// Firestore mit ignoreUndefinedProperties: leere/optionale Felder (undefined)
+// werden beim Schreiben ignoriert, statt einen Fehler zu werfen.
+// initializeFirestore darf nur EINMAL laufen -> beim Hot-Reload faellt es auf
+// getFirestore zurueck.
+export const db: Firestore = (
+  app
+    ? (() => {
+        try {
+          return initializeFirestore(app, { ignoreUndefinedProperties: true });
+        } catch {
+          return getFirestore(app);
+        }
+      })()
+    : undefined
+) as Firestore;
+
 export const storage: FirebaseStorage = (app ? getStorage(app) : undefined) as FirebaseStorage;
 
 export default app;

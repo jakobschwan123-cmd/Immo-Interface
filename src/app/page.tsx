@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
@@ -15,7 +15,7 @@ import { formatEuro, formatPercent } from "@/lib/money";
 import type { Property } from "@/lib/types";
 
 import { AppHeader } from "@/components/app-header";
-import { AddPropertyDialog } from "@/components/add-property-dialog";
+import { PropertyDialog } from "@/components/property-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +50,19 @@ export default function Dashboard() {
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Dialog-Steuerung: editing = null -> Anlegen, editing = Property -> Bearbeiten.
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Property | null>(null);
+
+  function openCreate() {
+    setEditing(null);
+    setDialogOpen(true);
+  }
+  function openEdit(p: Property) {
+    setEditing(p);
+    setDialogOpen(true);
+  }
 
   // Nicht eingeloggte Nutzer zur Login-Seite schicken.
   useEffect(() => {
@@ -108,7 +121,9 @@ export default function Dashboard() {
               {properties.length === 1 ? "Immobilie" : "Immobilien"}
             </p>
           </div>
-          <AddPropertyDialog />
+          <Button onClick={openCreate}>
+            <Plus /> Immobilie hinzufügen
+          </Button>
         </div>
 
         {/* Kennzahlen-Kacheln */}
@@ -140,7 +155,9 @@ export default function Dashboard() {
               <p className="text-muted-foreground">
                 Noch keine Immobilien erfasst.
               </p>
-              <AddPropertyDialog />
+              <Button onClick={openCreate}>
+                <Plus /> Immobilie hinzufügen
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -191,14 +208,24 @@ export default function Dashboard() {
                           {formatEuro(k.annualSurplusCents)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(p)}
-                            aria-label="Löschen"
-                          >
-                            <Trash2 className="text-muted-foreground" />
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEdit(p)}
+                              aria-label="Bearbeiten"
+                            >
+                              <Pencil className="text-muted-foreground" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(p)}
+                              aria-label="Löschen"
+                            >
+                              <Trash2 className="text-muted-foreground" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -209,6 +236,16 @@ export default function Dashboard() {
           </Card>
         )}
       </div>
+
+      {/* Ein Dialog fuer Anlegen UND Bearbeiten.
+          Der key sorgt dafuer, dass die Formularfelder bei jedem Oeffnen frisch
+          aus der gewaehlten Immobilie (bzw. leer) initialisiert werden. */}
+      <PropertyDialog
+        key={dialogOpen ? (editing?.id ?? "new") : "closed"}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        property={editing}
+      />
     </main>
   );
 }
