@@ -44,10 +44,26 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
 *   **`documents`** (Metadaten zu hochgeladenen Belegen)
     *   Storage-Pfad, Original-Dateiname, Upload-Datum, verknüpfte Transaktion
     *   Von Gemini extrahierte Rohdaten (zur Nachvollziehbarkeit)
+*   **`entities`** (Rechtsträger) — *geplant, siehe Backlog*
+    *   Name (z. B. „Schwan GmbH", „Familie Schwan GbR", „Papa privat"), Rechtsform
+    *   Jede Immobilie gehört genau einem Rechtsträger (`properties.entityId`)
 
 > **Hinweis zur Rechtsform:** Für **Privat / GbR** ist die EÜR das passende Werkzeug.
 > Eine **GmbH** bilanziert eigentlich (keine EÜR) → für den Start Scope auf **Privat/GbR**
 > beschränken, GmbH ggf. später.
+
+---
+
+## 🧭 Backlog / Für später
+
+*   **Rechtsträger-Gruppierung (wichtig für den Jahresabschluss):**
+    Immobilien gehören verschiedenen **Rechtsträgern** — es kann mehrere gleicher Art
+    geben (z. B. zwei GbRs, eine GmbH, Privatpersonen). Ziel: Immobilien einem
+    Rechtsträger zuordnen und im Dashboard **pro Rechtsträger gruppieren + Zwischensummen**
+    bilden. Der **Jahresabschluss (EÜR/Bilanz) läuft pro Rechtsträger**, nicht pro Immobilie.
+    → Umsetzung: neue Collection `entities`, Feld `entityId` an `properties`, Gruppierung
+    im Dashboard, Filter/Summen pro Rechtsträger. Ersetzt langfristig das einfache
+    Feld `legalForm`.
 
 ---
 
