@@ -79,6 +79,22 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
 *   **Bilder zu Immobilien:** Foto-Upload pro Objekt → braucht Firebase Storage,
     daher zusammen mit Phase 3 (Belege) umsetzen.
 
+*   **Immobilien-Wertberechnung (Marktwert automatisch):**
+    Zwei Verfahren:
+    1. **Schnell-Überschlag:** `Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt`.
+       Der Ø-m²-Preis ist der Teil, der **aktuelle Marktdaten** braucht → hier käme
+       **Gemini (AI)** ins Spiel (braucht API-Key). Grob/ungenau.
+    2. **Ertragswertverfahren (deterministisch, KEIN AI nötig):**
+       - Bodenwert = Grundstücksgröße × Bodenrichtwert (aus BORIS-NRW)
+       - Reiner Gebäudeertrag = Jahreskaltmiete − Bewirtschaftungskosten (ca. 15–30 %,
+         Ferien 35–50 %) − (Bodenwert × Liegenschaftszins ~5,5–6 %)
+       - Gebäudeertragswert = Reiner Gebäudeertrag × Vervielfältiger (amtl. Tabelle,
+         abhängig von Restnutzungsdauer + Liegenschaftszins)
+       - **Gesamtwert = Bodenwert + Gebäudeertragswert**
+       → Kann jederzeit ohne Kosten gebaut werden; Nutzer gibt Bodenrichtwert,
+         Grundstücksgröße, Liegenschaftszins, Vervielfältiger, Bewirtschaftungs-%
+         ein. Jahreskaltmiete haben wir bereits.
+
 ---
 
 ## 📅 Meilensteine & Phasen
