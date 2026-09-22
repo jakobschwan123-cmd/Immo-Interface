@@ -36,12 +36,19 @@ Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-D
 
 Gebaut u.a.: Rechtsträger-Gruppierung, Detailseite pro Immobilie, Diagramme, Anlegen/Bearbeiten/Löschen,
 Kredit als Annuitätendarlehen + Sondertilgungen, vermietungsabhängige Kostenaufteilung, Miete je Einheit,
-Dashboard-Kennzahlen (Gesamtwert #1, Einkommen/Jahr #2 mit Area-Chart), EÜR + CSV/Druck.
+Dashboard-Kennzahlen (Gesamtwert #1, Einkommen/Jahr #2 mit Area-Chart), EÜR + CSV/Druck,
+Privacy-Modus (Diskretionsmodus via CSS-Blur und localStorage).
 
 ## Backlog / Wünsche für später
+- **Jahresabschluss & Steuererklärung (Prio 1 für ELSTER & Steuerberater):**
+  - Objektbezogene EÜR (Pflicht für Anlage V: Umschaltung Gesamt/Einzelobjekt)
+  - Buchungsjournal-Export (lückenloser Einzelnachweis aller Belege als CSV/Druck)
+  - Zeitanteilige AfA im Kaufjahr (monatsgenau nach § 7 Abs. 4 EStG)
+  - Darlehenszinsen vs. Tilgung (Schuldzinsen-Berechnung/Übernahme in EÜR)
+  - ELSTER-Leitfaden / Zeilen-Mapping für Anlage V
 - **Immobilien-Wertberechnung:** Ertragswertverfahren (deterministisch, KEIN AI nötig) +
   m²-Schnellschätzer via Gemini (braucht API-Key). Details im Projektplan.
-- **Privacy-Modus:** Umschalter, der alle Geldwerte unkenntlich macht (Bildschirm herzeigen).
+- **Privacy-Modus:** ✅ Umgesetzt & live.
 - **Bilder pro Immobilie** (braucht Storage/Blaze, mit Phase 3).
 - Kosmetik: Restschuld-Spalte „–" statt „0,00 €" bei kreditfreien Objekten.
 
