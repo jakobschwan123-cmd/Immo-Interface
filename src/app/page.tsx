@@ -51,7 +51,7 @@ function KpiCard({ label, value }: { label: string; value: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
+        <p className="text-2xl font-semibold tabular-nums privacy-blur">{value}</p>
       </CardContent>
     </Card>
   );
@@ -109,25 +109,25 @@ function PropertyTable({
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(p.purchasePriceCents)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(
                     computeLoan(p, repaymentsFor(p.id, transactions))
                       .remainingCents,
                   )}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(effectiveMonthlyRentCents(p))}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatPercent(k.grossYieldPercent)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(k.annualAfaCents)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(k.annualSurplusCents)}
                 </TableCell>
                 <TableCell className="text-right">
@@ -158,22 +158,22 @@ function PropertyTable({
           <TableFooter>
             <TableRow>
               <TableCell className="font-medium">Summe</TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(totals.totalPurchaseCents)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(totals.totalLoanRemainingCents)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(monthlyRentSum)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatPercent(grossYield)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(totals.annualAfaCents)}
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(totals.annualSurplusCents)}
               </TableCell>
               <TableCell />

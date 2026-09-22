@@ -58,13 +58,13 @@ function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string;
             euer.income.map((l) => (
               <div key={l.label} className="flex justify-between py-0.5">
                 <span className="text-muted-foreground">{l.label}</span>
-                <span className="tabular-nums">{formatEuro(l.amountCents)}</span>
+                <span className="tabular-nums privacy-blur">{formatEuro(l.amountCents)}</span>
               </div>
             ))
           )}
           <div className="mt-1 flex justify-between border-t pt-1 font-medium">
             <span>Summe Einnahmen</span>
-            <span className="tabular-nums">{formatEuro(euer.incomeTotalCents)}</span>
+            <span className="tabular-nums privacy-blur">{formatEuro(euer.incomeTotalCents)}</span>
           </div>
         </div>
 
@@ -77,13 +77,13 @@ function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string;
             euer.expenses.map((l) => (
               <div key={l.label} className="flex justify-between py-0.5">
                 <span className="text-muted-foreground">{l.label}</span>
-                <span className="tabular-nums">{formatEuro(l.amountCents)}</span>
+                <span className="tabular-nums privacy-blur">{formatEuro(l.amountCents)}</span>
               </div>
             ))
           )}
           <div className="mt-1 flex justify-between border-t pt-1 font-medium">
             <span>Summe Ausgaben</span>
-            <span className="tabular-nums">{formatEuro(euer.expenseTotalCents)}</span>
+            <span className="tabular-nums privacy-blur">{formatEuro(euer.expenseTotalCents)}</span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@ function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string;
         <div className="flex justify-between border-t-2 pt-2 text-base font-semibold">
           <span>{euer.surplusCents >= 0 ? "Überschuss" : "Verlust"}</span>
           <span
-            className={`tabular-nums ${
+            className={`tabular-nums privacy-blur ${
               euer.surplusCents >= 0 ? "text-emerald-600" : "text-rose-600"
             }`}
           >

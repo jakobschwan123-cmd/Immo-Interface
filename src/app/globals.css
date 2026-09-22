@@ -128,3 +128,10 @@
     @apply font-sans;
   }
 }
+
+/* Privacy-Modus: Zahlen und sensible Grafiken weich verbluren */
+[data-privacy="true"] .privacy-blur {
+  filter: blur(8px);
+  user-select: none;
+  transition: filter 0.15s ease-in-out;
+}
