@@ -54,51 +54,8 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
 
 ---
 
-## 🧭 Backlog / Für später
-
-### 🔥 Höchste Priorität: Jahresabschluss & Steuererklärung (Anlage V & Steuerberater)
-Ziel: Die Steuererklärung (Anlage V) eigenständig bei ELSTER abgeben können bzw. dem Steuerberater einen vollständigen, prüffähigen Vorab-Abschluss übergeben.
-
-1. **Objektbezogene EÜR (Pflicht für Anlage V):**
-   - Das Finanzamt verlangt für jedes einzelne vermietete Objekt eine eigene Anlage V.
-   - Umschaltung/Aufklappen im Jahresabschluss: Konsolidiert pro Rechtsträger **und** detailliert pro Einzel-Immobilie.
-
-2. **Detailliertes Buchungsjournal (Einzelnachweis aller Belege):**
-   - Ein Steuerberater/Finanzamt benötigt den lückenlosen Einzelnachweis aller Buchungen eines Jahres.
-   - Exportfunktion (CSV / druckoptimiertes PDF) mit: *Datum, Immobilie, Kategorie, Belegtext/Zweck, Einnahme/Ausgabe, Betrag*.
-
-3. **Zeitanteilige AfA bei unterjährigem Kauf (§ 7 Abs. 4 EStG):**
-   - Bei Erwerb im laufenden Kalenderjahr (`purchaseDate`) darf die Gebäude-AfA nur monatsgenau angesetzt werden (z. B. Kauf im Juli = 6/12 der Jahres-AfA).
-   - Automatische Erkennung und Berechnung der zeitanteiligen AfA im Anschaffungsjahr.
-
-4. **Schuldzinsen vs. Tilgung bei Darlehen:**
-   - Nur der Zinsanteil einer Darlehensrate ist steuerlich als Werbungskosten abzugsfähig; die Tilgung mindert die Steuern nicht.
-   - Automatische Übernahme/Vorschlag der berechneten Jahreszinsen aus dem Annuitätendarlehensplan (`computeLoan`) in die EÜR bzw. Plausibilitätsprüfung gebuchter Finanzierungszinsen.
-
-5. **ELSTER-Leitfaden / Zeilen-Mapping (Anlage V):**
-   - Direkte Gegenüberstellung der App-Zahlen mit den amtlichen Zeilen/Kennziffern des ELSTER-Formulars Anlage V (Zeile 9: Kaltmiete, Zeile 13: Umlagen, Zeile 33: AfA, Zeile 37: Schuldzinsen, Zeile 40: Erhaltungsaufwand, Zeile 46: Verwaltung etc.).
-
----
-
-### Weitere Backlog-Punkte
-
-*   **Privacy-Modus:** ✅ Bereits umgesetzt (Augen-Icon im Header, CSS-Blur, Speicherung in localStorage).
-
-*   **Bilder zu Immobilien:** Foto-Upload pro Objekt → braucht Firebase Storage,
-    daher zusammen mit Phase 3 (Belege) umsetzen.
-
-*   **Immobilien-Wertberechnung (Marktwert automatisch):**
-    Zwei Verfahren:
-    1. **Schnell-Überschlag:** `Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt` (braucht Gemini AI / API-Key).
-    2. **Ertragswertverfahren (deterministisch, KEIN AI nötig):**
-       - Bodenwert = Grundstücksgröße × Bodenrichtwert (aus BORIS-NRW)
-       - Reiner Gebäudeertrag = Jahreskaltmiete − Bewirtschaftungskosten − (Bodenwert × Liegenschaftszins)
-       - Gebäudeertragswert = Reiner Gebäudeertrag × Vervielfältiger
-       - **Gesamtwert = Bodenwert + Gebäudeertragswert**
-
-*   **Kosmetik & Detail-Verbesserungen:**
-    - Restschuld-Spalte: Anzeige von „–" statt „0,00 €" bei schuldenfreien Immobilien.
-
+## 🧭 Backlog
+Siehe [`backlog.md`](backlog.md); offene technische Klärungen in [`offene-technische-themen.md`](offene-technische-themen.md).
 
 ---
 

@@ -1,8 +1,9 @@
 @AGENTS.md
 
-# Immo-Interface — Projektkontext für Claude
+# Immo-Interface
 
-Web-App zur Verwaltung der Immobilien & Finanzen der Familie (privat).
+Web-App zur Verwaltung der Immobilien & Finanzen der Familie (privat). Dient als README für
+Jakob und Claude: Überblick, Konventionen, Wegweiser. Details stehen in `docs/`.
 **Echte Finanzdaten → Sicherheit hat Vorrang.** Vorbereitung für den Steuerberater,
 kein Steuerberater-Ersatz. Antworten/Kommentare auf **Deutsch**.
 
@@ -10,55 +11,35 @@ kein Steuerberater-Ersatz. Antworten/Kommentare auf **Deutsch**.
 Next.js (App Router) + TypeScript · Tailwind + shadcn/ui (Style „base-nova", `@base-ui/react`) ·
 Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-Deploy bei `git push` auf `main`).
 
-## Wichtige Konventionen (unbedingt beachten)
+## Konventionen (unbedingt beachten)
 - **Geld immer als Ganzzahl in Cent.** Umrechnung nur über `src/lib/money.ts`
-  (`formatEuro`, `euroInputToCents`, `centsToEuroInput`). Round-Trip ist verlustfrei.
+  (`formatEuro`, `euroInputToCents`, `centsToEuroInput`).
+- **Rechenlogik als reine Funktionen in `src/lib/`**, UI zeigt nur an. Neue Geldwerte in der UI
+  bekommen die Klasse `privacy-blur`.
 - **Sicherheit:** Zugriff nur für Allowlist. Verbindlich über `firestore.rules`
-  (`config/allowlist` Dokument mit `emails`), Client-Whitelist `NEXT_PUBLIC_ALLOWED_EMAILS` ist nur UX.
+  (`config/allowlist` mit `emails`), Client-Whitelist `NEXT_PUBLIC_ALLOWED_EMAILS` ist nur UX.
 - **Firestore:** `ignoreUndefinedProperties` aktiv → leere optionale Felder sind ok.
-- **Nach jeder sinnvollen Änderung:** `npx tsc --noEmit` + `npm run lint`, dann committen & pushen (Vercel deployt automatisch).
+- **Nach jeder sinnvollen Änderung:** `npx tsc --noEmit` + `npm run lint`, dann committen & pushen
+  (Vercel deployt `main` automatisch; Feature-Branches nicht).
 - `.env.local` bleibt lokal; Vercel-Env-Vars separat pflegen.
 
 ## Datenmodell (Firestore, gemeinsames Haushaltsmodell)
-- `entities` — Rechtsträger (Name, Rechtsform). Immobilien gruppieren danach; EÜR läuft pro Rechtsträger.
-- `properties` — Immobilie: Stammdaten, Kaufpreis/Grund/Gebäude (AfA), Vermietungstyp
-  (Dauer/Ferien/Eigennutzung), m²/Einheiten, Miete (`unitRents` = Miete je Einheit),
-  Kostenpositionen (Strom/Wasser/Internet/Versicherung/Grundsteuer/Hausgeld+%/Sonstiges),
-  Kredit (Darlehenssumme, Zins, Rate, Beginn → Restschuld berechnet in `src/lib/loan.ts`).
-- `transactions` — Buchungen (income/expense/**repayment**=Sondertilgung). Sondertilgung senkt Restschuld, zählt NICHT in EÜR.
-- Kennzahlen: `src/lib/finance.ts` (`effectiveMonthlyRentCents`, `effectiveMonthlyCostsCents` je Vermietungsart, `calculateKpis`, `sumKpis`).
-- EÜR: `src/lib/euer.ts`; CSV/Export: `src/lib/csv.ts`.
+- `entities` — Rechtsträger. Immobilien gruppieren danach; EÜR läuft pro Rechtsträger und pro Objekt.
+- `properties` — Stammdaten, Kaufpreis/Grund/Gebäude (AfA), Vermietungstyp (Dauer/Ferien/Eigennutzung),
+  m²/Einheiten, Miete (`unitRents`), Kostenpositionen, Kredit (Restschuld berechnet in `src/lib/loan.ts`).
+- `transactions` — income/expense/**repayment** (Sondertilgung: senkt Restschuld, zählt NICHT in EÜR).
+- Logik: `src/lib/finance.ts` (Kennzahlen), `euer.ts` (EÜR, Journal), `csv.ts` (Export), `loan.ts`.
 
-## Stand der Phasen (Sept 2026)
-- **0 Setup, 1 Login, 2/2b Datenmodell+Dashboard+Buchungen, 4 Jahresabschluss (EÜR): ✅ fertig & live.**
-- **3 Belege/Gemini + Storage/Bilder: ⏸️ geparkt** (Datenschutz- & Blaze-Entscheidung offen; Gemini-Key noch nicht eingerichtet).
-- **5 Polish & Rollout: 🟡 teilweise** — Deployment auf Vercel ✅; offen: Mobile-Optimierung, Fehler/Edge-Cases, Backup (Firestore-Export), Onboarding der Eltern.
+## Stand
+- ✅ Phase 0–2b (Setup, Login, Datenmodell, Dashboard, Buchungen), Phase 4 (EÜR), Privacy-Modus, Deployment.
+- ✅ Steuer-Interface A1 (objektbezogene EÜR) und A4 (Buchungsjournal) auf `feature/steuer-interface`.
+- ⏸️ Phase 3 (Belege/Gemini/Storage) geparkt. 🟡 Phase 5 (Polish/Rollout) teilweise.
 
-Gebaut u.a.: Rechtsträger-Gruppierung, Detailseite pro Immobilie, Diagramme, Anlegen/Bearbeiten/Löschen,
-Kredit als Annuitätendarlehen + Sondertilgungen, vermietungsabhängige Kostenaufteilung, Miete je Einheit,
-Dashboard-Kennzahlen (Gesamtwert #1, Einkommen/Jahr #2 mit Area-Chart), EÜR + CSV/Druck,
-Privacy-Modus (Diskretionsmodus via CSS-Blur und localStorage).
+## Wegweiser: Doku
+- [`docs/backlog.md`](docs/backlog.md) — was noch gebaut werden soll, inkl. Status A1–A6
+- [`docs/offene-technische-themen.md`](docs/offene-technische-themen.md) — Entscheidungen, Absicherung, Tests, Fragen an den Steuerberater
+- [`docs/steuer-interface-aufgaben.md`](docs/steuer-interface-aufgaben.md) — Aufgabenplan Steuer-Interface (A1–A6)
+- [`docs/projektplan_immobilien_management.md`](docs/projektplan_immobilien_management.md) — Ursprungsplan, Phasen, Zeitplan
+- [`docs/phase-0-setup.md`](docs/phase-0-setup.md), [`docs/deployment.md`](docs/deployment.md), [`docs/master_prompt_ki_assistent.txt`](docs/master_prompt_ki_assistent.txt)
 
-## Backlog / Wünsche für später
-- **Jahresabschluss & Steuererklärung (Prio 1 für ELSTER & Steuerberater):**
-  - Objektbezogene EÜR (Pflicht für Anlage V: Umschaltung Gesamt/Einzelobjekt)
-  - Buchungsjournal-Export (lückenloser Einzelnachweis aller Belege als CSV/Druck)
-  - Zeitanteilige AfA im Kaufjahr (monatsgenau nach § 7 Abs. 4 EStG)
-  - Darlehenszinsen vs. Tilgung (Schuldzinsen-Berechnung/Übernahme in EÜR)
-  - ELSTER-Leitfaden / Zeilen-Mapping für Anlage V
-- **Immobilien-Wertberechnung:** Ertragswertverfahren (deterministisch, KEIN AI nötig) +
-  m²-Schnellschätzer via Gemini (braucht API-Key). Details im Projektplan.
-- **Privacy-Modus:** ✅ Umgesetzt & live.
-- **Bilder pro Immobilie** (braucht Storage/Blaze, mit Phase 3).
-- Kosmetik: Restschuld-Spalte „–" statt „0,00 €" bei kreditfreien Objekten.
-- **Tests:** Es gibt keinen Test-Runner. Reine Rechenlogik (`money.ts`, `loan.ts`, `finance.ts`, `euer.ts`)
-  wäre ideal für Unit-Tests (Vitest), da Fehler hier echte Finanzzahlen verfälschen.
-- **Firestore-Rules versionieren/deployen:** `firebase.json` + Firebase CLI (ggf. Emulator), statt
-  `firestore.rules` manuell in der Console zu pflegen.
-- **README aktualisieren:** erwähnt Gemini „serverseitig" und Storage, beides noch nicht gebaut (Phase 3 geparkt).
-- **Dev-Whitelist absichern:** Leere `NEXT_PUBLIC_ALLOWED_EMAILS` lässt jede Google-Adresse rein (nur UX,
-  Rules greifen trotzdem) – in Produktion nie leer lassen, ggf. Warnung/Build-Check ergänzen.
-
-## Doku
-`docs/projektplan_immobilien_management.md` (Plan + Backlog), `docs/phase-0-setup.md`,
-`docs/deployment.md`, `docs/master_prompt_ki_assistent.txt`.
+Neue Wünsche → `backlog.md`; Unklarheiten/Entscheidungen → `offene-technische-themen.md`. Nicht hier eintragen.

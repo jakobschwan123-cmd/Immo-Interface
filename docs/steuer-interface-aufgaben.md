@@ -19,7 +19,7 @@ Alle neuen Geldwerte in der UI bekommen die Klasse `privacy-blur`.
 
 ## Aufgaben (Reihenfolge = empfohlene Abarbeitung)
 
-### A1 – Objektbezogene EÜR  `S`
+### A1 – Objektbezogene EÜR  `S`  ✅ erledigt
 Umschaltung im Jahresabschluss: Gesamt (Rechtsträger) ↔ Einzelobjekt.
 - Backend: `computeEuer` unverändert nutzen; Helfer, der Buchungen/Objekt filtert und eine
   Pro-Objekt-Liste liefert (`computeEuerPerProperty`).
@@ -42,7 +42,7 @@ Nur Zinsen sind Werbungskosten.
 - Klären: Soll der berechnete Wert die Buchung ersetzen oder nur vergleichen?
 - Fertig, wenn: Zins+Tilgung = Jahresrate; Sondertilgung erscheint nicht als Ausgabe.
 
-### A4 – Buchungsjournal-Export  `S`
+### A4 – Buchungsjournal-Export  `S`  ✅ erledigt
 Lückenloser Einzelnachweis pro Jahr: Datum, Immobilie, Kategorie, Text, Einnahme/Ausgabe, Betrag.
 - Backend: `journalRows(properties, transactions, year)` + `journalToCsv` in `csv.ts`
   (Sortierung nach Datum, Sondertilgungen kennzeichnen oder ausschließen).
@@ -97,17 +97,6 @@ Merge entscheidet Jakob. Agent-Ergebnis kurz zusammenfassen (Dateien, Tests, off
 **Tokens sparen:** parallel höchstens 2–3 Agents; Agents bekommen einen selbsttragenden
 Prompt (Aufgabe + Dateien + „Fertig, wenn" aus diesem Plan), damit sie nichts neu erkunden.
 
-## Offene Fragen an den Steuerberater
-1. AfA im Kaufjahr: ab Kaufmonat voll oder tagesgenau?
-2. Berechneten Darlehenszins verwenden oder nur gebuchte Zinsen?
-3. Sollen Ferienobjekte und Eigennutzung in der Anlage V gesondert behandelt werden?
-
-## To-do vorab: Unterlagen vom Steuerberater besorgen
-Vor A2, A3, A5 und A6 (A1 und A4 sind unabhängig und können sofort starten).
-- [ ] Letzte **Anlage V** (bzw. Jahresabschluss/EÜR) je Objekt – ideal ein **Kaufjahr** und ein **Folgejahr**
-- [ ] Bank-**Jahresbescheinigung** der Darlehen (Zins vs. Tilgung), falls vorhanden
-- [ ] Die drei offenen Fragen oben klären (AfA-Kaufjahr, Darlehenszins, Ferienobjekt/Eigennutzung)
-- [ ] Zuordnung des Steuerberaters je Ausgabenart zu Anlage-V-Zeilen erfragen (für A5/A6)
-- [ ] Zeilennummern des passenden **Formularjahrgangs** übernehmen (Projektplan-Zeilen sind unverifiziert)
-- [ ] **Vor dem Ablegen schwärzen:** Namen, Adressen, Steuer-ID, IBAN. Nicht ins Git-Repo einchecken –
-      nur lokal in einem ignorierten Ordner (z. B. `local/` in `.gitignore`)
+## Offene Fragen & Unterlagen
+Siehe [`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Fachliche Fragen an den Steuerberater").
+Status der Aufgaben: [`backlog.md`](backlog.md).
