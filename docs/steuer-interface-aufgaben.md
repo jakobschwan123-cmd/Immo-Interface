@@ -68,6 +68,35 @@ Gegenüberstellung App-Zahl ↔ Zeile der Anlage V.
 `A1` → unabhängig · `A2`, `A3` → wirken in die EÜR, danach `A4` gegenprüfen ·
 `A5` → vor `A6` · Größe: S ≈ ½ Tag, M ≈ 1 Tag, L ≈ mehrere Tage.
 
+## Delegation an Agents (Claude entscheidet selbst, kein manuelles Aufrufen nötig)
+Ziel: Tokens sparen. Vor jeder Aufgabe bewertet Claude kurz und wählt die günstigste
+passende Ausführung. Ein Agent startet kalt (Kontext neu aufbauen) – lohnt sich nur,
+wenn die Aufgabe groß genug oder wirklich parallel ist.
+
+**Bewertung (4 Kriterien):**
+1. **Größe** – S/M/L aus dem Plan.
+2. **Klarheit** – keine offenen Steuerberater-Fragen, Definition „Fertig, wenn" eindeutig.
+3. **Isolation** – berührt andere Dateien als parallel laufende Aufgaben (Konflikt-Hotspots:
+   `euer.ts`, `jahresabschluss/page.tsx`, `types.ts`).
+4. **Risiko** – verändert Rechenlogik echter Finanzzahlen (dann Tests + Review Pflicht).
+
+**Entscheidung:**
+| Ergebnis der Bewertung | Ausführung |
+|---|---|
+| S, klar, wenig Kontext nötig | **Direkt im Hauptchat**, kein Agent |
+| M/L, klar, isoliert, parallel zu anderem Task | **Agent im eigenen Worktree/Branch** (`feature/<kurzname>`) |
+| Rechenlogik (A2, A3, Tests) | Agent mit stärkerem Modell; Ergebnis vor dem Merge mit `/code-review` prüfen |
+| Rein mechanisch (README, Doku, Lint-Fixes) | günstiges Modell (haiku) oder direkt |
+| Offene Fragen / Abhängigkeit ungeklärt (A6, A5 vor Klärung) | **Nicht starten**, Rückfrage an Jakob |
+| Ändert `types.ts` oder dieselbe Stelle in `euer.ts` wie ein laufender Agent | **Nacheinander**, nicht parallel |
+
+**Regeln für jeden Agent:** eigener Branch, nur die Dateien seiner Aufgabe anfassen,
+`npx tsc --noEmit` + `npm run lint` vor dem Commit, **nicht selbst auf `main` pushen** –
+Merge entscheidet Jakob. Agent-Ergebnis kurz zusammenfassen (Dateien, Tests, offene Punkte).
+
+**Tokens sparen:** parallel höchstens 2–3 Agents; Agents bekommen einen selbsttragenden
+Prompt (Aufgabe + Dateien + „Fertig, wenn" aus diesem Plan), damit sie nichts neu erkunden.
+
 ## Offene Fragen an den Steuerberater
 1. AfA im Kaufjahr: ab Kaufmonat voll oder tagesgenau?
 2. Berechneten Darlehenszins verwenden oder nur gebuchte Zinsen?
