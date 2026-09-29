@@ -43,11 +43,11 @@ export function StatCardArea({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
+        <p className="text-2xl font-semibold tabular-nums privacy-blur">{value}</p>
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
-          className="mt-2 h-10 w-full"
+          className="mt-2 h-10 w-full privacy-blur"
           aria-hidden="true"
         >
           <defs>

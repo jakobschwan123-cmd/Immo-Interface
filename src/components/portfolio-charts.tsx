@@ -76,11 +76,11 @@ export function PortfolioCharts({
               <div key={b.label}>
                 <div className="mb-1 flex justify-between text-sm">
                   <span className="truncate">{b.label}</span>
-                  <span className="tabular-nums text-muted-foreground">
+                  <span className="tabular-nums text-muted-foreground privacy-blur">
                     {formatEuro(b.value)} · {share.toFixed(0)} %
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted privacy-blur">
                   <div
                     className={`h-full rounded-full ${COLORS[i % COLORS.length]}`}
                     style={{ width: `${share}%` }}
@@ -105,11 +105,11 @@ export function PortfolioCharts({
               <div key={f.label}>
                 <div className="mb-1 flex justify-between text-sm">
                   <span>{f.label}</span>
-                  <span className="tabular-nums text-muted-foreground">
+                  <span className="tabular-nums text-muted-foreground privacy-blur">
                     {formatEuro(f.value)}
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted privacy-blur">
                   <div
                     className={`h-full rounded-full ${negative ? "bg-red-600" : f.color}`}
                     style={{ width: `${width}%` }}

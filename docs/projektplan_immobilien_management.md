@@ -56,48 +56,49 @@ Alle Daten sind pro Nutzer/Haushalt isoliert (user-scoped).
 
 ## 🧭 Backlog / Für später
 
-*   **Privacy-Modus:** Umschalter, der alle Geldbeträge/Werte unkenntlich macht
-    (z. B. verblurrt oder als „••••"), damit man den Bildschirm zeigen kann, ohne
-    Zahlen preiszugeben. Idealerweise pro Gerät gemerkt (localStorage).
+### 🔥 Höchste Priorität: Jahresabschluss & Steuererklärung (Anlage V & Steuerberater)
+Ziel: Die Steuererklärung (Anlage V) eigenständig bei ELSTER abgeben können bzw. dem Steuerberater einen vollständigen, prüffähigen Vorab-Abschluss übergeben.
 
-*   **Rechtsträger-Gruppierung (wichtig für den Jahresabschluss):**
-    Immobilien gehören verschiedenen **Rechtsträgern** — es kann mehrere gleicher Art
-    geben (z. B. zwei GbRs, eine GmbH, Privatpersonen). Ziel: Immobilien einem
-    Rechtsträger zuordnen und im Dashboard **pro Rechtsträger gruppieren + Zwischensummen**
-    bilden. Der **Jahresabschluss (EÜR/Bilanz) läuft pro Rechtsträger**, nicht pro Immobilie.
-    → Umsetzung: neue Collection `entities`, Feld `entityId` an `properties`, Gruppierung
-    im Dashboard, Filter/Summen pro Rechtsträger. Ersetzt langfristig das einfache
-    Feld `legalForm`.
+1. **Objektbezogene EÜR (Pflicht für Anlage V):**
+   - Das Finanzamt verlangt für jedes einzelne vermietete Objekt eine eigene Anlage V.
+   - Umschaltung/Aufklappen im Jahresabschluss: Konsolidiert pro Rechtsträger **und** detailliert pro Einzel-Immobilie.
 
-*   **Zusätzliche Stammdaten-Felder:**
-    *   Wohnfläche in **m²**
-    *   **Anzahl Wohnungen/Einheiten** pro Objekt
+2. **Detailliertes Buchungsjournal (Einzelnachweis aller Belege):**
+   - Ein Steuerberater/Finanzamt benötigt den lückenlosen Einzelnachweis aller Buchungen eines Jahres.
+   - Exportfunktion (CSV / druckoptimiertes PDF) mit: *Datum, Immobilie, Kategorie, Belegtext/Zweck, Einnahme/Ausgabe, Betrag*.
 
-*   **Vermietungstyp (wichtig fürs Ferienhaus):**
-    Nicht jede Immobilie hat eine feste Monatsmiete. Feld `rentalType`:
-    `Dauervermietung` | `Ferienvermietung` | `Eigennutzung/leer`.
-    Bei **Ferienvermietung** (z. B. Ferienhaus der Eltern, nur zeitweise vermietet)
-    kommen die Einnahmen aus **einzelnen Buchungen** (Phase 2b), nicht aus einer
-    Monats-Kaltmiete. Die Kennzahlen (Rendite etc.) müssen das berücksichtigen.
+3. **Zeitanteilige AfA bei unterjährigem Kauf (§ 7 Abs. 4 EStG):**
+   - Bei Erwerb im laufenden Kalenderjahr (`purchaseDate`) darf die Gebäude-AfA nur monatsgenau angesetzt werden (z. B. Kauf im Juli = 6/12 der Jahres-AfA).
+   - Automatische Erkennung und Berechnung der zeitanteiligen AfA im Anschaffungsjahr.
+
+4. **Schuldzinsen vs. Tilgung bei Darlehen:**
+   - Nur der Zinsanteil einer Darlehensrate ist steuerlich als Werbungskosten abzugsfähig; die Tilgung mindert die Steuern nicht.
+   - Automatische Übernahme/Vorschlag der berechneten Jahreszinsen aus dem Annuitätendarlehensplan (`computeLoan`) in die EÜR bzw. Plausibilitätsprüfung gebuchter Finanzierungszinsen.
+
+5. **ELSTER-Leitfaden / Zeilen-Mapping (Anlage V):**
+   - Direkte Gegenüberstellung der App-Zahlen mit den amtlichen Zeilen/Kennziffern des ELSTER-Formulars Anlage V (Zeile 9: Kaltmiete, Zeile 13: Umlagen, Zeile 33: AfA, Zeile 37: Schuldzinsen, Zeile 40: Erhaltungsaufwand, Zeile 46: Verwaltung etc.).
+
+---
+
+### Weitere Backlog-Punkte
+
+*   **Privacy-Modus:** ✅ Bereits umgesetzt (Augen-Icon im Header, CSS-Blur, Speicherung in localStorage).
 
 *   **Bilder zu Immobilien:** Foto-Upload pro Objekt → braucht Firebase Storage,
     daher zusammen mit Phase 3 (Belege) umsetzen.
 
 *   **Immobilien-Wertberechnung (Marktwert automatisch):**
     Zwei Verfahren:
-    1. **Schnell-Überschlag:** `Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt`.
-       Der Ø-m²-Preis ist der Teil, der **aktuelle Marktdaten** braucht → hier käme
-       **Gemini (AI)** ins Spiel (braucht API-Key). Grob/ungenau.
+    1. **Schnell-Überschlag:** `Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt` (braucht Gemini AI / API-Key).
     2. **Ertragswertverfahren (deterministisch, KEIN AI nötig):**
        - Bodenwert = Grundstücksgröße × Bodenrichtwert (aus BORIS-NRW)
-       - Reiner Gebäudeertrag = Jahreskaltmiete − Bewirtschaftungskosten (ca. 15–30 %,
-         Ferien 35–50 %) − (Bodenwert × Liegenschaftszins ~5,5–6 %)
-       - Gebäudeertragswert = Reiner Gebäudeertrag × Vervielfältiger (amtl. Tabelle,
-         abhängig von Restnutzungsdauer + Liegenschaftszins)
+       - Reiner Gebäudeertrag = Jahreskaltmiete − Bewirtschaftungskosten − (Bodenwert × Liegenschaftszins)
+       - Gebäudeertragswert = Reiner Gebäudeertrag × Vervielfältiger
        - **Gesamtwert = Bodenwert + Gebäudeertragswert**
-       → Kann jederzeit ohne Kosten gebaut werden; Nutzer gibt Bodenrichtwert,
-         Grundstücksgröße, Liegenschaftszins, Vervielfältiger, Bewirtschaftungs-%
-         ein. Jahreskaltmiete haben wir bereits.
+
+*   **Kosmetik & Detail-Verbesserungen:**
+    - Restschuld-Spalte: Anzeige von „–" statt „0,00 €" bei schuldenfreien Immobilien.
+
 
 ---
 

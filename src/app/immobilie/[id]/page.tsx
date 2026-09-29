@@ -50,7 +50,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-4 py-1.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium tabular-nums">{value}</span>
+      <span className="text-right font-medium tabular-nums privacy-blur">{value}</span>
     </div>
   );
 }
@@ -377,26 +377,26 @@ export default function PropertyDetail() {
             <div className="mb-2 flex flex-wrap gap-x-8 gap-y-1 px-6 text-sm">
               <span>
                 Einnahmen:{" "}
-                <span className="font-medium tabular-nums text-emerald-600">
+                <span className="font-medium tabular-nums text-emerald-600 privacy-blur">
                   {formatEuro(incomeCents)}
                 </span>
               </span>
               <span>
                 Ausgaben:{" "}
-                <span className="font-medium tabular-nums text-rose-600">
+                <span className="font-medium tabular-nums text-rose-600 privacy-blur">
                   {formatEuro(expenseCents)}
                 </span>
               </span>
               <span>
                 Saldo:{" "}
-                <span className="font-medium tabular-nums">
+                <span className="font-medium tabular-nums privacy-blur">
                   {formatEuro(saldoCents)}
                 </span>
               </span>
               {repaymentCents > 0 && (
                 <span>
                   Sondertilgungen:{" "}
-                  <span className="font-medium tabular-nums">
+                  <span className="font-medium tabular-nums privacy-blur">
                     {formatEuro(repaymentCents)}
                   </span>
                 </span>
@@ -440,7 +440,7 @@ export default function PropertyDetail() {
                             {t.description ?? "–"}
                           </TableCell>
                           <TableCell
-                            className={`text-right tabular-nums ${
+                            className={`text-right tabular-nums privacy-blur ${
                               signed < 0 ? "text-rose-600" : "text-emerald-600"
                             }`}
                           >

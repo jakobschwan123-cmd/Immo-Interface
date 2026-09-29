@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { PrivacyProvider } from "@/lib/privacy-context";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         {/* AuthProvider stellt der ganzen App den Login-Status bereit. */}
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <PrivacyProvider>{children}</PrivacyProvider>
+        </AuthProvider>
         {/* Toaster fuer kurze Erfolg-/Fehlermeldungen (sonner). */}
         <Toaster richColors />
       </body>
