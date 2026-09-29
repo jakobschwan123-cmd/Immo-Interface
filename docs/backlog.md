@@ -28,7 +28,8 @@ Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht 
   Gesamtwert = Bodenwert + Gebäudeertragswert.
 - **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt (braucht API-Key).
 
-## ⏸️ Phase 3: Belege & Gemini (geparkt)
+## ⏸️ Phase 3: Belege & Gemini (bewusst zurückgestellt)
+Entscheidung: vorerst nur manuelle Erfassung (ca. 1× pro Woche).
 - Beleg-Upload (Firebase Storage) und Gemini-Auslesung (Betrag, Datum, Zweck, Kategorievorschlag),
   serverseitig, mit Bestätigungs-UI. Blockiert durch Datenschutz-/Blaze-Entscheidung, siehe
   offene technische Themen.
@@ -39,6 +40,10 @@ Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht 
 - Fehlerbehandlung und Edge-Cases
 - Backup (Firestore-Export)
 - Onboarding der Eltern
+
+## Produkt / Vermarktung (Idee)
+App/Website auch für andere anbieten. Vorbedingungen und Überlegungen in
+[`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Produkt-Idee").
 
 ## Kosmetik
 - Restschuld-Spalte: „–" statt „0,00 €" bei kreditfreien Objekten.

@@ -16,10 +16,11 @@ Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-D
   (`formatEuro`, `euroInputToCents`, `centsToEuroInput`).
 - **Rechenlogik als reine Funktionen in `src/lib/`**, UI zeigt nur an. Neue Geldwerte in der UI
   bekommen die Klasse `privacy-blur`.
+- **Tests:** Vitest (`npm test`, `*.test.ts` neben dem Code). Neue Rechenlogik in `src/lib/` bekommt einen Test.
 - **Sicherheit:** Zugriff nur für Allowlist. Verbindlich über `firestore.rules`
   (`config/allowlist` mit `emails`), Client-Whitelist `NEXT_PUBLIC_ALLOWED_EMAILS` ist nur UX.
 - **Firestore:** `ignoreUndefinedProperties` aktiv → leere optionale Felder sind ok.
-- **Nach jeder sinnvollen Änderung:** `npx tsc --noEmit` + `npm run lint`, dann committen & pushen
+- **Nach jeder sinnvollen Änderung:** `npx tsc --noEmit` + `npm run lint` + `npm test`, dann committen & pushen
   (Vercel deployt `main` automatisch; Feature-Branches nicht).
 - `.env.local` bleibt lokal; Vercel-Env-Vars separat pflegen.
 
