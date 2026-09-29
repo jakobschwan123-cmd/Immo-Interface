@@ -111,6 +111,8 @@ export default function Jahresabschluss() {
   const [entities, setEntities] = useState<Entity[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  // "all" = Gesamt je Rechtsträger, sonst ID einer Einzelimmobilie.
+  const [scope, setScope] = useState<string>("all");
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -155,6 +157,10 @@ export default function Jahresabschluss() {
   if (orphan.length)
     groups.push({ key: "orphan", title: "Ohne Rechtsträger", props: orphan });
 
+  const selectedProperty = properties.find((p) => p.id === scope);
+  // Existiert das gewaehlte Objekt nicht mehr (z.B. geloescht), zurueck auf Gesamt.
+  const effectiveScope = selectedProperty ? scope : "all";
+
   return (
     <main className="flex flex-1 flex-col bg-muted/30">
       <AppHeader />
@@ -164,10 +170,30 @@ export default function Jahresabschluss() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Jahresabschluss</h1>
             <p className="text-sm text-muted-foreground">
-              Einnahmen-Überschuss-Rechnung (EÜR) je Rechtsträger
+              Einnahmen-Überschuss-Rechnung (EÜR){" "}
+              {selectedProperty ? "je Objekt" : "je Rechtsträger"}
             </p>
           </div>
-          <div className="flex items-center gap-2 print:hidden">
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <Select value={effectiveScope} onValueChange={(v) => setScope(v ?? "all")}>
+              <SelectTrigger>
+                <SelectValue>
+                  {(v: string) =>
+                    v === "all"
+                      ? "Gesamt (Rechtsträger)"
+                      : (properties.find((p) => p.id === v)?.name ?? "Objekt")
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Gesamt (Rechtsträger)</SelectItem>
+                {properties.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
               <SelectTrigger>
                 <SelectValue />
@@ -198,14 +224,22 @@ export default function Jahresabschluss() {
           </p>
         ) : (
           <div className="space-y-6">
-            {groups.map((g) => (
+            {selectedProperty ? (
               <EuerCard
-                key={g.key}
-                title={g.title}
-                subtitle={g.subtitle ? `${g.subtitle} · ${year}` : String(year)}
-                euer={computeEuer(g.props, transactions, year)}
+                title={selectedProperty.name}
+                subtitle={`${entityMap.get(selectedProperty.entityId ?? "")?.name ?? "Ohne Rechtsträger"} · ${year}`}
+                euer={computeEuer([selectedProperty], transactions, year)}
               />
-            ))}
+            ) : (
+              groups.map((g) => (
+                <EuerCard
+                  key={g.key}
+                  title={g.title}
+                  subtitle={g.subtitle ? `${g.subtitle} · ${year}` : String(year)}
+                  euer={computeEuer(g.props, transactions, year)}
+                />
+              ))
+            )}
           </div>
         )}
       </div>

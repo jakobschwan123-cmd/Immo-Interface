@@ -84,6 +84,19 @@ export function computeEuer(
   };
 }
 
+// Objektbezogene EÜR: je Immobilie eine eigene EÜR (Liste mit einem Element
+// an computeEuer). Die Summe der Einzelobjekte entspricht der Gesamt-EÜR.
+export function computeEuerPerProperty(
+  properties: Property[],
+  transactions: Transaction[],
+  year: number,
+): { property: Property; euer: Euer }[] {
+  return properties.map((property) => ({
+    property,
+    euer: computeEuer([property], transactions, year),
+  }));
+}
+
 // Alle Jahre, in denen es Buchungen gibt (fuer die Jahresauswahl),
 // plus das aktuelle Jahr. Absteigend sortiert.
 export function availableYears(transactions: Transaction[]): number[] {
