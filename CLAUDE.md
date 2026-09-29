@@ -44,6 +44,13 @@ Dashboard-Kennzahlen (Gesamtwert #1, Einkommen/Jahr #2 mit Area-Chart), EÜR + C
 - **Privacy-Modus:** Umschalter, der alle Geldwerte unkenntlich macht (Bildschirm herzeigen).
 - **Bilder pro Immobilie** (braucht Storage/Blaze, mit Phase 3).
 - Kosmetik: Restschuld-Spalte „–" statt „0,00 €" bei kreditfreien Objekten.
+- **Tests:** Es gibt keinen Test-Runner. Reine Rechenlogik (`money.ts`, `loan.ts`, `finance.ts`, `euer.ts`)
+  wäre ideal für Unit-Tests (Vitest), da Fehler hier echte Finanzzahlen verfälschen.
+- **Firestore-Rules versionieren/deployen:** `firebase.json` + Firebase CLI (ggf. Emulator), statt
+  `firestore.rules` manuell in der Console zu pflegen.
+- **README aktualisieren:** erwähnt Gemini „serverseitig" und Storage, beides noch nicht gebaut (Phase 3 geparkt).
+- **Dev-Whitelist absichern:** Leere `NEXT_PUBLIC_ALLOWED_EMAILS` lässt jede Google-Adresse rein (nur UX,
+  Rules greifen trotzdem) – in Produktion nie leer lassen, ggf. Warnung/Build-Check ergänzen.
 
 ## Doku
 `docs/projektplan_immobilien_management.md` (Plan + Backlog), `docs/phase-0-setup.md`,
