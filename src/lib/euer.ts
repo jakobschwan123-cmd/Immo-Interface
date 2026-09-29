@@ -97,6 +97,56 @@ export function computeEuerPerProperty(
   }));
 }
 
+export type JournalRow = {
+  id: string;
+  date: string; // ISO "YYYY-MM-DD"
+  propertyName: string;
+  category: string;
+  description: string;
+  type: Transaction["type"];
+  amountCents: number; // immer positiv, Vorzeichen ergibt sich aus type
+};
+
+// Buchungsjournal eines Jahres: lueckenloser Einzelnachweis, nach Datum sortiert.
+// Sondertilgungen (type "repayment") sind enthalten, aber gekennzeichnet –
+// sie zaehlen nicht in die EÜR (siehe journalTotals).
+export function journalRows(
+  properties: Property[],
+  transactions: Transaction[],
+  year: number,
+): JournalRow[] {
+  const names = new Map(properties.map((p) => [p.id, p.name]));
+  return transactions
+    .filter((t) => names.has(t.propertyId) && inYear(t, year))
+    .map((t) => ({
+      id: t.id,
+      date: t.date,
+      propertyName: names.get(t.propertyId) ?? "",
+      category: t.category,
+      description: t.description ?? "",
+      type: t.type,
+      amountCents: t.amountCents,
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+}
+
+// Summen der Journalzeilen, die der EÜR entsprechen (ohne AfA und Sondertilgung).
+export function journalTotals(rows: JournalRow[]): {
+  incomeCents: number;
+  expenseCents: number;
+  repaymentCents: number;
+} {
+  let incomeCents = 0;
+  let expenseCents = 0;
+  let repaymentCents = 0;
+  for (const r of rows) {
+    if (r.type === "income") incomeCents += r.amountCents;
+    else if (r.type === "expense") expenseCents += r.amountCents;
+    else repaymentCents += r.amountCents;
+  }
+  return { incomeCents, expenseCents, repaymentCents };
+}
+
 // Alle Jahre, in denen es Buchungen gibt (fuer die Jahresauswahl),
 // plus das aktuelle Jahr. Absteigend sortiert.
 export function availableYears(transactions: Transaction[]): number[] {

@@ -4,15 +4,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Printer } from "lucide-react";
+import { BookOpen, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { subscribeProperties } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
 import { subscribeAllTransactions } from "@/lib/transactions";
-import { computeEuer, availableYears, type Euer } from "@/lib/euer";
-import { euerToCsv, downloadTextFile } from "@/lib/csv";
+import { computeEuer, availableYears, journalRows, journalTotals, type Euer, type JournalRow } from "@/lib/euer";
+import { euerToCsv, journalToCsv, JOURNAL_TYPE_LABEL, downloadTextFile } from "@/lib/csv";
 import { formatEuro } from "@/lib/money";
 import type { Property, Entity, Transaction } from "@/lib/types";
 
@@ -28,7 +28,26 @@ import {
 } from "@/components/ui/select";
 
 // Eine EÜR-Karte fuer einen Rechtsträger.
-function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string; euer: Euer }) {
+function EuerCard({
+  title,
+  subtitle,
+  euer,
+  journal,
+}: {
+  title: string;
+  subtitle?: string;
+  euer: Euer;
+  journal: JournalRow[];
+}) {
+  const [showJournal, setShowJournal] = useState(false);
+  const totals = journalTotals(journal);
+
+  function handleJournalCsv() {
+    const safe = title.replace(/[^\p{L}\p{N}_-]+/gu, "_");
+    downloadTextFile(`Journal_${euer.year}_${safe}.csv`, journalToCsv(journal, euer.year, title));
+    toast.success("Journal-CSV heruntergeladen.");
+  }
+
   function handleCsv() {
     const safe = title.replace(/[^\p{L}\p{N}_-]+/gu, "_");
     downloadTextFile(`EUER_${euer.year}_${safe}.csv`, euerToCsv(euer, title));
@@ -44,9 +63,14 @@ function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string;
             <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={handleCsv} className="print:hidden">
-          <Download /> CSV
-        </Button>
+        <div className="flex gap-2 print:hidden">
+          <Button variant="outline" size="sm" onClick={() => setShowJournal((v) => !v)}>
+            <BookOpen /> Journal
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleCsv}>
+            <Download /> CSV
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {/* Einnahmen */}
@@ -98,6 +122,70 @@ function EuerCard({ title, subtitle, euer }: { title: string; subtitle?: string;
             {formatEuro(euer.surplusCents)}
           </span>
         </div>
+
+        {/* Buchungsjournal (Einzelnachweis) – wird mitgedruckt, wenn geoeffnet */}
+        {showJournal && (
+          <div className="border-t pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-medium">Buchungsjournal {euer.year}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleJournalCsv}
+                className="print:hidden"
+              >
+                <Download /> Journal-CSV
+              </Button>
+            </div>
+            {journal.length === 0 ? (
+              <p className="text-muted-foreground">Keine Buchungen in diesem Jahr.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b text-left text-muted-foreground">
+                      <th className="py-1 pr-2 font-normal">Datum</th>
+                      <th className="py-1 pr-2 font-normal">Immobilie</th>
+                      <th className="py-1 pr-2 font-normal">Kategorie</th>
+                      <th className="py-1 pr-2 font-normal">Text</th>
+                      <th className="py-1 text-right font-normal">Betrag</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {journal.map((r) => (
+                      <tr key={r.id} className="border-b last:border-0">
+                        <td className="py-1 pr-2 whitespace-nowrap">
+                          {r.date.split("-").reverse().join(".")}
+                        </td>
+                        <td className="py-1 pr-2">{r.propertyName}</td>
+                        <td className="py-1 pr-2">
+                          {r.category}
+                          {r.type === "repayment" && (
+                            <span className="ml-1 text-muted-foreground">
+                              ({JOURNAL_TYPE_LABEL.repayment})
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-1 pr-2">{r.description}</td>
+                        <td className="py-1 text-right tabular-nums privacy-blur">
+                          {r.type === "income" ? "" : "−"}
+                          {formatEuro(r.amountCents)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Einnahmen <span className="privacy-blur">{formatEuro(totals.incomeCents)}</span> ·
+                  Ausgaben (ohne AfA){" "}
+                  <span className="privacy-blur">{formatEuro(totals.expenseCents)}</span> ·
+                  Sondertilgungen (nicht in EÜR){" "}
+                  <span className="privacy-blur">{formatEuro(totals.repaymentCents)}</span>
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -229,6 +317,7 @@ export default function Jahresabschluss() {
                 title={selectedProperty.name}
                 subtitle={`${entityMap.get(selectedProperty.entityId ?? "")?.name ?? "Ohne Rechtsträger"} · ${year}`}
                 euer={computeEuer([selectedProperty], transactions, year)}
+                journal={journalRows([selectedProperty], transactions, year)}
               />
             ) : (
               groups.map((g) => (
@@ -237,6 +326,7 @@ export default function Jahresabschluss() {
                   title={g.title}
                   subtitle={g.subtitle ? `${g.subtitle} · ${year}` : String(year)}
                   euer={computeEuer(g.props, transactions, year)}
+                  journal={journalRows(g.props, transactions, year)}
                 />
               ))
             )}
