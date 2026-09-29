@@ -33,7 +33,7 @@ Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-D
 
 ## Stand
 - ✅ Phase 0–2b (Setup, Login, Datenmodell, Dashboard, Buchungen), Phase 4 (EÜR), Privacy-Modus, Deployment.
-- ✅ Steuer-Interface A1 (objektbezogene EÜR) und A4 (Buchungsjournal) auf `feature/steuer-interface`.
+- ✅ Steuer-Interface A1 (objektbezogene EÜR), A2 (zeitanteilige AfA, `afaForYear`) und A4 (Buchungsjournal) auf `feature/steuer-interface`.
 - ⏸️ Phase 3 (Belege/Gemini/Storage) geparkt. 🟡 Phase 5 (Polish/Rollout) teilweise.
 
 ## Wegweiser: Doku

@@ -1,13 +1,13 @@
 // Einnahmen-Überschuss-Rechnung (EÜR) pro Rechtsträger und Jahr.
 //
 // Grundidee: tatsaechliche Buchungen eines Jahres nach Kategorie gruppieren,
-// zusaetzlich die Abschreibung (AfA) als Ausgabe ansetzen (sie mindert
+// zusaetzlich die Abschreibung (AfA, siehe afaForYear) als Ausgabe ansetzen (sie mindert
 // steuerlich den Gewinn, ist aber keine Zahlung).
 //
 // Hinweis: vereinfachte Darstellung als Vorbereitung fuer den Steuerberater,
-// KEIN Steuerberater-Ersatz. Die AfA wird als voller Jahresbetrag angesetzt.
+// KEIN Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau (Kaufmonat voll) angesetzt.
 
-import { calculateKpis } from "./finance";
+import { afaForYear } from "./finance";
 import { TRANSACTION_CATEGORIES } from "./types";
 import type { Property, Transaction } from "./types";
 
@@ -66,7 +66,7 @@ export function computeEuer(
 
   // AfA als zusaetzliche Ausgabe (Summe ueber alle Immobilien).
   const afaCents = properties.reduce(
-    (s, p) => s + calculateKpis(p).annualAfaCents,
+    (s, p) => s + afaForYear(p, year),
     0,
   );
   if (afaCents > 0) {

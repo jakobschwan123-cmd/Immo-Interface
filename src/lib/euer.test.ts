@@ -5,6 +5,7 @@ import {
   journalRows,
   journalTotals,
 } from "./euer";
+import { afaForYear } from "./finance";
 import type { Property, Transaction } from "./types";
 
 function prop(id: string, buildingValueCents: number): Property {
@@ -34,6 +35,20 @@ function tx(
 ): Transaction {
   return { id, propertyId, type, amountCents, date, category, createdBy: "test" };
 }
+
+describe("A2: afaForYear (§ 7 Abs. 4 EStG)", () => {
+  const p = { ...prop("x", 10_000_000), purchaseDate: "2025-07-15" }; // Jahres-AfA 200.000
+  it("Kauf 15.07. -> 6/12 im Kaufjahr", () => expect(afaForYear(p, 2025)).toBe(100_000));
+  it("Kauf im Vorjahr -> 12/12", () => expect(afaForYear(p, 2026)).toBe(200_000));
+  it("Kauf im Folgejahr -> 0", () => expect(afaForYear(p, 2024)).toBe(0));
+  it("Januar = 12/12, Dezember = 1/12", () => {
+    expect(afaForYear({ ...p, purchaseDate: "2025-01-31" }, 2025)).toBe(200_000);
+    expect(afaForYear({ ...p, purchaseDate: "2025-12-01" }, 2025)).toBe(16_667);
+  });
+  it("ungültiges Datum -> voller Jahresbetrag", () => {
+    expect(afaForYear({ ...p, purchaseDate: "" }, 2025)).toBe(200_000);
+  });
+});
 
 const props = [prop("a", 10_000_000), prop("b", 5_000_000)];
 const txs: Transaction[] = [

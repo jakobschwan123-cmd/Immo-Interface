@@ -26,7 +26,7 @@ Umschaltung im Jahresabschluss: Gesamt (Rechtsträger) ↔ Einzelobjekt.
 - UI: `src/app/jahresabschluss/page.tsx` – Auswahl Objekt, CSV/Druck übernehmen den Filter.
 - Fertig, wenn: Summe der Einzelobjekte = Gesamt-EÜR des Rechtsträgers.
 
-### A2 – Zeitanteilige AfA im Kaufjahr  `M`
+### A2 – Zeitanteilige AfA im Kaufjahr  `M`  ✅ umgesetzt (Annahme: Kaufmonat voll, Steuerberater bestätigt noch)
 § 7 Abs. 4 EStG: monatsgenau ab Anschaffungsmonat (Kauf Juli = 6/12).
 - Backend: `afaForYear(property, year)` in `src/lib/finance.ts` (aus `purchaseDate`;
   Jahre vor Kauf = 0, Folgejahre voll). `computeEuer` nutzt sie statt `annualAfaCents`.

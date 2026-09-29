@@ -303,7 +303,7 @@ export default function Jahresabschluss() {
         {/* Hinweis */}
         <p className="mb-6 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
           Vereinfachte Darstellung als Vorbereitung für den Steuerberater – kein
-          Steuerberater-Ersatz. Die AfA wird als voller Jahresbetrag angesetzt.
+          Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau angesetzt (Kaufmonat zählt voll, Bestätigung durch den Steuerberater steht noch aus).
         </p>
 
         {properties.length === 0 ? (

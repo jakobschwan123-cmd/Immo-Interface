@@ -14,7 +14,7 @@ einen vollständigen, prüffähigen Vorab-Abschluss übergeben. Branch `feature/
 |---|---|---|
 | A1 | Objektbezogene EÜR (Umschaltung Gesamt/Einzelobjekt) | ✅ |
 | A4 | Buchungsjournal (Anzeige, Druck, CSV) | ✅ |
-| A2 | Zeitanteilige AfA im Kaufjahr (§ 7 Abs. 4 EStG, monatsgenau) | offen – wartet auf Klärung AfA-Kaufmonat |
+| A2 | Zeitanteilige AfA im Kaufjahr (§ 7 Abs. 4 EStG, monatsgenau) | ✅ mit Annahme „Kaufmonat voll"; Bestätigung Steuerberater offen |
 | A3 | Schuldzinsen vs. Tilgung (berechneter Zins aus `computeLoan`) | offen – wartet auf Klärung Zins ersetzen/vergleichen |
 | A5 | Kategorien für Anlage V verfeinern (abwärtskompatibel) | offen – braucht Zuordnung vom Steuerberater |
 | A6 | ELSTER-Zeilen-Mapping Anlage V | offen – braucht A5 und verifizierte Formularzeilen |
