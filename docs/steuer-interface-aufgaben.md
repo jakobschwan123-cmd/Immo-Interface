@@ -33,7 +33,7 @@ Umschaltung im Jahresabschluss: Gesamt (Rechtsträger) ↔ Einzelobjekt.
 - Klären: Monat des Kaufs zählt voll (üblich) – gegen Steuerberater bestätigen.
 - Fertig, wenn: Kauf 15.07. → 6/12; Kauf im Vorjahr → 12/12; Kauf im Folgejahr → 0.
 
-### A3 – Schuldzinsen vs. Tilgung  `M`
+### A3 – Schuldzinsen vs. Tilgung  `M`  🟡 Teil 1 fertig (`loanInterestForYear`, Vergleichshinweis in der EÜR); Entscheidung ersetzen/vergleichen offen
 Nur Zinsen sind Werbungskosten.
 - Backend: `loanInterestForYear(property, year)` in `src/lib/loan.ts` aus dem
   Annuitätenplan (`computeLoan`, Sondertilgungen berücksichtigen).

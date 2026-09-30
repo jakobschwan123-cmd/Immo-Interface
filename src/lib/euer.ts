@@ -8,6 +8,7 @@
 // KEIN Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau (Kaufmonat voll) angesetzt.
 
 import { afaForYear } from "./finance";
+import { loanInterestForYear } from "./loan";
 import { TRANSACTION_CATEGORIES } from "./types";
 import type { Property, Transaction } from "./types";
 
@@ -20,6 +21,14 @@ export type Euer = {
   expenses: EuerLine[]; // Ausgaben je Kategorie + AfA (nur > 0)
   expenseTotalCents: number;
   surplusCents: number; // Ueberschuss (+) oder Verlust (-)
+  // Plausibilitaetsvergleich Darlehenszins: berechnet (Annuitaetenplan) vs. gebucht
+  // (Kategorie "Finanzierungszins"). null, wenn kein Objekt einen Kredit hat.
+  // Fliesst NICHT in die EÜR-Summen ein (kein Doppelansatz).
+  loanInterestCheck: {
+    calculatedCents: number;
+    bookedCents: number;
+    diffCents: number; // berechnet - gebucht
+  } | null;
 };
 
 // Gehoert eine Buchung (per Datum) ins angegebene Jahr?
@@ -74,6 +83,23 @@ export function computeEuer(
     expenseTotalCents += afaCents;
   }
 
+  // Vergleich Darlehenszins (nur zur Anzeige, nicht in den Summen).
+  let calculatedCents = 0;
+  let hasLoan = false;
+  for (const p of properties) {
+    const repayments = transactions
+      .filter((t) => t.propertyId === p.id && t.type === "repayment")
+      .map((t) => ({ amountCents: t.amountCents, date: t.date }));
+    const ly = loanInterestForYear(p, year, repayments);
+    if (ly.configured) {
+      hasLoan = true;
+      calculatedCents += ly.interestCents;
+    }
+  }
+  const bookedCents = yearTx
+    .filter((t) => t.type === "expense" && t.category === "Finanzierungszins")
+    .reduce((s, t) => s + t.amountCents, 0);
+
   return {
     year,
     income,
@@ -81,6 +107,9 @@ export function computeEuer(
     expenses,
     expenseTotalCents,
     surplusCents: incomeTotalCents - expenseTotalCents,
+    loanInterestCheck: hasLoan
+      ? { calculatedCents, bookedCents, diffCents: calculatedCents - bookedCents }
+      : null,
   };
 }
 

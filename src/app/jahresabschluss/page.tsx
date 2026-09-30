@@ -111,6 +111,35 @@ function EuerCard({
           </div>
         </div>
 
+        {/* Plausibilitaet Darlehenszins (nur Hinweis, nicht in den Summen) */}
+        {euer.loanInterestCheck && (
+          <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">Darlehenszins – Plausibilitätsprüfung</p>
+            <p className="mt-1">
+              Berechnet (Annuitätenplan):{" "}
+              <span className="tabular-nums privacy-blur">
+                {formatEuro(euer.loanInterestCheck.calculatedCents)}
+              </span>{" "}
+              · Gebucht:{" "}
+              <span className="tabular-nums privacy-blur">
+                {formatEuro(euer.loanInterestCheck.bookedCents)}
+              </span>
+            </p>
+            {Math.abs(euer.loanInterestCheck.diffCents) > 100 ? (
+              <p className="mt-1 text-amber-600">
+                Abweichung von{" "}
+                <span className="tabular-nums privacy-blur">
+                  {formatEuro(Math.abs(euer.loanInterestCheck.diffCents))}
+                </span>
+                . Bitte mit der Jahresbescheinigung der Bank abgleichen. Die EÜR
+                verwendet nur die gebuchten Zinsen.
+              </p>
+            ) : (
+              <p className="mt-1">Kein nennenswerter Unterschied.</p>
+            )}
+          </div>
+        )}
+
         {/* Ergebnis */}
         <div className="flex justify-between border-t-2 pt-2 text-base font-semibold">
           <span>{euer.surplusCents >= 0 ? "Überschuss" : "Verlust"}</span>

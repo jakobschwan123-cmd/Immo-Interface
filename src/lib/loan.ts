@@ -132,3 +132,78 @@ export function computeLoan(
     payable,
   };
 }
+
+export type LoanYear = {
+  configured: boolean;
+  interestCents: number; // Zinsen, die in diesem Kalenderjahr faellig wurden
+  principalCents: number; // regulaere Tilgung in diesem Jahr (ohne Sondertilgung)
+  extraRepaymentCents: number; // Sondertilgungen in diesem Jahr (kein Werbungskosten)
+};
+
+// Zins- und Tilgungsanteil eines Kalenderjahres aus dem Annuitaetenplan.
+// Gleiche Simulation wie computeLoan (Monat 0 = Kreditbeginn ohne Rate, danach
+// Zins = Restschuld x Monatszins, Sondertilgung am Monatsende), aber ueber das
+// Jahr `year` aufsummiert statt bis heute. Nur der Zins ist Werbungskosten.
+export function loanInterestForYear(
+  p: Property,
+  year: number,
+  repayments: Repayment[] = [],
+): LoanYear {
+  const none: LoanYear = {
+    configured: false,
+    interestCents: 0,
+    principalCents: 0,
+    extraRepaymentCents: 0,
+  };
+  if (
+    p.loanOriginalCents == null ||
+    p.loanMonthlyPaymentCents == null ||
+    p.loanInterestRatePercent == null ||
+    !p.loanStartDate
+  ) {
+    return none;
+  }
+  const start = new Date(p.loanStartDate);
+  if (Number.isNaN(start.getTime())) return none;
+
+  const monthlyRate = p.loanInterestRatePercent / 100 / 12;
+  const payment = p.loanMonthlyPaymentCents;
+
+  const repayByMonth = new Map<string, number>();
+  for (const r of repayments) {
+    const key = (r.date ?? "").slice(0, 7);
+    if (key) repayByMonth.set(key, (repayByMonth.get(key) ?? 0) + r.amountCents);
+  }
+
+  let balance = p.loanOriginalCents;
+  let interestCents = 0;
+  let principalCents = 0;
+  let extraRepaymentCents = 0;
+
+  // Bis Dezember des gewaehlten Jahres simulieren.
+  const lastMonthIndex =
+    (year - start.getFullYear()) * 12 + (11 - start.getMonth());
+  for (let m = 0; m <= lastMonthIndex && balance > 0; m++) {
+    const d = new Date(start.getFullYear(), start.getMonth() + m, 1);
+    const inYear = d.getFullYear() === year;
+    if (m > 0) {
+      const interest = Math.round(balance * monthlyRate);
+      const principal = payment - interest;
+      if (principal > 0) {
+        const paid = Math.min(principal, balance);
+        balance -= paid;
+        if (inYear) principalCents += paid;
+      }
+      if (inYear) interestCents += interest;
+    }
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const extra = repayByMonth.get(key);
+    if (extra) {
+      const paid = Math.min(extra, balance);
+      balance -= paid;
+      if (inYear) extraRepaymentCents += paid;
+    }
+  }
+
+  return { configured: true, interestCents, principalCents, extraRepaymentCents };
+}
