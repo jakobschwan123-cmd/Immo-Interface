@@ -6,7 +6,7 @@
 // der Nutzer im Buchungsdialog.
 
 import { useRef, useState } from "react";
-import { ref, uploadBytes } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Camera, FileUp, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,32 @@ export async function uploadReceipt(propertyId: string, file: File): Promise<str
   const path = `receipts/${propertyId}/${Date.now()}-${safeName}`;
   await uploadBytes(ref(storage, path), file, { contentType: file.type });
   return path;
+}
+
+// Beleg aus dem Storage loeschen (best effort: Fehler werden verschluckt, die Datei
+// bleibt dann liegen – kein Absturz, kein Abbruch der eigentlichen Aktion).
+export async function deleteReceiptFile(path: string | undefined): Promise<void> {
+  if (!path) return;
+  try {
+    await deleteObject(ref(storage, path));
+  } catch (err) {
+    console.warn("[Beleg loeschen]", err);
+  }
+}
+
+// Beleg in neuem Tab oeffnen. Der Tab wird synchron geoeffnet (sonst blockt Safari
+// das Popup) und danach auf die Download-URL gesetzt; opener=null ~ noopener.
+export async function openReceipt(path: string): Promise<void> {
+  const tab = window.open("about:blank", "_blank");
+  if (tab) tab.opener = null;
+  try {
+    const url = await getDownloadURL(ref(storage, path));
+    if (tab) tab.location.href = url;
+    else window.location.href = url;
+  } catch (err) {
+    tab?.close();
+    throw err;
+  }
 }
 
 // Handyfotos sind oft > 4 MB (Vercel-Limit der API). Nur fuer die Auslesung

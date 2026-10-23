@@ -82,6 +82,7 @@ export type Transaction = {
   date: string; // ISO-Datum "YYYY-MM-DD"
   category: TransactionCategory | LegacyCategory; // Altdaten koennen veraltete Kategorien haben
   description?: string;
+  receiptPath?: string; // Storage-Pfad des Belegs (receipts/{propertyId}/...)
   createdBy: string;
   createdAt?: Timestamp;
 };
