@@ -44,5 +44,17 @@ Namen mit den Werten aus deiner lokalen `.env.local` anlegen:
 2. Link an die Eltern geben (deren E-Mails müssen in der Allowlist stehen:
    `config/allowlist` in Firestore + `NEXT_PUBLIC_ALLOWED_EMAILS`).
 
+## Firestore-Rules deployen (Firebase CLI)
+Die Rules liegen versioniert in `firestore.rules`; `firebase.json` und `.firebaserc`
+(Projekt-ID `immo-interface`) sind im Repo. Hosting läuft über Vercel, die CLI wird
+nur für die Rules genutzt. Deploy erfolgt manuell, nicht automatisch per `git push`.
+
+1. CLI installieren: `npm i -g firebase-tools` (oder ohne Installation `npx firebase-tools …`).
+2. Einmalig anmelden: `firebase login` (mit dem Google-Konto des Firebase-Projekts).
+3. Deployen: `firebase deploy --only firestore:rules`
+   (bzw. `npx firebase-tools deploy --only firestore:rules`).
+
+> Die Allowlist (`config/allowlist`) bleibt in der Console gepflegt – sie ist ein Dokument, keine Rule.
+
 ## Danach
 Jeder `git push` auf `main` löst automatisch ein neues Deployment aus.
