@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  availableYears,
   computeEuer,
   computeEuerPerProperty,
   journalRows,
@@ -98,5 +99,20 @@ describe("A4: Journal", () => {
 
   it("filtert nach Immobilien", () => {
     expect(journalRows([props[1]], txs, 2025).map((r) => r.id)).toEqual(["2", "4"]);
+  });
+});
+
+describe("availableYears", () => {
+  const now = new Date().getFullYear();
+  const p = (purchaseDate: string) => ({ ...prop("a", 1), purchaseDate });
+  it("enthält aktuelles Jahr, Buchungsjahre und Kaufjahre, absteigend", () => {
+    const years = availableYears([tx("1", "a", "income", 1, "2022-03-01")], [p("2019-05-01")]);
+    expect(years).toEqual([now, 2022, 2019]);
+  });
+  it("ignoriert ungültige und zukünftige Kaufdaten", () => {
+    expect(availableYears([], [p(""), p("abc"), p(`${now + 1}-01-01`)])).toEqual([now]);
+  });
+  it("ohne Objekte wie bisher", () => {
+    expect(availableYears([tx("1", "a", "income", 1, "2021-01-01")])).toEqual([now, 2021]);
   });
 });

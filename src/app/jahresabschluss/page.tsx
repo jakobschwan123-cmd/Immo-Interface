@@ -361,7 +361,7 @@ export default function Jahresabschluss() {
     );
   }
 
-  const years = availableYears(transactions);
+  const years = availableYears(transactions, properties);
 
   // Gruppen nach Rechtsträger (wie im Dashboard).
   const entityMap = new Map(entities.map((e) => [e.id, e]));

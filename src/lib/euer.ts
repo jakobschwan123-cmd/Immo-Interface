@@ -186,11 +186,17 @@ export function journalTotals(rows: JournalRow[]): {
   return { incomeCents, expenseCents, repaymentCents };
 }
 
-// Alle Jahre, in denen es Buchungen gibt (fuer die Jahresauswahl),
-// plus das aktuelle Jahr. Absteigend sortiert.
-export function availableYears(transactions: Transaction[]): number[] {
+// Alle Jahre, in denen es Buchungen gibt (fuer die Jahresauswahl), plus das
+// aktuelle Jahr und die Kaufjahre der Objekte (bis zum aktuellen Jahr, damit z. B.
+// die anteilige AfA im Kaufjahr auch ohne Buchungen abrufbar ist). Absteigend sortiert.
+export function availableYears(transactions: Transaction[], properties: Property[] = []): number[] {
   const years = new Set<number>();
-  years.add(new Date().getFullYear());
+  const current = new Date().getFullYear();
+  years.add(current);
+  for (const p of properties) {
+    const y = Number((p.purchaseDate ?? "").slice(0, 4));
+    if (Number.isInteger(y) && y > 1990 && y <= current) years.add(y);
+  }
   for (const t of transactions) {
     const y = Number(t.date.slice(0, 4));
     if (Number.isFinite(y) && y > 1990) years.add(y);

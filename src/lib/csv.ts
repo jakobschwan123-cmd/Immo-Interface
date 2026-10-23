@@ -11,7 +11,10 @@ function centsToPlain(cents: number): string {
 }
 
 // Ein CSV-Feld sicher escapen (Semikolon/Anfuehrungszeichen/Zeilenumbruch).
-function cell(value: string): string {
+// Schutz vor Formel-Injection: Text, der mit = + - @ Tab/CR beginnt, bekommt ein ' voran.
+// Reine Zahlen (Betraege wie "-123,45") bleiben unveraendert, damit Excel sie als Zahl liest.
+export function cell(value: string): string {
+  if (/^[=+\-@\t\r]/.test(value) && !/^-?\d+([.,]\d+)?$/.test(value)) value = `'${value}`;
   if (/[";\n]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
   }
