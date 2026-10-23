@@ -44,3 +44,6 @@ next-env.d.ts
 
 # lokaler Ordner für geschwärzte Steuerunterlagen (nie committen)
 local/
+
+# Claude-Agent-Worktrees
+.claude/worktrees/

@@ -23,7 +23,10 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 
 ## Qualität
 - **Tests:** ✅ Vitest eingerichtet (`npm test`). Abgedeckt: `money.ts`, EÜR-Summen (A1),
-  Journal (A4). Offen: `loan.ts`, `finance.ts`. Neue Rechenlogik (A2, A3) immer mit Test.
+  Journal (A4), `loan.ts`, `finance.ts`. Neue Rechenlogik (A2, A3) immer mit Test.
+- **AfA ohne gültiges Kaufdatum:** `afaForYear` setzt dann die volle AfA an – auch für Jahre
+  vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
+  Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
 - **Journal vs. EÜR bei Alt-Kategorien:** Die EÜR zählt nur Kategorien aus
   `TRANSACTION_CATEGORIES`, das Journal zeigt alle Buchungen. Bei Buchungen mit unbekannter
   Kategorie weichen die Summen ab. Mit echten Daten prüfen (relevant für A5).
@@ -46,6 +49,3 @@ Haftung/„kein Steuerberater-Ersatz", Abrechnung. Schritt 1 wäre ein kleiner P
 - [ ] Zeilennummern des passenden Formularjahrgangs
 - [ ] Vor dem Ablegen schwärzen (Namen, Adressen, Steuer-ID, IBAN); nicht ins Git-Repo, nur lokal
       in einem ignorierten Ordner (z. B. `local/` in `.gitignore`)
-
-## Doku
-- **README.md aktualisieren:** erwähnt Gemini „serverseitig" und Storage, beides noch nicht gebaut.

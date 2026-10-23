@@ -45,8 +45,6 @@ Entscheidung: vorerst nur manuelle Erfassung (ca. 1× pro Woche).
 App/Website auch für andere anbieten. Vorbedingungen und Überlegungen in
 [`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Produkt-Idee").
 
-## Kosmetik
-- Restschuld-Spalte: „–" statt „0,00 €" bei kreditfreien Objekten.
-
 ## Erledigt
 - Privacy-Modus (Augen-Icon im Header, CSS-Blur, localStorage) ✅
+- Restschuld-Spalte: „–" statt „0,00 €" bei kreditfreien Objekten ✅
