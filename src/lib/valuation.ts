@@ -4,10 +4,15 @@
 import type { Property } from "./types";
 import { effectiveMonthlyCostsCents, effectiveMonthlyRentCents } from "./finance";
 
+// Mietausfallwagnis in % des Jahresrohertrags. Quelle: ImmoWertV 2021, Anlage 3
+// (Modellansätze Bewirtschaftungskosten), Wohnnutzung: 2 % des Rohertrags.
+export const RENT_LOSS_RISK_PERCENT = 2;
+
 export type IncomeValuation = {
   landValueCents: number; // Bodenwert = Flaeche × Bodenrichtwert
   annualGrossIncomeCents: number; // Jahresrohertrag (Jahreskaltmiete)
-  annualOperatingCostsCents: number; // Bewirtschaftungskosten p.a.
+  annualRentLossRiskCents: number; // Mietausfallwagnis p.a. (Teil der Bewirtschaftungskosten)
+  annualOperatingCostsCents: number; // Bewirtschaftungskosten p.a. (inkl. Mietausfallwagnis)
   annualNetIncomeCents: number; // Reinertrag = Rohertrag − Bewirtschaftungskosten
   landYieldCents: number; // Bodenwertverzinsung = Bodenwert × Liegenschaftszins
   buildingNetIncomeRawCents: number; // Gebaeudereinertrag vor Begrenzung (kann < 0 sein)
@@ -36,9 +41,10 @@ function isNonNegative(v: number | undefined): v is number {
 // Versicherung, Grundsteuer, Eigentuemer-Anteil Hausgeld (enthaelt i. d. R.
 // Verwaltung + Instandhaltungsruecklage), Sonstiges; bei Ferien-/Eigennutzung
 // zusaetzlich Strom/Wasser/Internet. Das entspricht dem Gedanken der ImmoWertV
-// (nur nicht umlagefaehige Kosten mindern den Reinertrag). Abweichung: Das
-// Mietausfallwagnis und modellkonforme Pauschalen (Anlage 3 ImmoWertV) fehlen,
-// der Wert ist daher eher etwas zu hoch.
+// (nur nicht umlagefaehige Kosten mindern den Reinertrag). Dazu kommt das
+// Mietausfallwagnis (RENT_LOSS_RISK_PERCENT vom Jahresrohertrag). Abweichung:
+// modellkonforme Pauschalen fuer Verwaltung/Instandhaltung (Anlage 3 ImmoWertV)
+// fehlen weiterhin, der Wert ist daher eher etwas zu hoch.
 //
 // Annahme negativer Gebaeudereinertrag: Deckt der Reinertrag nicht einmal die
 // Bodenwertverzinsung, hat das Gebaeude keinen Ertragswert. Wir begrenzen auf 0
@@ -59,7 +65,11 @@ export function incomeValuation(p: Property): IncomeValuation | null {
   const rate = capRateBasisPoints / 10000;
   const landValueCents = Math.round(landAreaSqm * landRateCentsPerSqm);
   const annualGrossIncomeCents = effectiveMonthlyRentCents(p) * 12;
-  const annualOperatingCostsCents = effectiveMonthlyCostsCents(p) * 12;
+  const annualRentLossRiskCents = Math.round(
+    (annualGrossIncomeCents * RENT_LOSS_RISK_PERCENT) / 100,
+  );
+  const annualOperatingCostsCents =
+    effectiveMonthlyCostsCents(p) * 12 + annualRentLossRiskCents;
   const annualNetIncomeCents = annualGrossIncomeCents - annualOperatingCostsCents;
   const landYieldCents = Math.round(landValueCents * rate);
   const buildingNetIncomeRawCents = annualNetIncomeCents - landYieldCents;
@@ -70,6 +80,7 @@ export function incomeValuation(p: Property): IncomeValuation | null {
   return {
     landValueCents,
     annualGrossIncomeCents,
+    annualRentLossRiskCents,
     annualOperatingCostsCents,
     annualNetIncomeCents,
     landYieldCents,

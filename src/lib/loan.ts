@@ -76,10 +76,9 @@ export function computeLoan(
       // regulaere Rate: Zins + Tilgung
       const interest = Math.round(balance * monthlyRate);
       const principal = payment - interest;
-      if (principal > 0) {
-        balance -= principal;
-        if (balance < 0) balance = 0;
-      }
+      // Rate < Zins: ungedeckter Zinsanteil wird der Restschuld zugeschlagen.
+      balance -= principal;
+      if (balance < 0) balance = 0;
     }
     // Sondertilgungen dieses Kalendermonats abziehen.
     const d = new Date(start.getFullYear(), start.getMonth() + m, 1);
@@ -93,7 +92,9 @@ export function computeLoan(
   const remaining = Math.max(0, balance);
 
   // Zins-/Tilgungsanteil der aktuellen Rate.
-  const monthlyInterest = remaining > 0 ? Math.round(remaining * monthlyRate) : 0;
+  // Gezahlter Zins ist hoechstens die Rate (sonst waere er nicht bezahlt).
+  const monthlyInterest =
+    remaining > 0 ? Math.min(Math.round(remaining * monthlyRate), payment) : 0;
   const monthlyPrincipal =
     remaining > 0 ? Math.max(0, payment - monthlyInterest) : 0;
 
@@ -102,7 +103,7 @@ export function computeLoan(
   let payable = true;
   if (remaining <= 0) {
     monthsRemaining = 0;
-  } else if (payment <= monthlyInterest) {
+  } else if (payment <= Math.round(remaining * monthlyRate)) {
     payable = false; // Rate deckt nicht mal die Zinsen
     monthsRemaining = null;
   } else {
@@ -199,8 +200,13 @@ export function loanInterestForYear(
         const paid = Math.min(principal, balance);
         balance -= paid;
         if (inYear) principalCents += paid;
+        if (inYear) interestCents += interest;
+      } else {
+        // Rate < Zins: nur die Rate wird als Zins gezahlt, der ungedeckte
+        // Zinsanteil erhoeht die Restschuld (negative Tilgung).
+        balance -= principal;
+        if (inYear) interestCents += payment;
       }
-      if (inYear) interestCents += interest;
     }
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const extra = repayByMonth.get(key);

@@ -22,7 +22,7 @@ import {
   effectiveMonthlyRentCents,
 } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
-import { incomeValuation } from "@/lib/valuation";
+import { incomeValuation, RENT_LOSS_RISK_PERCENT } from "@/lib/valuation";
 import { formatEuro, formatPercent } from "@/lib/money";
 import {
   signedAmountCents,
@@ -327,7 +327,7 @@ export default function PropertyDetail() {
               <p className="text-xs text-muted-foreground">
                 Schätzung, kein Gutachten. Vereinfachtes Ertragswertverfahren
                 nach ImmoWertV; Bewirtschaftungskosten = deine Eigentümer-Kosten
-                (ohne Mietausfallwagnis).
+                plus Mietausfallwagnis.
               </p>
             </CardHeader>
             <CardContent className="divide-y">
@@ -339,6 +339,10 @@ export default function PropertyDetail() {
               <Row
                 label="− Bewirtschaftungskosten"
                 value={formatEuro(valuation.annualOperatingCostsCents)}
+              />
+              <Row
+                label={`davon Mietausfallwagnis (${RENT_LOSS_RISK_PERCENT} % vom Rohertrag)`}
+                value={formatEuro(valuation.annualRentLossRiskCents)}
               />
               <Row label="= Reinertrag" value={formatEuro(valuation.annualNetIncomeCents)} />
               <Row
