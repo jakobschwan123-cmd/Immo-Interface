@@ -1,7 +1,7 @@
 # Immo-Interface
 
 Web-App zur Verwaltung von Immobilien und deren Finanzen (privates Familienprojekt).
-Übersicht über alle Kennzahlen, KI-gestützte Beleg-Erfassung und ein exportfähiger
+Übersicht über alle Kennzahlen, (geplante) KI-gestützte Beleg-Erfassung und ein exportfähiger
 Jahresabschluss (EÜR) als Vorbereitung für den Steuerberater.
 
 > ⚠️ Diese App verwaltet **echte, private Finanzdaten** und ist eine Vorbereitung für
@@ -11,8 +11,8 @@ Jahresabschluss (EÜR) als Vorbereitung für den Steuerberater.
 
 - **Next.js (App Router)** + React + TypeScript
 - **Tailwind CSS** + shadcn/ui
-- **Firebase**: Firestore (DB), Auth (Google Sign-In), Storage (Belege)
-- **Google Gemini API** (Beleg-Auslesung, nur serverseitig)
+- **Firebase**: Firestore (DB), Auth (Google Sign-In), Storage (Belege – geplant, Phase 3 geparkt)
+- **Google Gemini API** (Beleg-Auslesung, nur serverseitig – geplant, Phase 3 geparkt)
 - **Deployment**: Vercel (via GitHub)
 
 ## Setup (lokal)
@@ -23,7 +23,7 @@ npm install
 
 # 2. Umgebungsvariablen anlegen
 cp .env.example .env.local
-# -> danach echte Firebase-/Gemini-Werte in .env.local eintragen
+# -> danach echte Firebase-Werte in .env.local eintragen
 
 # 3. Entwicklungsserver starten
 npm run dev

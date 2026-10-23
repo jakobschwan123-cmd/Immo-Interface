@@ -97,6 +97,10 @@ function PropertyTable({
         <TableBody>
           {props.map((p) => {
             const k = calculateKpis(p);
+            const restschuldCents = computeLoan(
+              p,
+              repaymentsFor(p.id, transactions),
+            ).remainingCents;
             return (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">
@@ -113,10 +117,7 @@ function PropertyTable({
                   {formatEuro(p.purchasePriceCents)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums privacy-blur">
-                  {formatEuro(
-                    computeLoan(p, repaymentsFor(p.id, transactions))
-                      .remainingCents,
-                  )}
+                  {restschuldCents === 0 ? "–" : formatEuro(restschuldCents)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums privacy-blur">
                   {formatEuro(effectiveMonthlyRentCents(p))}
