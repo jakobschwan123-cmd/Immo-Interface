@@ -4,8 +4,8 @@ Dinge, die geklärt oder entschieden werden müssen, bevor oder während sie umg
 Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 
 ## Entschieden
-- **Gemini/Belegauslesung:** vorerst nicht. Buchungen werden manuell erfasst, ca. 1× pro Woche.
-  Feature bleibt im Backlog (Phase 3), damit entfällt auch der Blaze-Plan vorerst.
+- **Gemini/Belegauslesung:** wird gebaut (Entscheidung 10/2026, vorher „vorerst nicht"). Serverseitig,
+  Bestätigung durch den Nutzer, Blaze-Plan nötig. Details: [`backlog.md`](backlog.md) Phase 3.
 - **Onboarding/Nutzer:** final. Ein Google-Account, genutzt von zwei PCs (Claude Code und Antigravity).
 - **Rechtsträger:** aktuell keine Immobilie in einer GmbH, GmbH bleibt außerhalb des Scopes.
 
@@ -28,10 +28,10 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
   Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
 - **Aus dem Review (Branch vs. main), offen:**
-  - `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
-  - CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
-  - `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
-  - `loanInterestForYear`: Rate < Monatszins → voller Zins angesetzt, Restschuld wächst nicht.
+  - (nach A5) `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
+  - (nach A5) CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
+  - (nach A5) `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
+  - 🔄 `loanInterestForYear`: Rate < Monatszins → voller Zins angesetzt, Restschuld wächst nicht.
 - **Journal vs. EÜR bei Alt-Kategorien:** Die EÜR zählt nur Kategorien aus
   `TRANSACTION_CATEGORIES`, das Journal zeigt alle Buchungen. Bei Buchungen mit unbekannter
   Kategorie weichen die Summen ab. Mit echten Daten prüfen (relevant für A5).

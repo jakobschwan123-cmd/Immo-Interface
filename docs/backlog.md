@@ -22,26 +22,31 @@ einen vollständigen, prüffähigen Vorab-Abschluss übergeben. Branch `feature/
 Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht verifiziert.
 
 ## Immobilien-Wertberechnung
-- ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite). Offen: Mietausfallwagnis/
-  Pauschalen nach Anlage 3 ImmoWertV fehlen in den Bewirtschaftungskosten (Wert eher zu hoch).
-- **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt (braucht API-Key).
+- ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite).
+  🔄 Mietausfallwagnis (2 %) wird ergänzt.
 
-## ⏸️ Phase 3: Belege & Gemini (bewusst zurückgestellt)
-Entscheidung: vorerst nur manuelle Erfassung (ca. 1× pro Woche).
-- Beleg-Upload (Firebase Storage) und Gemini-Auslesung (Betrag, Datum, Zweck, Kategorievorschlag),
-  serverseitig, mit Bestätigungs-UI. Blockiert durch Datenschutz-/Blaze-Entscheidung, siehe
-  offene technische Themen.
-- **Bilder pro Immobilie** (braucht Storage, zusammen mit Belegen).
+## 🔄 Phase 3: Belege & Gemini (in Arbeit)
+Entscheidung (10/2026): wird gebaut – Upload nach Firebase Storage + Auslesung per Gemini, serverseitig,
+mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in einem Projekt mit Abrechnung
+(unbezahltes Tier darf Eingaben zur Produktverbesserung nutzen).
+- 🔄 Infrastruktur: Storage-Rules, API-Route mit Token- und Allowlist-Prüfung, Upload-Komponente
+- Integration in den Buchungsdialog (nach A5, damit Gemini die neuen Kategorien vorschlägt)
+- Einrichtung durch Jakob: Blaze, Storage anlegen, Key, Env-Vars in Vercel
 
 ## Phase 5: Polish & Rollout (teilweise)
-- ✅ Mobile-Optimierung (ohne Objektseite/Objekt-Dialog – die noch prüfen)
+- ✅ Mobile-Optimierung (🔄 Objektseite/Objekt-Dialog laufen noch)
 - Fehlerbehandlung und Edge-Cases
-- Backup (Firestore-Export)
-- Onboarding der Eltern
+- Backup – Entscheidung offen: eigenes Skript (JSON lokal) oder Firestore-Export (mit Blaze jetzt möglich)
 
-## Produkt / Vermarktung (Idee)
-App/Website auch für andere anbieten. Vorbedingungen und Überlegungen in
-[`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Produkt-Idee").
+## Später / Ideen
+- **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt. Wird leicht, sobald
+  der Gemini-Endpoint aus Phase 3 steht.
+- **Bilder pro Immobilie** – nutzt denselben Storage wie die Belege.
+- **Ertragswert: weitere Pauschalen** nach Anlage 3 ImmoWertV (Verwaltung, Instandhaltung), falls nicht
+  schon im Hausgeld enthalten.
+- **Onboarding der Eltern.**
+- **Produkt / Vermarktung:** App/Website auch für andere anbieten. Vorbedingungen in
+  [`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Produkt-Idee").
 
 ## Erledigt
 - Privacy-Modus (Augen-Icon im Header, CSS-Blur, localStorage) ✅
