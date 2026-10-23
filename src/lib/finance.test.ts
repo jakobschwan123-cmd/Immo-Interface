@@ -73,6 +73,27 @@ describe("afaForYear (§ 7 Abs. 4 EStG, Kaufmonat zählt voll)", () => {
   });
 });
 
+describe("afaForYear: Ende der Abschreibung", () => {
+  // Kauf 03/1970: 10/12 im Kaufjahr = 166.667, dann 200.000/Jahr bis 10.000.000 erreicht.
+  const alt = prop({ purchaseDate: "1970-03-01" });
+
+  it("vor Ende volle AfA", () => {
+    expect(afaForYear(alt, 2019)).toBe(200_000);
+  });
+  it("letztes Jahr nur der Restbuchwert", () => {
+    expect(afaForYear(alt, 2020)).toBe(33_333);
+  });
+  it("danach 0", () => {
+    expect(afaForYear(alt, 2021)).toBe(0);
+    expect(afaForYear(alt, 2026)).toBe(0);
+  });
+  it("Summe aller Jahre = Gebäudewert", () => {
+    let sum = 0;
+    for (let y = 1970; y <= 2030; y++) sum += afaForYear(alt, y);
+    expect(sum).toBe(10_000_000);
+  });
+});
+
 describe("effectiveMonthlyRentCents", () => {
   it("ohne Einheiten: Einzelfeld", () => {
     expect(effectiveMonthlyRentCents(prop({ monthlyRentCents: 90_000 }))).toBe(90_000);

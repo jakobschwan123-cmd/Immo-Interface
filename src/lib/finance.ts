@@ -71,8 +71,12 @@ export function afaForYear(p: Property, year: number): number {
     return annual;
   }
   if (year < purchaseYear) return 0;
-  if (year > purchaseYear) return annual;
-  return Math.round((annual * (13 - purchaseMonth)) / 12);
+  const firstYearCents = Math.round((annual * (13 - purchaseMonth)) / 12);
+  if (year === purchaseYear) return firstYearCents;
+
+  // AfA endet, sobald der Gebäudewert voll abgeschrieben ist: letztes Jahr nur der Rest, danach 0.
+  const writtenOffBefore = firstYearCents + annual * (year - purchaseYear - 1);
+  return Math.max(0, Math.min(annual, p.buildingValueCents - writtenOffBefore));
 }
 
 export function calculateKpis(p: Property): PropertyKpis {
