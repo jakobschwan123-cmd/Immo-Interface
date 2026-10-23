@@ -49,9 +49,9 @@ import {
 // Eine Zeile "Bezeichnung ... Wert" in den Detail-Karten.
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex justify-between gap-4 py-1.5 text-sm">
+    <div className="flex justify-between gap-3 py-1.5 text-sm sm:gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium tabular-nums privacy-blur">{value}</span>
+      <span className="shrink-0 text-right font-medium tabular-nums privacy-blur">{value}</span>
     </div>
   );
 }
@@ -192,7 +192,7 @@ export default function PropertyDetail() {
     <main className="flex flex-1 flex-col bg-muted/30">
       <AppHeader />
 
-      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         {/* Zurueck-Link + Titel + Bearbeiten */}
         <Link
           href="/"
@@ -201,9 +201,9 @@ export default function PropertyDetail() {
           <ArrowLeft className="size-4" /> Zurück zur Übersicht
         </Link>
 
-        <div className="mt-3 mb-6 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="mt-3 mb-6 flex flex-wrap items-start justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight break-words">
               {property.name}
             </h1>
             {property.address && (
@@ -219,7 +219,7 @@ export default function PropertyDetail() {
               </Badge>
             </div>
           </div>
-          <Button variant="outline" onClick={() => setEditOpen(true)}>
+          <Button variant="outline" onClick={() => setEditOpen(true)} className="max-sm:h-10">
             <Pencil /> Bearbeiten
           </Button>
         </div>
@@ -232,7 +232,7 @@ export default function PropertyDetail() {
           </p>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Stammdaten */}
           <Card>
             <CardHeader>
@@ -429,15 +429,15 @@ export default function PropertyDetail() {
 
         {/* Buchungen (Einnahmen/Ausgaben) */}
         <Card className="mt-6">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0">
             <CardTitle className="text-base">Buchungen</CardTitle>
-            <Button size="sm" onClick={() => setTxOpen(true)}>
+            <Button size="sm" onClick={() => setTxOpen(true)} className="max-sm:h-10">
               <Plus /> Buchung
             </Button>
           </CardHeader>
           <CardContent className="px-0">
             {/* Zusammenfassung */}
-            <div className="mb-2 flex flex-wrap gap-x-8 gap-y-1 px-6 text-sm">
+            <div className="mb-2 flex flex-wrap gap-x-6 gap-y-1 px-4 text-sm sm:gap-x-8 sm:px-6">
               <span>
                 Einnahmen:{" "}
                 <span className="font-medium tabular-nums text-emerald-600 privacy-blur">
@@ -467,12 +467,12 @@ export default function PropertyDetail() {
             </div>
 
             {transactions.length === 0 ? (
-              <p className="px-6 py-4 text-sm text-muted-foreground">
+              <p className="px-4 py-4 text-sm text-muted-foreground sm:px-6">
                 Noch keine Buchungen erfasst.
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[32rem]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Datum</TableHead>
@@ -513,6 +513,7 @@ export default function PropertyDetail() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="max-sm:size-10"
                               onClick={() => handleDeleteTransaction(t)}
                               aria-label="Löschen"
                             >
