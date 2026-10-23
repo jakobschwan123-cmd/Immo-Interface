@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Paperclip, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
@@ -34,6 +34,7 @@ import {
 import { AppHeader } from "@/components/app-header";
 import { PropertyDialog } from "@/components/property-dialog";
 import { TransactionDialog } from "@/components/transaction-dialog";
+import { deleteReceiptFile, openReceipt } from "@/components/receipt-upload";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,10 +118,21 @@ export default function PropertyDetail() {
     if (!confirm("Diese Buchung wirklich löschen?")) return;
     try {
       await deleteTransaction(t.id);
+      // Erst nach erfolgreichem Loeschen der Buchung; Fehler dort bleiben still.
+      await deleteReceiptFile(t.receiptPath);
       toast.success("Buchung gelöscht.");
     } catch (err) {
       console.error("[Buchung loeschen]", err);
       toast.error("Löschen fehlgeschlagen.");
+    }
+  }
+
+  async function handleOpenReceipt(path: string) {
+    try {
+      await openReceipt(path);
+    } catch (err) {
+      console.error("[Beleg oeffnen]", err);
+      toast.error("Beleg konnte nicht geöffnet werden.");
     }
   }
 
@@ -505,6 +517,17 @@ export default function PropertyDetail() {
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {t.description ?? "–"}
+                            {t.receiptPath && (
+                              <button
+                                type="button"
+                                className="ml-2 inline-flex align-middle text-muted-foreground hover:text-foreground max-sm:size-8 max-sm:items-center max-sm:justify-center"
+                                onClick={() => handleOpenReceipt(t.receiptPath!)}
+                                aria-label="Beleg öffnen"
+                                title="Beleg öffnen"
+                              >
+                                <Paperclip className="size-4" />
+                              </button>
+                            )}
                           </TableCell>
                           <TableCell
                             className={`text-right tabular-nums privacy-blur ${

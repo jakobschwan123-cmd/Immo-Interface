@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_EXTRACTION,
+  applyExtraction,
+  matchCategory,
+  type ReceiptForm,
   normalizeReceiptExtraction,
   parseAmountCents,
   parseIsoDate,
@@ -80,5 +83,56 @@ describe("normalizeReceiptExtraction", () => {
     const r = normalizeReceiptExtraction({ description: "x".repeat(1000), rawText: "y".repeat(10000) });
     expect(r.description).toHaveLength(200);
     expect(r.rawText).toHaveLength(4000);
+  });
+});
+
+describe("applyExtraction", () => {
+  const form: ReceiptForm = {
+    type: "income",
+    amount: "",
+    date: "2026-01-01",
+    category: "Mieteinnahme",
+    description: "",
+  };
+  const ex = { ...EMPTY_EXTRACTION };
+
+  it("uebernimmt Betrag (Euro-Eingabe), Datum, Zweck", () => {
+    const r = applyExtraction(form, { ...ex, amountCents: 119000, date: "2026-05-02", description: "Rechnung" });
+    expect(r).toEqual({ ...form, amount: "1190.00", date: "2026-05-02", description: "Rechnung" });
+  });
+
+  it("leerer Vorschlag aendert nichts", () => {
+    const filled = { ...form, amount: "5,00", description: "x" };
+    expect(applyExtraction(filled, ex)).toEqual(filled);
+  });
+
+  it("Kategorie passend zur Art: uebernommen (case-insensitive)", () => {
+    const r = applyExtraction({ ...form, type: "expense", category: "Verwaltung" }, { ...ex, categorySuggestion: "versicherung" });
+    expect(r.type).toBe("expense");
+    expect(r.category).toBe("Versicherung");
+  });
+
+  it("eindeutige Kategorie der anderen Art wechselt die Art", () => {
+    const r = applyExtraction(form, { ...ex, categorySuggestion: "Grundsteuer" });
+    expect(r.type).toBe("expense");
+    expect(r.category).toBe("Grundsteuer");
+    const back = applyExtraction({ ...form, type: "expense", category: "Verwaltung" }, { ...ex, categorySuggestion: "Mieteinnahme" });
+    expect(back.type).toBe("income");
+  });
+
+  it("Altname Instandhaltung -> Erhaltungsaufwand (Ausgabe)", () => {
+    const r = applyExtraction(form, { ...ex, categorySuggestion: "Instandhaltung" });
+    expect(r).toMatchObject({ type: "expense", category: "Erhaltungsaufwand" });
+  });
+
+  it("mehrdeutiges Sonstiges: Art bleibt, bei Sondertilgung nichts", () => {
+    const e = { ...ex, categorySuggestion: "Sonstiges" };
+    expect(applyExtraction({ ...form, type: "expense", category: "Verwaltung" }, e)).toMatchObject({ type: "expense", category: "Sonstiges" });
+    expect(applyExtraction({ ...form, type: "repayment" }, e)).toMatchObject({ type: "repayment", category: "Mieteinnahme" });
+  });
+
+  it("unbekannte Kategorie wird ignoriert", () => {
+    expect(applyExtraction(form, { ...ex, categorySuggestion: "Blumen" })).toEqual(form);
+    expect(matchCategory(null)).toBeNull();
   });
 });

@@ -32,13 +32,16 @@ Gemini, eigenständige Komponente. Noch **nicht** im Buchungsdialog eingebaut.
    - `GEMINI_MODEL` – optional, Standard `gemini-3.8-flash`
    Danach neu deployen. Lokal dieselben Werte in `.env.local`.
 
-## Offene Punkte für die Integration
-- `ReceiptUpload` in `transaction-dialog.tsx` einbauen: Vorschlag in Felder übernehmen (Betrag via
-  `centsToEuroInput`, Datum, Verwendungszweck); `categorySuggestion` nur übernehmen, wenn es eine
-  gültige `TransactionCategory` ist. Speichern bleibt Klick des Nutzers.
-- `Transaction` um z. B. `receiptPath?: string` erweitern und `storagePath` mitspeichern.
-- Bricht der Nutzer ab, bleibt die Datei liegen → beim Abbrechen `deleteObject` aufrufen oder
-  verwaiste Belege später aufräumen.
-- Anzeige/Download eines Belegs (`getDownloadURL` oder `getBlob`) an der Buchung.
+## Integration (Stand: umgesetzt, auf `feature/beleg-integration`)
+- ✅ `ReceiptUpload` im Buchungsdialog (einklappbar, „Beleg hinzufügen (optional)"). Vorschlag landet per
+  `applyExtraction` (`src/lib/receipts.ts`) in den Feldern; Speichern bleibt Klick des Nutzers.
+  Regeln: leere Felder überschreiben nichts; Kategorie nur bei gültigem Namen (ohne Groß-/Kleinschreibung,
+  Altname „Instandhaltung" → Erhaltungsaufwand); passt sie nicht zur Art, wechselt die Art nur bei eindeutiger
+  Kategorie („Sonstiges" gibt es bei Einnahme und Ausgabe → Art bleibt, bei Sondertilgung wird nichts gesetzt).
+- ✅ `Transaction.receiptPath?` wird beim Speichern mitgeschrieben.
+- ✅ Abbruch des Dialogs (Abbrechen/X/Esc) und zweiter Upload löschen die Datei per `deleteObject` (best effort).
+- ✅ Buchungsliste: Büroklammer-Icon öffnet den Beleg per `getDownloadURL` im neuen Tab; beim Löschen der
+  Buchung wird die Datei best effort mitgelöscht.
+- Offen: verwaiste Belege (Tab/Browser während des Dialogs geschlossen) bleiben im Storage liegen.
 - Optional: einfaches Rate-Limit der API (aktuell nur durch Allowlist geschützt).
 - Token-Widerruf wird nicht geprüft (ID-Token lebt max. 1 h) – bewusst, dafür kein Service-Account nötig.

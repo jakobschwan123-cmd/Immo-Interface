@@ -3,6 +3,7 @@
 // Dialog zum Erfassen einer Buchung (Einnahme/Ausgabe) fuer eine Immobilie.
 
 import { useState } from "react";
+import { Paperclip } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { ReceiptUpload, deleteReceiptFile } from "@/components/receipt-upload";
 import { addTransaction } from "@/lib/transactions";
+import { applyExtraction, type ReceiptExtraction } from "@/lib/receipts";
 import { euroInputToCents } from "@/lib/money";
 import {
   EXPENSE_CATEGORIES,
@@ -35,7 +38,12 @@ import {
 import { anlageVBereich } from "@/lib/anlage-v";
 import { useAuth } from "@/lib/auth-context";
 
-const TODAY = () => new Date().toISOString().slice(0, 10);
+// Lokales Datum (toISOString waere UTC -> um den Jahreswechsel der Vortag).
+const TODAY = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 
 export function TransactionDialog({
   open,
@@ -53,6 +61,9 @@ export function TransactionDialog({
   const [date, setDate] = useState(TODAY());
   const [category, setCategory] = useState<TransactionCategory>("Mieteinnahme");
   const [description, setDescription] = useState("");
+  const [showReceipt, setShowReceipt] = useState(false);
+  // Storage-Pfad des hochgeladenen Belegs; wird erst mit "Speichern" Teil der Buchung.
+  const [receiptPath, setReceiptPath] = useState<string | null>(null);
 
   // Auswahl je Art (Einnahme/Ausgabe); veraltete Kategorien sind nicht mehr waehlbar,
   // bestehende Buchungen behalten sie aber (keine Migration).
@@ -65,6 +76,29 @@ export function TransactionDialog({
     const nextOptions: readonly TransactionCategory[] =
       next === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
     if (!nextOptions.includes(category)) setCategory(nextOptions[0]);
+  }
+
+  // Beleg (KI-Vorschlag) in die Felder uebernehmen; gespeichert wird erst per Klick.
+  function handleExtracted(extraction: ReceiptExtraction, storagePath: string) {
+    // Zweiter Upload ersetzt den ersten -> alte Datei nicht verwaisen lassen.
+    if (receiptPath) void deleteReceiptFile(receiptPath);
+    setReceiptPath(storagePath);
+    const next = applyExtraction({ type, amount, date, category, description }, extraction);
+    setType(next.type);
+    setAmount(next.amount);
+    setDate(next.date);
+    setCategory(next.category);
+    setDescription(next.description);
+  }
+
+  // Jedes Schliessen ohne Speichern (Abbrechen, X, Esc, Klick daneben) verwirft den Beleg.
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      if (receiptPath) void deleteReceiptFile(receiptPath);
+      setReceiptPath(null);
+      setShowReceipt(false);
+    }
+    onOpenChange(next);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -85,12 +119,16 @@ export function TransactionDialog({
         // Sondertilgung braucht keine EÜR-Kategorie.
         category: type === "repayment" ? "Sonstiges" : category,
         description: description.trim() || undefined,
+        receiptPath: receiptPath ?? undefined,
         createdBy: user.uid,
       });
       toast.success("Buchung gespeichert.");
       // Felder fuer die naechste Buchung teils zuruecksetzen.
       setAmount("");
       setDescription("");
+      // Beleg gehoert jetzt zur Buchung -> nicht beim Schliessen loeschen.
+      setReceiptPath(null);
+      setShowReceipt(false);
       onOpenChange(false);
     } catch (err) {
       console.error("[Buchung speichern]", err);
@@ -101,7 +139,7 @@ export function TransactionDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -112,6 +150,19 @@ export function TransactionDialog({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            {showReceipt ? (
+              <ReceiptUpload propertyId={propertyId} onExtracted={handleExtracted} />
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="max-sm:h-10"
+                onClick={() => setShowReceipt(true)}
+              >
+                <Paperclip /> Beleg hinzufügen (optional)
+              </Button>
+            )}
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label>Art</Label>
@@ -199,7 +250,7 @@ export function TransactionDialog({
               type="button"
               variant="outline"
               className="max-sm:h-10"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={saving}
             >
               Abbrechen

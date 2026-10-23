@@ -3,7 +3,16 @@
 // nutzen kann, ohne das Client-SDK mitzuziehen. Der Storage-Upload liegt in
 // src/components/receipt-upload.tsx.
 
-import { euroInputToCents } from "./money";
+import { centsToEuroInput, euroInputToCents } from "./money";
+import {
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
+  LEGACY_CATEGORIES,
+  TRANSACTION_CATEGORIES,
+  normalizeCategory,
+  type TransactionCategory,
+  type TransactionType,
+} from "./types";
 
 // Vorschlag aus einem Beleg. Alles optional (null), weil die KI sich irren oder
 // nichts finden kann – der Nutzer bestaetigt/korrigiert immer selbst.
@@ -114,4 +123,48 @@ export function normalizeReceiptExtraction(input: unknown): ReceiptExtraction {
     confidence: conf >= 0 && conf <= 1 ? conf : null,
     rawText: cleanText(o.rawText, MAX_RAW_TEXT),
   };
+}
+
+// Formularzustand des Buchungsdialogs (Betrag als Eingabe-String in Euro).
+export type ReceiptForm = {
+  type: TransactionType;
+  amount: string;
+  date: string;
+  category: TransactionCategory;
+  description: string;
+};
+
+// Freitext der KI -> gueltige Kategorie (ohne Gross-/Kleinschreibung, auch alte
+// Namen wie "Instandhaltung"), sonst null.
+export function matchCategory(suggestion: string | null): TransactionCategory | null {
+  const wanted = suggestion?.trim().toLowerCase();
+  if (!wanted) return null;
+  const hit = [...TRANSACTION_CATEGORIES, ...Object.keys(LEGACY_CATEGORIES)].find(
+    (c) => c.toLowerCase() === wanted,
+  );
+  return hit ? (normalizeCategory(hit) as TransactionCategory) : null;
+}
+
+// Belegvorschlag ins Formular uebernehmen. Leere (null) Felder ueberschreiben nichts.
+// Kategorie: nur wenn gueltig; passt sie nicht zur gewaehlten Art, wird die Art
+// gewechselt, aber nur wenn die Kategorie eindeutig Einnahme ODER Ausgabe ist
+// ("Sonstiges" gibt es bei beiden -> Art bleibt, Kategorie wird nur bei passender Art gesetzt).
+export function applyExtraction(form: ReceiptForm, extraction: ReceiptExtraction): ReceiptForm {
+  const next = { ...form };
+  if (extraction.amountCents !== null) next.amount = centsToEuroInput(extraction.amountCents);
+  if (extraction.date) next.date = extraction.date;
+  if (extraction.description) next.description = extraction.description;
+
+  const category = matchCategory(extraction.categorySuggestion);
+  if (category) {
+    const isIncome = (INCOME_CATEGORIES as readonly string[]).includes(category);
+    const isExpense = (EXPENSE_CATEGORIES as readonly string[]).includes(category);
+    if ((form.type === "income" && isIncome) || (form.type === "expense" && isExpense)) {
+      next.category = category;
+    } else if (isIncome !== isExpense) {
+      next.type = isIncome ? "income" : "expense";
+      next.category = category;
+    }
+  }
+  return next;
 }
