@@ -28,12 +28,9 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
   Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
 - **Aus dem Review (Branch vs. main), offen:**
-  - (nach A5) `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
-  - (nach A5) CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
-  - (nach A5) `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
-- **Journal vs. EÜR bei Alt-Kategorien:** Die EÜR zählt nur Kategorien aus
-  `TRANSACTION_CATEGORIES`, das Journal zeigt alle Buchungen. Bei Buchungen mit unbekannter
-  Kategorie weichen die Summen ab. Mit echten Daten prüfen (relevant für A5).
+  - 🔄 `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
+  - 🔄 CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
+  - 🔄 `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
 
 ## Produkt-Idee: Vermarktung als App/Website
 Idee: Programm über die Familie hinaus anbieten (erster Interessent: Bekannter mit mehreren Immobilien).
@@ -44,7 +41,11 @@ Haftung/„kein Steuerberater-Ersatz", Abrechnung. Schritt 1 wäre ein kleiner P
 ## Fachliche Fragen an den Steuerberater
 1. **AfA im Kaufjahr:** Kaufmonat voll oder tagesgenau? (A2, üblich: Kaufmonat voll)
 2. **Darlehenszins:** Berechneten Zins verwenden oder nur gebuchte Zinsen? (A3)
-3. **Ferienobjekte und Eigennutzung:** In der Anlage V gesondert behandeln? (A6)
+3. **Ferienobjekte und Eigennutzung:** In der Anlage V gesondert behandeln? (A6, ggf. Anlage V-FeWo)
+4. **Grundsteuer, Versicherung, Verwaltung:** umgelegte oder nicht umgelegte Kosten? (A5-Entwurf: nicht umgelegt)
+5. **Hausgeld (WEG):** Aufteilung umgelegt / nicht umgelegt / Erhaltungsrücklage (Rücklage erst bei Verwendung abziehbar)?
+6. **Erhaltungsaufwand:** sofort abziehen oder nach § 82b EStDV verteilen? Anschaffungsnahe Herstellungskosten (15 %-Grenze)?
+7. **Miete von Angehörigen:** gesondert auszuweisen – unterscheidet die App bisher nicht.
 
 ### Unterlagen besorgen (vor A2, A3, A5, A6)
 - [ ] Letzte Anlage V bzw. EÜR je Objekt, ideal ein Kaufjahr und ein Folgejahr

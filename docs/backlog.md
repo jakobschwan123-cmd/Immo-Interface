@@ -16,10 +16,10 @@ einen vollständigen, prüffähigen Vorab-Abschluss übergeben. Branch `feature/
 | A4 | Buchungsjournal (Anzeige, Druck, CSV) | ✅ |
 | A2 | Zeitanteilige AfA im Kaufjahr (§ 7 Abs. 4 EStG, monatsgenau) | ✅ mit Annahme „Kaufmonat voll"; Bestätigung Steuerberater offen |
 | A3 | Schuldzinsen vs. Tilgung (berechneter Zins aus dem Annuitätenplan) | 🟡 Berechnung + Vergleichsanzeige fertig; offen: ersetzt der berechnete Zins die Buchungen? |
-| A5 | Kategorien für Anlage V verfeinern (abwärtskompatibel) | offen – braucht Zuordnung vom Steuerberater |
-| A6 | ELSTER-Zeilen-Mapping Anlage V | offen – braucht A5 und verifizierte Formularzeilen |
+| A5 | Kategorien für Anlage V verfeinern (abwärtskompatibel) | 🟡 Entwurf fertig (`LEGACY_CATEGORIES`, keine Migration); Bestätigung Steuerberater offen |
+| A6 | ELSTER-Zeilen-Mapping Anlage V | 🟡 Entwurf fertig (`anlage-v.ts`, Zeilen nur für 2025 aus der ELSTER-Anleitung); Bestätigung Steuerberater offen |
 
-Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht verifiziert.
+Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang; hinterlegt ist nur 2025 (Quelle im Code).
 
 ## Immobilien-Wertberechnung
 - ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite).
@@ -29,8 +29,9 @@ Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht 
 Entscheidung (10/2026): wird gebaut – Upload nach Firebase Storage + Auslesung per Gemini, serverseitig,
 mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in einem Projekt mit Abrechnung
 (unbezahltes Tier darf Eingaben zur Produktverbesserung nutzen).
-- 🔄 Infrastruktur: Storage-Rules, API-Route mit Token- und Allowlist-Prüfung, Upload-Komponente
-- Integration in den Buchungsdialog (nach A5, damit Gemini die neuen Kategorien vorschlägt)
+- ✅ Infrastruktur: Storage-Rules, API-Route mit Token- und Allowlist-Prüfung, Upload-Komponente
+  (Anleitung: [`phase-3-belege.md`](phase-3-belege.md))
+- 🔄 Integration in den Buchungsdialog (Beleg an Buchung, Vorschlag übernehmen)
 - Einrichtung durch Jakob: Blaze, Storage anlegen, Key, Env-Vars in Vercel
 
 ## Phase 5: Polish & Rollout (teilweise)
