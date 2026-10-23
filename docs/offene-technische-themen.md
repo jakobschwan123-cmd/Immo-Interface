@@ -31,7 +31,6 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   - (nach A5) `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
   - (nach A5) CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
   - (nach A5) `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
-  - 🔄 `loanInterestForYear`: Rate < Monatszins → voller Zins angesetzt, Restschuld wächst nicht.
 - **Journal vs. EÜR bei Alt-Kategorien:** Die EÜR zählt nur Kategorien aus
   `TRANSACTION_CATEGORIES`, das Journal zeigt alle Buchungen. Bei Buchungen mit unbekannter
   Kategorie weichen die Summen ab. Mit echten Daten prüfen (relevant für A5).

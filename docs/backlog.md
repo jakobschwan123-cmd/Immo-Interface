@@ -23,7 +23,7 @@ Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht 
 
 ## Immobilien-Wertberechnung
 - ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite).
-  🔄 Mietausfallwagnis (2 %) wird ergänzt.
+  Mietausfallwagnis 2 % (ImmoWertV Anlage 3) ist enthalten.
 
 ## 🔄 Phase 3: Belege & Gemini (in Arbeit)
 Entscheidung (10/2026): wird gebaut – Upload nach Firebase Storage + Auslesung per Gemini, serverseitig,
@@ -34,7 +34,7 @@ mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in ei
 - Einrichtung durch Jakob: Blaze, Storage anlegen, Key, Env-Vars in Vercel
 
 ## Phase 5: Polish & Rollout (teilweise)
-- ✅ Mobile-Optimierung (🔄 Objektseite/Objekt-Dialog laufen noch)
+- ✅ Mobile-Optimierung (alle Seiten und Dialoge)
 - Fehlerbehandlung und Edge-Cases
 - Backup – Entscheidung offen: eigenes Skript (JSON lokal) oder Firestore-Export (mit Blaze jetzt möglich)
 
