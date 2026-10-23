@@ -47,3 +47,6 @@ local/
 
 # Claude-Agent-Worktrees
 .claude/worktrees/
+
+# Vitest-Ausgabe
+.vitest/
