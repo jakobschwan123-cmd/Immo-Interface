@@ -25,13 +25,14 @@ Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang; hinterlegt ist
 - ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite).
   Mietausfallwagnis 2 % (ImmoWertV Anlage 3) ist enthalten.
 
-## 🔄 Phase 3: Belege & Gemini (in Arbeit)
+## 🟡 Phase 3: Belege & Gemini (Code fertig, Einrichtung offen)
 Entscheidung (10/2026): wird gebaut – Upload nach Firebase Storage + Auslesung per Gemini, serverseitig,
 mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in einem Projekt mit Abrechnung
 (unbezahltes Tier darf Eingaben zur Produktverbesserung nutzen).
 - ✅ Infrastruktur: Storage-Rules, API-Route mit Token- und Allowlist-Prüfung, Upload-Komponente
   (Anleitung: [`phase-3-belege.md`](phase-3-belege.md))
-- 🔄 Integration in den Buchungsdialog (Beleg an Buchung, Vorschlag übernehmen)
+- ✅ Integration in den Buchungsdialog (Beleg an Buchung, Vorschlag übernehmen, Beleg-Link, Löschen bei Abbruch)
+- Offen: verwaiste Belege, wenn der Tab bei offenem Dialog geschlossen wird (Aufräum-Job später)
 - Einrichtung durch Jakob: Blaze, Storage anlegen, Key, Env-Vars in Vercel
 
 ## Phase 5: Polish & Rollout (teilweise)
