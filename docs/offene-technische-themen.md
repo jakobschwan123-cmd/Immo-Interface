@@ -27,6 +27,12 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 - **AfA ohne gültiges Kaufdatum:** `afaForYear` setzt dann die volle AfA an – auch für Jahre
   vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
   Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
+- **Aus dem Review (Branch vs. main), offen:**
+  - `afaForYear` hat kein Ende: nach voller Abschreibung des Gebäudewerts weiter volle AfA (Altobjekte!).
+  - `availableYears` (euer.ts) kennt nur Buchungsjahre → Kaufjahr ohne Buchung nicht wählbar.
+  - CSV: Freitext mit `=`/`+`/`-`/`@` am Anfang wird in Excel als Formel ausgeführt.
+  - `transaction-dialog.tsx` `TODAY()` per `toISOString()` (UTC) → 1.1. 0–1 Uhr ergibt Vorjahr.
+  - `loanInterestForYear`: Rate < Monatszins → voller Zins angesetzt, Restschuld wächst nicht.
 - **Journal vs. EÜR bei Alt-Kategorien:** Die EÜR zählt nur Kategorien aus
   `TRANSACTION_CATEGORIES`, das Journal zeigt alle Buchungen. Bei Buchungen mit unbekannter
   Kategorie weichen die Summen ab. Mit echten Daten prüfen (relevant für A5).

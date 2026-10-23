@@ -22,10 +22,8 @@ einen vollständigen, prüffähigen Vorab-Abschluss übergeben. Branch `feature/
 Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang und sind nicht verifiziert.
 
 ## Immobilien-Wertberechnung
-- **Ertragswertverfahren** (deterministisch, KEIN AI): Bodenwert = Grundstücksgröße × Bodenrichtwert
-  (BORIS-NRW); Reiner Gebäudeertrag = Jahreskaltmiete − Bewirtschaftungskosten −
-  (Bodenwert × Liegenschaftszins); Gebäudeertragswert = Reiner Gebäudeertrag × Vervielfältiger;
-  Gesamtwert = Bodenwert + Gebäudeertragswert.
+- ✅ **Ertragswertverfahren** (`src/lib/valuation.ts`, Anzeige auf der Objektseite). Offen: Mietausfallwagnis/
+  Pauschalen nach Anlage 3 ImmoWertV fehlen in den Bewirtschaftungskosten (Wert eher zu hoch).
 - **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt (braucht API-Key).
 
 ## ⏸️ Phase 3: Belege & Gemini (bewusst zurückgestellt)
@@ -36,7 +34,7 @@ Entscheidung: vorerst nur manuelle Erfassung (ca. 1× pro Woche).
 - **Bilder pro Immobilie** (braucht Storage, zusammen mit Belegen).
 
 ## Phase 5: Polish & Rollout (teilweise)
-- Mobile-Optimierung
+- ✅ Mobile-Optimierung (ohne Objektseite/Objekt-Dialog – die noch prüfen)
 - Fehlerbehandlung und Edge-Cases
 - Backup (Firestore-Export)
 - Onboarding der Eltern
