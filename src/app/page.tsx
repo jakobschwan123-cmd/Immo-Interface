@@ -136,6 +136,7 @@ function PropertyTable({
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="max-sm:size-10"
                       onClick={() => onEdit(p)}
                       aria-label="Bearbeiten"
                     >
@@ -144,6 +145,7 @@ function PropertyTable({
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="max-sm:size-10"
                       onClick={() => onDelete(p)}
                       aria-label="Löschen"
                     >
@@ -163,7 +165,9 @@ function PropertyTable({
                 {formatEuro(totals.totalPurchaseCents)}
               </TableCell>
               <TableCell className="text-right tabular-nums privacy-blur">
-                {formatEuro(totals.totalLoanRemainingCents)}
+                {totals.totalLoanRemainingCents === 0
+                  ? "–"
+                  : formatEuro(totals.totalLoanRemainingCents)}
               </TableCell>
               <TableCell className="text-right tabular-nums privacy-blur">
                 {formatEuro(monthlyRentSum)}
@@ -287,7 +291,7 @@ export default function Dashboard() {
     <main className="flex flex-1 flex-col bg-muted/30">
       <AppHeader />
 
-      <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         {/* Titelzeile mit Aktionen */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -299,11 +303,11 @@ export default function Dashboard() {
               {entities.length === 1 ? "Rechtsträger" : "Rechtsträger"}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setEntityManagerOpen(true)}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setEntityManagerOpen(true)} className="max-sm:h-10">
               <Users /> Rechtsträger
             </Button>
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className="max-sm:h-10">
               <Plus /> Immobilie hinzufügen
             </Button>
           </div>
@@ -349,7 +353,7 @@ export default function Dashboard() {
           <div className="space-y-6">
             {groups.map((g) => (
               <Card key={g.entity?.id ?? "orphan"}>
-                <CardHeader className="flex-row items-center gap-2 space-y-0">
+                <CardHeader className="flex-row flex-wrap items-center gap-2 space-y-0">
                   <CardTitle className="text-base">
                     {g.entity ? g.entity.name : "Ohne Rechtsträger"}
                   </CardTitle>

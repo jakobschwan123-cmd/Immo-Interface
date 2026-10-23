@@ -97,14 +97,14 @@ export function TransactionDialog({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label>Art</Label>
                 <Select
                   value={type}
                   onValueChange={(v) => setType((v as TransactionType) ?? "income")}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full max-sm:h-10!">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -118,6 +118,7 @@ export function TransactionDialog({
                 <Label htmlFor="amount">Betrag (€)</Label>
                 <Input
                   id="amount"
+                  className="max-sm:h-10"
                   inputMode="decimal"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
@@ -125,12 +126,13 @@ export function TransactionDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="date">Datum</Label>
                 <Input
                   id="date"
                   type="date"
+                  className="max-sm:h-10"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
@@ -144,7 +146,7 @@ export function TransactionDialog({
                       setCategory((v as TransactionCategory) ?? "Sonstiges")
                     }
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full max-sm:h-10!">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -163,6 +165,7 @@ export function TransactionDialog({
               <Label htmlFor="description">Verwendungszweck</Label>
               <Input
                 id="description"
+                className="max-sm:h-10"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="z. B. Miete März, Rechnung Sanitär …"
@@ -174,12 +177,13 @@ export function TransactionDialog({
             <Button
               type="button"
               variant="outline"
+              className="max-sm:h-10"
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
               Abbrechen
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="max-sm:h-10">
               {saving ? "Speichere …" : "Speichern"}
             </Button>
           </DialogFooter>

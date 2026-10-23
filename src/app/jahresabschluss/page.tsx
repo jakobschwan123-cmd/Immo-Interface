@@ -56,7 +56,7 @@ function EuerCard({
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
+      <CardHeader className="flex-row flex-wrap items-start justify-between gap-3 space-y-0">
         <div>
           <CardTitle className="text-base">{title}</CardTitle>
           {subtitle && (
@@ -64,10 +64,10 @@ function EuerCard({
           )}
         </div>
         <div className="flex gap-2 print:hidden">
-          <Button variant="outline" size="sm" onClick={() => setShowJournal((v) => !v)}>
+          <Button variant="outline" size="sm" className="max-sm:h-10" onClick={() => setShowJournal((v) => !v)}>
             <BookOpen /> Journal
           </Button>
-          <Button variant="outline" size="sm" onClick={handleCsv}>
+          <Button variant="outline" size="sm" className="max-sm:h-10" onClick={handleCsv}>
             <Download /> CSV
           </Button>
         </div>
@@ -155,13 +155,13 @@ function EuerCard({
         {/* Buchungsjournal (Einzelnachweis) – wird mitgedruckt, wenn geoeffnet */}
         {showJournal && (
           <div className="border-t pt-4">
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <p className="font-medium">Buchungsjournal {euer.year}</p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleJournalCsv}
-                className="print:hidden"
+                className="max-sm:h-10 print:hidden"
               >
                 <Download /> Journal-CSV
               </Button>
@@ -170,7 +170,7 @@ function EuerCard({
               <p className="text-muted-foreground">Keine Buchungen in diesem Jahr.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full min-w-[30rem] text-xs sm:min-w-0">
                   <thead>
                     <tr className="border-b text-left text-muted-foreground">
                       <th className="py-1 pr-2 font-normal">Datum</th>
@@ -282,7 +282,7 @@ export default function Jahresabschluss() {
     <main className="flex flex-1 flex-col bg-muted/30">
       <AppHeader />
 
-      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Jahresabschluss</h1>
@@ -291,9 +291,9 @@ export default function Jahresabschluss() {
               {selectedProperty ? "je Objekt" : "je Rechtsträger"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 print:hidden">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto print:hidden">
             <Select value={effectiveScope} onValueChange={(v) => setScope(v ?? "all")}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full max-sm:h-10! sm:w-auto">
                 <SelectValue>
                   {(v: string) =>
                     v === "all"
@@ -312,7 +312,7 @@ export default function Jahresabschluss() {
               </SelectContent>
             </Select>
             <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-              <SelectTrigger>
+              <SelectTrigger className="max-sm:h-10!">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -323,7 +323,7 @@ export default function Jahresabschluss() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => window.print()}>
+            <Button variant="outline" onClick={() => window.print()} className="max-sm:h-10">
               <Printer /> Drucken / PDF
             </Button>
           </div>

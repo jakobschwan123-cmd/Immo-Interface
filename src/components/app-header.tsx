@@ -13,19 +13,19 @@ export function AppHeader() {
   const { isPrivacyMode, togglePrivacyMode } = usePrivacy();
 
   return (
-    <header className="flex items-center justify-between border-b bg-card px-6 py-3 print:hidden">
-      <div className="flex items-center gap-6">
+    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b bg-card px-4 py-3 sm:px-6 print:hidden">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-6">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Immo-Interface
         </Link>
         {user && (
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <Link href="/" className="py-2 text-muted-foreground hover:text-foreground">
               Übersicht
             </Link>
             <Link
               href="/jahresabschluss"
-              className="text-muted-foreground hover:text-foreground"
+              className="py-2 text-muted-foreground hover:text-foreground"
             >
               Jahresabschluss
             </Link>
@@ -33,7 +33,7 @@ export function AppHeader() {
         )}
       </div>
       {user && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
             size="sm"
@@ -43,7 +43,7 @@ export function AppHeader() {
                 ? "Datenschutzmodus aktiv (Zahlen ausgeblendet) – Klick zum Einblenden"
                 : "Datenschutzmodus aktivieren (Zahlen ausblenden)"
             }
-            className={`flex items-center gap-1.5 transition-colors ${
+            className={`flex items-center gap-1.5 transition-colors max-sm:h-10 max-sm:w-10 ${
               isPrivacyMode
                 ? "bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-950 dark:text-amber-200"
                 : "text-muted-foreground hover:text-foreground"
@@ -64,7 +64,7 @@ export function AppHeader() {
           <span className="hidden text-sm text-muted-foreground sm:inline">
             {user.displayName ?? user.email}
           </span>
-          <Button variant="outline" size="sm" onClick={logout}>
+          <Button variant="outline" size="sm" onClick={logout} className="max-sm:h-10">
             Abmelden
           </Button>
         </div>

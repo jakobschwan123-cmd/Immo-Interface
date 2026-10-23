@@ -63,7 +63,7 @@ export function PortfolioCharts({
   const maxFlow = Math.max(1, ...flows.map((f) => Math.abs(f.value)));
 
   return (
-    <div className="mb-8 grid gap-6 lg:grid-cols-2">
+    <div className="mb-8 grid gap-4 sm:gap-6 lg:grid-cols-2">
       {/* Verteilung nach Rechtsträger */}
       <Card>
         <CardHeader>
@@ -74,9 +74,9 @@ export function PortfolioCharts({
             const share = totalValue > 0 ? (b.value / totalValue) * 100 : 0;
             return (
               <div key={b.label}>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span className="truncate">{b.label}</span>
-                  <span className="tabular-nums text-muted-foreground privacy-blur">
+                <div className="mb-1 flex justify-between gap-2 text-sm">
+                  <span className="min-w-0 truncate">{b.label}</span>
+                  <span className="shrink-0 tabular-nums text-muted-foreground privacy-blur">
                     {formatEuro(b.value)} · {share.toFixed(0)} %
                   </span>
                 </div>
@@ -103,9 +103,9 @@ export function PortfolioCharts({
             const negative = f.value < 0;
             return (
               <div key={f.label}>
-                <div className="mb-1 flex justify-between text-sm">
+                <div className="mb-1 flex justify-between gap-2 text-sm">
                   <span>{f.label}</span>
-                  <span className="tabular-nums text-muted-foreground privacy-blur">
+                  <span className="shrink-0 tabular-nums text-muted-foreground privacy-blur">
                     {formatEuro(f.value)}
                   </span>
                 </div>

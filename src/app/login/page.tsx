@@ -16,8 +16,8 @@ export default function LoginPage() {
   }, [user, router]);
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-zinc-50 p-6 dark:bg-black">
-      <div className="w-full max-w-sm rounded-2xl border border-black/10 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-zinc-900">
+    <main className="flex flex-1 items-center justify-center bg-zinc-50 p-4 sm:p-6 dark:bg-black">
+      <div className="w-full max-w-sm rounded-2xl border border-black/10 bg-white p-6 sm:p-8 shadow-sm dark:border-white/10 dark:bg-zinc-900">
         <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
           Immo-Interface
         </h1>

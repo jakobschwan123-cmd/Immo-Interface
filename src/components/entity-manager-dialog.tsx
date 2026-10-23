@@ -102,13 +102,14 @@ export function EntityManagerDialog({
                 key={entity.id}
                 className="flex items-center justify-between gap-2 py-2"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{entity.name}</span>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <span className="min-w-0 break-words text-sm font-medium">{entity.name}</span>
                   <Badge variant="secondary">{entity.legalForm}</Badge>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="shrink-0 max-sm:size-10"
                   onClick={() => handleDelete(entity)}
                   aria-label="Löschen"
                 >
@@ -126,6 +127,7 @@ export function EntityManagerDialog({
               <Label htmlFor="entityName">Name</Label>
               <Input
                 id="entityName"
+                className="max-sm:h-10"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="z. B. Familie Schwan GbR"
@@ -137,7 +139,7 @@ export function EntityManagerDialog({
                 value={legalForm}
                 onValueChange={(v) => setLegalForm(v as LegalForm)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full max-sm:h-10!">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,7 +151,7 @@ export function EntityManagerDialog({
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="max-sm:h-10">
               <Plus /> {saving ? "Lege an …" : "Rechtsträger anlegen"}
             </Button>
           </div>
