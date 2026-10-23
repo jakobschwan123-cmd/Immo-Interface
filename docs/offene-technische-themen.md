@@ -13,7 +13,8 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 - **Firestore-Rules versionieren/deployen:** `firebase.json` + Firebase CLI statt `firestore.rules`
   manuell in der Console pflegen. Rules liegen dann im Repo, Änderungen sind nachvollziehbar und
   per `firebase deploy --only firestore:rules` reproduzierbar (ggf. lokal testbar mit Emulator).
-  Offen: Freigabe für Firebase-CLI-Login.
+  Angelegt: `firebase.json` + `.firebaserc` (Projekt `immo-interface`), Anleitung in `docs/deployment.md`.
+  Offen: `firebase login` und erster `firebase deploy --only firestore:rules` durch Jakob.
 - **Backup:** Automatischer Firestore-Export; wöchentlich passt zum Erfassungsrhythmus.
   Firestore-Export braucht Blaze (Cloud Storage Bucket) → Alternative: eigenes Skript, das
   wöchentlich JSON lokal sichert. Entscheiden.
