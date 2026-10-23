@@ -30,6 +30,12 @@ const NOT_CONFIGURED: LoanState = {
   payable: false,
 };
 
+// "YYYY-MM-DD" als lokalen Monatsersten lesen. new Date(iso) waere UTC-Mitternacht
+// und verschiebt westlich von UTC Monat/Jahr. Ungueltig -> Invalid Date.
+function localMonthStart(iso: string): Date {
+  return new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, 1);
+}
+
 export function computeLoan(
   p: Property,
   repayments: Repayment[] = [],
@@ -43,7 +49,7 @@ export function computeLoan(
     return NOT_CONFIGURED;
   }
 
-  const start = new Date(p.loanStartDate);
+  const start = localMonthStart(p.loanStartDate);
   if (Number.isNaN(start.getTime())) return NOT_CONFIGURED;
 
   const monthlyRate = p.loanInterestRatePercent / 100 / 12;
@@ -163,7 +169,7 @@ export function loanInterestForYear(
   ) {
     return none;
   }
-  const start = new Date(p.loanStartDate);
+  const start = localMonthStart(p.loanStartDate);
   if (Number.isNaN(start.getTime())) return none;
 
   const monthlyRate = p.loanInterestRatePercent / 100 / 12;

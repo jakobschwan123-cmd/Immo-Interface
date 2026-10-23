@@ -86,6 +86,7 @@ export function computeEuer(
   // Vergleich Darlehenszins (nur zur Anzeige, nicht in den Summen).
   let calculatedCents = 0;
   let hasLoan = false;
+  const loanPropertyIds = new Set<string>();
   for (const p of properties) {
     const repayments = transactions
       .filter((t) => t.propertyId === p.id && t.type === "repayment")
@@ -93,11 +94,18 @@ export function computeEuer(
     const ly = loanInterestForYear(p, year, repayments);
     if (ly.configured) {
       hasLoan = true;
+      loanPropertyIds.add(p.id);
       calculatedCents += ly.interestCents;
     }
   }
+  // Nur Objekte mit Kreditdaten vergleichen, sonst meldet die Warnung Fehlalarme.
   const bookedCents = yearTx
-    .filter((t) => t.type === "expense" && t.category === "Finanzierungszins")
+    .filter(
+      (t) =>
+        t.type === "expense" &&
+        t.category === "Finanzierungszins" &&
+        loanPropertyIds.has(t.propertyId),
+    )
     .reduce((s, t) => s + t.amountCents, 0);
 
   return {
