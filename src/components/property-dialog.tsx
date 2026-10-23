@@ -326,7 +326,7 @@ export function PropertyDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-1.5">
               <Label htmlFor="name">Bezeichnung *</Label>
-              <Input
+              <Input className="max-sm:h-10"
                 id="name"
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
@@ -341,7 +341,7 @@ export function PropertyDialog({
                 value={form.entityId}
                 onValueChange={(v) => set("entityId", v ?? NO_ENTITY)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full max-sm:h-10!">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -355,10 +355,10 @@ export function PropertyDialog({
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="address">Adresse</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="address"
                   value={form.address}
                   onChange={(e) => set("address", e.target.value)}
@@ -370,7 +370,7 @@ export function PropertyDialog({
                   value={form.legalForm}
                   onValueChange={(v) => set("legalForm", v as LegalForm)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full max-sm:h-10!">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -385,14 +385,14 @@ export function PropertyDialog({
             </div>
 
             {/* Vermietungstyp + m² + Einheiten */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label>Vermietungstyp</Label>
                 <Select
                   value={form.rentalType}
                   onValueChange={(v) => set("rentalType", v as RentalType)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full max-sm:h-10!">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -407,7 +407,7 @@ export function PropertyDialog({
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="area">Fläche (m²)</Label>
-                  <Input
+                  <Input className="max-sm:h-10"
                     id="area"
                     inputMode="decimal"
                     value={form.area}
@@ -416,7 +416,7 @@ export function PropertyDialog({
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="units">Einheiten</Label>
-                  <Input
+                  <Input className="max-sm:h-10"
                     id="units"
                     inputMode="numeric"
                     value={form.units}
@@ -426,10 +426,10 @@ export function PropertyDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="purchaseDate">Kaufdatum</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="purchaseDate"
                   type="date"
                   value={form.purchaseDate}
@@ -438,7 +438,7 @@ export function PropertyDialog({
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="purchasePrice">Kaufpreis (€)</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="purchasePrice"
                   inputMode="decimal"
                   value={form.purchasePrice}
@@ -447,10 +447,10 @@ export function PropertyDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="landValue">Grundanteil (€)</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="landValue"
                   inputMode="decimal"
                   value={form.landValue}
@@ -459,7 +459,7 @@ export function PropertyDialog({
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="buildingValue">Gebäudeanteil (€)</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="buildingValue"
                   inputMode="decimal"
                   value={form.buildingValue}
@@ -468,10 +468,10 @@ export function PropertyDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="afaRate">AfA-Satz (% p.a.)</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="afaRate"
                   inputMode="decimal"
                   value={form.afaRate}
@@ -480,7 +480,7 @@ export function PropertyDialog({
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="marketValue">Marktwert (€)</Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="marketValue"
                   inputMode="decimal"
                   value={form.marketValue}
@@ -497,7 +497,7 @@ export function PropertyDialog({
                     ? "Kaltmiete / Monat (€)"
                     : "Einnahmen / Monat (€)"}
                 </Label>
-                <Input
+                <Input className="max-sm:h-10"
                   id="monthlyRent"
                   inputMode="decimal"
                   value={form.monthlyRent}
@@ -508,9 +508,9 @@ export function PropertyDialog({
 
             {/* Einheiten & Mieten (optional, z.B. Mehrfamilienhaus) */}
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <Label>Einheiten &amp; Mieten (optional)</Label>
-                <Button type="button" variant="ghost" size="sm" onClick={addUnit}>
+                <Button type="button" variant="ghost" size="sm" onClick={addUnit} className="max-sm:h-10">
                   <Plus /> Einheit
                 </Button>
               </div>
@@ -522,18 +522,18 @@ export function PropertyDialog({
                         <Label htmlFor={`unit-label-${i}`} className="text-xs">
                           Bezeichnung
                         </Label>
-                        <Input
+                        <Input className="max-sm:h-10"
                           id={`unit-label-${i}`}
                           value={u.label}
                           placeholder={`Einheit ${i + 1}`}
                           onChange={(e) => updateUnit(i, "label", e.target.value)}
                         />
                       </div>
-                      <div className="grid w-32 gap-1.5">
+                      <div className="grid w-28 gap-1.5 sm:w-32">
                         <Label htmlFor={`unit-rent-${i}`} className="text-xs">
                           Miete/Monat (€)
                         </Label>
-                        <Input
+                        <Input className="max-sm:h-10"
                           id={`unit-rent-${i}`}
                           inputMode="decimal"
                           value={u.rent}
@@ -544,6 +544,7 @@ export function PropertyDialog({
                         type="button"
                         variant="ghost"
                         size="sm"
+                        className="max-sm:size-10"
                         onClick={() => removeUnit(i)}
                         aria-label="Einheit entfernen"
                       >
@@ -568,29 +569,29 @@ export function PropertyDialog({
                     Strom, Wasser & Internet zahlt der Mieter – hier nur deine
                     Eigentümer-Kosten.
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
                       <Label htmlFor="costInsurance">Gebäudeversicherung (€)</Label>
-                      <Input id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="costPropertyTax">Grundsteuer (€)</Label>
-                      <Input id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
                       <Label htmlFor="costHausgeld">Hausgeld gesamt (€)</Label>
-                      <Input id="costHausgeld" inputMode="decimal" value={form.costHausgeld} onChange={(e) => set("costHausgeld", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costHausgeld" inputMode="decimal" value={form.costHausgeld} onChange={(e) => set("costHausgeld", e.target.value)} />
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="hausgeldOwnerPct">davon Eigentümer (%)</Label>
-                      <Input id="hausgeldOwnerPct" inputMode="decimal" value={form.hausgeldOwnerPct} onChange={(e) => set("hausgeldOwnerPct", e.target.value)} />
+                      <Input className="max-sm:h-10" id="hausgeldOwnerPct" inputMode="decimal" value={form.hausgeldOwnerPct} onChange={(e) => set("hausgeldOwnerPct", e.target.value)} />
                     </div>
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="costOther">Sonstiges (€)</Label>
-                    <Input id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
+                    <Input className="max-sm:h-10" id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
                   </div>
                 </div>
               ) : (
@@ -598,34 +599,34 @@ export function PropertyDialog({
                   <p className="text-xs text-muted-foreground">
                     Du trägst alle laufenden Kosten selbst.
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
                       <Label htmlFor="costElectricity">Strom (€)</Label>
-                      <Input id="costElectricity" inputMode="decimal" value={form.costElectricity} onChange={(e) => set("costElectricity", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costElectricity" inputMode="decimal" value={form.costElectricity} onChange={(e) => set("costElectricity", e.target.value)} />
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="costWater">Wasser (€)</Label>
-                      <Input id="costWater" inputMode="decimal" value={form.costWater} onChange={(e) => set("costWater", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costWater" inputMode="decimal" value={form.costWater} onChange={(e) => set("costWater", e.target.value)} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
                       <Label htmlFor="costInternet">Internet (€)</Label>
-                      <Input id="costInternet" inputMode="decimal" value={form.costInternet} onChange={(e) => set("costInternet", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costInternet" inputMode="decimal" value={form.costInternet} onChange={(e) => set("costInternet", e.target.value)} />
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="costInsurance">Gebäudeversicherung (€)</Label>
-                      <Input id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costInsurance" inputMode="decimal" value={form.costInsurance} onChange={(e) => set("costInsurance", e.target.value)} />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1.5">
                       <Label htmlFor="costPropertyTax">Grundsteuer (€)</Label>
-                      <Input id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costPropertyTax" inputMode="decimal" value={form.costPropertyTax} onChange={(e) => set("costPropertyTax", e.target.value)} />
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="costOther">Sonstiges (€)</Label>
-                      <Input id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
+                      <Input className="max-sm:h-10" id="costOther" inputMode="decimal" value={form.costOther} onChange={(e) => set("costOther", e.target.value)} />
                     </div>
                   </div>
                 </div>
@@ -640,24 +641,24 @@ export function PropertyDialog({
                 Ertragswert berechnet.
               </p>
               <div className="grid gap-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <Label htmlFor="landArea">Grundstücksfläche (m²)</Label>
-                    <Input id="landArea" inputMode="decimal" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} />
+                    <Input className="max-sm:h-10" id="landArea" inputMode="decimal" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} />
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="landRate">Bodenrichtwert (€/m²)</Label>
-                    <Input id="landRate" inputMode="decimal" value={form.landRate} onChange={(e) => set("landRate", e.target.value)} />
+                    <Input className="max-sm:h-10" id="landRate" inputMode="decimal" value={form.landRate} onChange={(e) => set("landRate", e.target.value)} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <Label htmlFor="capRate">Liegenschaftszins (%)</Label>
-                    <Input id="capRate" inputMode="decimal" value={form.capRate} onChange={(e) => set("capRate", e.target.value)} />
+                    <Input className="max-sm:h-10" id="capRate" inputMode="decimal" value={form.capRate} onChange={(e) => set("capRate", e.target.value)} />
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="remainingLife">Restnutzungsdauer (Jahre)</Label>
-                    <Input id="remainingLife" inputMode="numeric" value={form.remainingLife} onChange={(e) => set("remainingLife", e.target.value)} />
+                    <Input className="max-sm:h-10" id="remainingLife" inputMode="numeric" value={form.remainingLife} onChange={(e) => set("remainingLife", e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -670,10 +671,10 @@ export function PropertyDialog({
                 Restschuld & Enddatum werden daraus automatisch berechnet.
               </p>
               <div className="grid gap-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <Label htmlFor="loanOriginal">Darlehenssumme (€)</Label>
-                    <Input
+                    <Input className="max-sm:h-10"
                       id="loanOriginal"
                       inputMode="decimal"
                       value={form.loanOriginal}
@@ -682,7 +683,7 @@ export function PropertyDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="loanRate">Zinssatz (% p.a.)</Label>
-                    <Input
+                    <Input className="max-sm:h-10"
                       id="loanRate"
                       inputMode="decimal"
                       value={form.loanRate}
@@ -690,10 +691,10 @@ export function PropertyDialog({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <Label htmlFor="loanMonthly">Rate / Monat (€)</Label>
-                    <Input
+                    <Input className="max-sm:h-10"
                       id="loanMonthly"
                       inputMode="decimal"
                       value={form.loanMonthly}
@@ -702,7 +703,7 @@ export function PropertyDialog({
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="loanStart">Kreditbeginn</Label>
-                    <Input
+                    <Input className="max-sm:h-10"
                       id="loanStart"
                       type="date"
                       value={form.loanStart}
@@ -720,10 +721,11 @@ export function PropertyDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={saving}
+              className="max-sm:h-10"
             >
               Abbrechen
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving} className="max-sm:h-10">
               {saving ? "Speichere …" : "Speichern"}
             </Button>
           </DialogFooter>
