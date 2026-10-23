@@ -74,6 +74,11 @@ type FormState = {
   loanRate: string;
   loanMonthly: string;
   loanStart: string;
+  // Ertragswert (optional)
+  landArea: string; // m²
+  landRate: string; // Bodenrichtwert €/m²
+  capRate: string; // Liegenschaftszins %
+  remainingLife: string; // Jahre
 };
 
 const EMPTY: FormState = {
@@ -104,6 +109,10 @@ const EMPTY: FormState = {
   loanRate: "",
   loanMonthly: "",
   loanStart: "",
+  landArea: "",
+  landRate: "",
+  capRate: "",
+  remainingLife: "",
 };
 
 // Bestehende Immobilie -> Formularwerte (Cent -> Euro-String).
@@ -144,7 +153,19 @@ function formFromProperty(p: Property): FormState {
         ? centsToEuroInput(p.loanMonthlyPaymentCents)
         : "",
     loanStart: p.loanStartDate ?? "",
+    landArea: p.landAreaSqm != null ? String(p.landAreaSqm) : "",
+    landRate: p.landRateCentsPerSqm != null ? centsToEuroInput(p.landRateCentsPerSqm) : "",
+    capRate: p.capRateBasisPoints != null ? String(p.capRateBasisPoints / 100) : "",
+    remainingLife: p.remainingLifeYears != null ? String(p.remainingLifeYears) : "",
   };
+}
+
+// Zahl-Eingabe (Komma oder Punkt) -> number; leer/ungueltig -> undefined.
+// 0 bleibt erhalten (z.B. Liegenschaftszins 0 %).
+function optionalNumber(input: string): number | undefined {
+  if (!input.trim()) return undefined;
+  const n = Number(input.replace(",", "."));
+  return Number.isFinite(n) ? n : undefined;
 }
 
 export function PropertyDialog({
@@ -203,6 +224,8 @@ export function PropertyDialog({
       }));
     const hasUnits = unitRentsClean.length > 0;
 
+    const capRatePercent = optionalNumber(form.capRate);
+
     // Gemeinsame Felder (ohne createdBy) aus dem Formular bauen.
     const data = {
       name: form.name.trim(),
@@ -260,6 +283,13 @@ export function PropertyDialog({
         ? euroInputToCents(form.loanMonthly)
         : undefined,
       loanStartDate: form.loanStart || undefined,
+      // Leere Felder -> undefined (Ertragswert wird dann nicht berechnet).
+      // Liegenschaftszins: Eingabe in %, gespeichert in Basispunkten (3,5 -> 350).
+      landAreaSqm: optionalNumber(form.landArea),
+      landRateCentsPerSqm: form.landRate ? euroInputToCents(form.landRate) : undefined,
+      capRateBasisPoints:
+        capRatePercent != null ? Math.round(capRatePercent * 100) : undefined,
+      remainingLifeYears: optionalNumber(form.remainingLife),
     };
 
     setSaving(true);
@@ -600,6 +630,37 @@ export function PropertyDialog({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Ertragswert (optional) */}
+            <div className="border-t pt-3">
+              <p className="mb-2 text-sm font-medium">Ertragswert (optional)</p>
+              <p className="mb-2 text-xs text-muted-foreground">
+                Bodenrichtwert z. B. aus BORIS-NRW. Ohne alle vier Angaben wird kein
+                Ertragswert berechnet.
+              </p>
+              <div className="grid gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="landArea">Grundstücksfläche (m²)</Label>
+                    <Input id="landArea" inputMode="decimal" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="landRate">Bodenrichtwert (€/m²)</Label>
+                    <Input id="landRate" inputMode="decimal" value={form.landRate} onChange={(e) => set("landRate", e.target.value)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="capRate">Liegenschaftszins (%)</Label>
+                    <Input id="capRate" inputMode="decimal" value={form.capRate} onChange={(e) => set("capRate", e.target.value)} />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="remainingLife">Restnutzungsdauer (Jahre)</Label>
+                    <Input id="remainingLife" inputMode="numeric" value={form.remainingLife} onChange={(e) => set("remainingLife", e.target.value)} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Finanzierung / Kredit (optional) */}
