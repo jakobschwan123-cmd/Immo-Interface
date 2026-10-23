@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// =============================================================================
+//  Firebase Storage Security Rules  -  Belege (Phase 3).
+//  Gleiches Zugriffsmodell wie firestore.rules: nur eingeloggte Nutzer mit
+//  verifizierter E-Mail, die in /config/allowlist (Firestore) steht.
+//  Die Allowlist wird per Cross-Service-Rule aus Firestore gelesen
+//  (Firebase fragt beim ersten Deploy nach der noetigen Berechtigung).
+// =============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAllowed() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in
+          firestore.get(/databases/(default)/documents/config/allowlist).data.emails;
+    }
+
+    // Nur Formate, die Gemini lesen kann (gleiche Liste wie RECEIPT_MIME_TYPES
+    // in src/lib/receipts.ts). Kein SVG/HTML -> kein Skript-Inhalt im Bucket.
+    function isReceiptFile() {
+      return request.resource.size > 0
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|heic|heif)|application/pdf');
+    }
+
+    match /receipts/{propertyId}/{fileName} {
+      allow read: if isAllowed();
+      // Nur neu anlegen, kein Ueberschreiben bestehender Belege.
+      allow create: if isAllowed() && isReceiptFile();
+      // Loeschen z. B. bei abgebrochener Buchung.
+      allow delete: if isAllowed();
+    }
+
+    // Alles andere ist verboten (sicherer Default).
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
