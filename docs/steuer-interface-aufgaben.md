@@ -49,14 +49,25 @@ Lückenloser Einzelnachweis pro Jahr: Datum, Immobilie, Kategorie, Text, Einnahm
 - UI: Button neben dem EÜR-Export; Druckansicht (`print:`-Styles wie EÜR).
 - Fertig, wenn: Summe der Journalzeilen = EÜR-Einnahmen/-Ausgaben (ohne AfA/Sondertilgung).
 
-### A5 – Kategorien für Anlage V verfeinern  `M` (Voraussetzung für A6)
+### A5 – Kategorien für Anlage V verfeinern  `M` (Voraussetzung für A6)  🟡 ENTWURF auf `feature/anlage-v` (Steuerberater bestätigt noch)
 Aktuelle Kategorien lassen sich nicht sauber auf Anlage-V-Zeilen abbilden (z. B. Umlagen,
 Erhaltungsaufwand, Verwaltung getrennt von Sonstigem).
 - Backend: `TRANSACTION_CATEGORIES` in `src/lib/types.ts` erweitern **abwärtskompatibel**
   (bestehende Buchungen in Firestore behalten ihre Kategorie).
 - UI: `transaction-dialog.tsx` Auswahl anpassen.
+- Umgesetzt: `INCOME_CATEGORIES` / `EXPENSE_CATEGORIES` (Dialog filtert nach Art, zeigt den
+  Anlage-V-Bereich als Entwurf). Neu: Zuschuss, Geldbeschaffungskosten, Erhaltungsaufwand,
+  Betriebskosten (umgelegt / nicht umgelegt). Alt → neu über `LEGACY_CATEGORIES`
+  (`Instandhaltung` → `Erhaltungsaufwand`), keine Firestore-Migration. `computeEuer` zählt
+  jetzt **alle** Kategorien (unbekannte am Ende) → EÜR und Journal stimmen immer überein.
 
-### A6 – ELSTER-Zeilen-Mapping Anlage V  `L`
+### A6 – ELSTER-Zeilen-Mapping Anlage V  `L`  🟡 ENTWURF auf `feature/anlage-v` (Steuerberater bestätigt noch)
+- Umgesetzt: `src/lib/anlage-v.ts` (`computeAnlageV` je Objekt/Jahr auf Basis `computeEuer`),
+  `anlageVToCsv`, Ansicht „Anlage V (Entwurf)" im Jahresabschluss. Zuordnung über
+  Feldbezeichnungen; Zeilennummern nur für **2025**, verifiziert in der ELSTER-Anleitung zur
+  ESt-Erklärung 2025 (Abschnitt Anlage V). Andere Jahre: keine Zeilen, Hinweis.
+- Offen: Zuordnung des Steuerberaters (v. a. Grundsteuer/Versicherung/Verwaltung als
+  „nicht umgelegt"), Ferienvermietung (Anlage V-FeWo) und Eigennutzung.
 Gegenüberstellung App-Zahl ↔ Zeile der Anlage V.
 - Backend: `src/lib/anlage-v.ts` mit Mapping Kategorie/AfA/Zins → Zeile; pro Objekt und Jahr.
 - **Zeilennummern vorher gegen das amtliche Formular des jeweiligen Jahres prüfen** – die im

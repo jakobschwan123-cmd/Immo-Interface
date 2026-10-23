@@ -1,8 +1,9 @@
 "use client";
 
-// Jahresabschluss: EÜR pro Rechtsträger fuer ein gewaehltes Jahr, mit CSV-Export.
+// Jahresabschluss: EÜR pro Rechtsträger fuer ein gewaehltes Jahr, mit CSV-Export,
+// sowie Anlage V (Entwurf) je Objekt.
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -12,7 +13,14 @@ import { subscribeProperties } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
 import { subscribeAllTransactions } from "@/lib/transactions";
 import { computeEuer, availableYears, journalRows, journalTotals, type Euer, type JournalRow } from "@/lib/euer";
-import { euerToCsv, journalToCsv, JOURNAL_TYPE_LABEL, downloadTextFile } from "@/lib/csv";
+import { euerToCsv, journalToCsv, anlageVToCsv, JOURNAL_TYPE_LABEL, downloadTextFile } from "@/lib/csv";
+import {
+  computeAnlageV,
+  ANLAGE_V_QUELLE,
+  ANLAGE_V_SUMMEN_ZEILEN,
+  ANLAGE_V_ZEILEN_JAHR,
+  type AnlageV,
+} from "@/lib/anlage-v";
 import { formatEuro } from "@/lib/money";
 import type { Property, Entity, Transaction } from "@/lib/types";
 
@@ -220,6 +228,97 @@ function EuerCard({
   );
 }
 
+// Anlage V (Entwurf) fuer ein Objekt: Bereich <-> Betrag.
+function AnlageVCard({ av, subtitle }: { av: AnlageV; subtitle: string }) {
+  const z = av.year === ANLAGE_V_ZEILEN_JAHR ? ANLAGE_V_SUMMEN_ZEILEN : undefined;
+
+  function handleCsv() {
+    const safe = av.property.name.replace(/[^\p{L}\p{N}_-]+/gu, "_");
+    downloadTextFile(`AnlageV_Entwurf_${av.year}_${safe}.csv`, anlageVToCsv(av));
+    toast.success("CSV heruntergeladen.");
+  }
+
+  const sumRow = (label: string, zeile: string | undefined, cents: number, bold = false) => (
+    <tr className={bold ? "border-t-2 font-semibold" : "border-t font-medium"}>
+      <td className="py-1 pr-2">{label}</td>
+      <td className="py-1 pr-2 whitespace-nowrap">{zeile ?? "–"}</td>
+      <td className="py-1 text-right tabular-nums privacy-blur">{formatEuro(cents)}</td>
+    </tr>
+  );
+
+  return (
+    <Card className="break-inside-avoid">
+      <CardHeader className="flex-row flex-wrap items-start justify-between gap-3 space-y-0">
+        <div>
+          <CardTitle className="text-base">
+            {av.property.name}{" "}
+            <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
+              Entwurf
+            </span>
+          </CardTitle>
+          <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+        </div>
+        <Button variant="outline" size="sm" className="max-sm:h-10 print:hidden" onClick={handleCsv}>
+          <Download /> CSV
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        {av.hinweise.map((h) => (
+          <p key={h} className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
+            {h}
+          </p>
+        ))}
+        {av.rows.length === 0 ? (
+          <p className="text-muted-foreground">Keine Einnahmen/Werbungskosten in diesem Jahr.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-xs text-muted-foreground">
+                <th className="py-1 pr-2 font-normal">Bereich (Anlage V)</th>
+                <th className="py-1 pr-2 font-normal">Zeile</th>
+                <th className="py-1 text-right font-normal">Betrag</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(["Einnahmen", "Werbungskosten"] as const).map((art) => (
+                <Fragment key={art}>
+                  <tr>
+                    <td colSpan={3} className="pt-3 pb-1 font-medium">
+                      {art}
+                    </td>
+                  </tr>
+                  {av.rows
+                    .filter((r) => r.art === art)
+                    .map((r) => (
+                      <tr key={r.bereich} className="border-b align-top">
+                        <td className="py-1 pr-2">
+                          <span className={r.zugeordnet ? "" : "font-medium text-rose-600"}>
+                            {r.bereich}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            aus: {r.positionen.join(", ")}
+                            {r.hinweis && <> · {r.hinweis}</>}
+                          </span>
+                        </td>
+                        <td className="py-1 pr-2 whitespace-nowrap">{r.zeile ?? "–"}</td>
+                        <td className="py-1 text-right tabular-nums whitespace-nowrap privacy-blur">
+                          {formatEuro(r.amountCents)}
+                        </td>
+                      </tr>
+                    ))}
+                </Fragment>
+              ))}
+              {sumRow("Summe der Einnahmen", z?.einnahmen, av.einnahmenCents)}
+              {sumRow("Summe der Werbungskosten", z?.werbungskosten, av.werbungskostenCents)}
+              {sumRow("Überschuss", z?.ueberschuss, av.ueberschussCents, true)}
+            </tbody>
+          </table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Jahresabschluss() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -230,6 +329,7 @@ export default function Jahresabschluss() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   // "all" = Gesamt je Rechtsträger, sonst ID einer Einzelimmobilie.
   const [scope, setScope] = useState<string>("all");
+  const [view, setView] = useState<"euer" | "anlage-v">("euer");
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -287,11 +387,31 @@ export default function Jahresabschluss() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Jahresabschluss</h1>
             <p className="text-sm text-muted-foreground">
-              Einnahmen-Überschuss-Rechnung (EÜR){" "}
-              {selectedProperty ? "je Objekt" : "je Rechtsträger"}
+              {view === "anlage-v"
+                ? "Anlage V (Entwurf) je Objekt"
+                : `Einnahmen-Überschuss-Rechnung (EÜR) ${selectedProperty ? "je Objekt" : "je Rechtsträger"}`}
             </p>
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto print:hidden">
+            <div className="flex w-full gap-1 rounded-lg bg-muted p-1 sm:w-auto">
+              {(
+                [
+                  ["euer", "EÜR"],
+                  ["anlage-v", "Anlage V (Entwurf)"],
+                ] as const
+              ).map(([v, label]) => (
+                <Button
+                  key={v}
+                  size="sm"
+                  variant={view === v ? "default" : "ghost"}
+                  className="flex-1 max-sm:h-9 sm:flex-none"
+                  aria-pressed={view === v}
+                  onClick={() => setView(v)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
             <Select value={effectiveScope} onValueChange={(v) => setScope(v ?? "all")}>
               <SelectTrigger className="w-full max-sm:h-10! sm:w-auto">
                 <SelectValue>
@@ -335,13 +455,34 @@ export default function Jahresabschluss() {
           Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau angesetzt (Kaufmonat zählt voll, Bestätigung durch den Steuerberater steht noch aus).
         </p>
 
+        {view === "anlage-v" && (
+          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            <p className="font-semibold">Entwurf – vom Steuerberater zu bestätigen</p>
+            <p className="mt-1">
+              Die Zuordnung der Kategorien zu den Bereichen der Anlage V ist eine Annahme; die
+              Zuordnung des Steuerberaters liegt noch nicht vor. Je Objekt eine Anlage V; Beträge
+              entsprechen der EÜR (inkl. AfA, ohne Sondertilgungen). Zeilennummern nur für{" "}
+              {ANLAGE_V_ZEILEN_JAHR} geprüft (Quelle: {ANLAGE_V_QUELLE}). „Nicht zugeordnet“ bitte
+              mit dem Steuerberater klären.
+            </p>
+          </div>
+        )}
+
         {properties.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Noch keine Immobilien/Buchungen vorhanden.
           </p>
         ) : (
           <div className="space-y-6">
-            {selectedProperty ? (
+            {view === "anlage-v" ? (
+              (selectedProperty ? [selectedProperty] : groups.flatMap((g) => g.props)).map((p) => (
+                <AnlageVCard
+                  key={p.id}
+                  av={computeAnlageV(p, transactions, year)}
+                  subtitle={`${entityMap.get(p.entityId ?? "")?.name ?? "Ohne Rechtsträger"} · ${p.rentalType} · ${year}`}
+                />
+              ))
+            ) : selectedProperty ? (
               <EuerCard
                 title={selectedProperty.name}
                 subtitle={`${entityMap.get(selectedProperty.entityId ?? "")?.name ?? "Ohne Rechtsträger"} · ${year}`}
