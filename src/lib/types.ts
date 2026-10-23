@@ -132,6 +132,12 @@ export type Property = {
   loanMonthlyPaymentCents?: number; // monatliche Rate (Zins + Tilgung)
   loanStartDate?: string; // Kreditbeginn (ISO "YYYY-MM-DD")
 
+  // --- Ertragswert (optional, vereinfacht nach ImmoWertV, siehe lib/valuation.ts) ---
+  landAreaSqm?: number; // Grundstuecksflaeche in m²
+  landRateCentsPerSqm?: number; // Bodenrichtwert in Cent/m² (Quelle: BORIS-NRW)
+  capRateBasisPoints?: number; // Liegenschaftszins in Basispunkten (350 = 3,50 %)
+  remainingLifeYears?: number; // Restnutzungsdauer des Gebaeudes in Jahren
+
   createdBy: string; // uid des Anlegers
   createdAt?: Timestamp; // Server-Zeitstempel
 };

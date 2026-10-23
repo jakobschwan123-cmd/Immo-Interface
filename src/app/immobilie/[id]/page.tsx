@@ -22,6 +22,7 @@ import {
   effectiveMonthlyRentCents,
 } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
+import { incomeValuation } from "@/lib/valuation";
 import { formatEuro, formatPercent } from "@/lib/money";
 import {
   signedAmountCents,
@@ -177,6 +178,9 @@ export default function PropertyDetail() {
 
   // Finanzierung (berechnet aus den Kreditdaten + Sondertilgungen)
   const loan = computeLoan(property, repayments);
+
+  // Ertragswert (Schaetzung) – wird NICHT als Marktwert uebernommen.
+  const valuation = incomeValuation(property);
   const restlaufzeitText =
     loan.monthsRemaining != null && loan.monthsRemaining > 0
       ? `noch ${Math.floor(loan.monthsRemaining / 12)} J. ${loan.monthsRemaining % 12} Mon.`
@@ -314,6 +318,65 @@ export default function PropertyDetail() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Ertragswert (vereinfacht nach ImmoWertV) */}
+        {valuation && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-base">Ertragswert (Schätzung)</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Schätzung, kein Gutachten. Vereinfachtes Ertragswertverfahren
+                nach ImmoWertV; Bewirtschaftungskosten = deine Eigentümer-Kosten
+                (ohne Mietausfallwagnis).
+              </p>
+            </CardHeader>
+            <CardContent className="divide-y">
+              <Row
+                label={`Bodenwert (${property.landAreaSqm} m² × Bodenrichtwert)`}
+                value={formatEuro(valuation.landValueCents)}
+              />
+              <Row label="Jahresrohertrag" value={formatEuro(valuation.annualGrossIncomeCents)} />
+              <Row
+                label="− Bewirtschaftungskosten"
+                value={formatEuro(valuation.annualOperatingCostsCents)}
+              />
+              <Row label="= Reinertrag" value={formatEuro(valuation.annualNetIncomeCents)} />
+              <Row
+                label={`− Bodenwertverzinsung (${formatPercent((property.capRateBasisPoints ?? 0) / 100)})`}
+                value={formatEuro(valuation.landYieldCents)}
+              />
+              <Row
+                label="= Gebäudereinertrag"
+                value={formatEuro(valuation.buildingNetIncomeCents)}
+              />
+              <Row
+                label={`× Vervielfältiger (${property.remainingLifeYears} J. Restnutzung)`}
+                value={valuation.multiplier.toLocaleString("de-DE", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              />
+              <Row
+                label="= Gebäudeertragswert"
+                value={formatEuro(valuation.buildingValueCents)}
+              />
+              <Row
+                label="Ertragswert (Boden + Gebäude)"
+                value={
+                  <span className="font-semibold">
+                    {formatEuro(valuation.incomeValueCents)}
+                  </span>
+                }
+              />
+              {valuation.buildingNetIncomeRawCents < 0 && (
+                <p className="py-1.5 text-xs text-amber-700 dark:text-amber-400">
+                  Der Reinertrag deckt die Bodenwertverzinsung nicht – der
+                  Gebäudereinertrag wurde auf 0 gesetzt (Ertragswert = Bodenwert).
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Finanzierung / Kredit (berechnet) */}
         {loan.configured && (
