@@ -9,7 +9,7 @@
 
 import { afaForYear } from "./finance";
 import { loanInterestForYear } from "./loan";
-import { TRANSACTION_CATEGORIES } from "./types";
+import { normalizeCategory, TRANSACTION_CATEGORIES } from "./types";
 import type { Property, Transaction } from "./types";
 
 export type EuerLine = { label: string; amountCents: number };
@@ -31,6 +31,28 @@ export type Euer = {
   } | null;
 };
 
+export const AFA_LABEL = "Abschreibung (AfA)";
+
+// Summen je Kategorie (nur > 0). Veraltete Kategorien zaehlen unter der neuen
+// (normalizeCategory); unbekannte Kategorien fallen NICHT heraus, sondern
+// erscheinen am Ende – so stimmen EÜR und Journal immer ueberein.
+function linesByCategory(txs: Transaction[], type: "income" | "expense"): EuerLine[] {
+  const sums = new Map<string, number>();
+  for (const t of txs) {
+    if (t.type !== type) continue;
+    const cat = normalizeCategory(t.category);
+    sums.set(cat, (sums.get(cat) ?? 0) + t.amountCents);
+  }
+  const order = (c: string) => {
+    const i = (TRANSACTION_CATEGORIES as string[]).indexOf(c);
+    return i === -1 ? TRANSACTION_CATEGORIES.length : i;
+  };
+  return [...sums]
+    .filter(([, sum]) => sum > 0)
+    .sort(([a], [b]) => order(a) - order(b) || a.localeCompare(b))
+    .map(([label, amountCents]) => ({ label, amountCents }));
+}
+
 // Gehoert eine Buchung (per Datum) ins angegebene Jahr?
 function inYear(t: Transaction, year: number): boolean {
   return t.date.startsWith(String(year));
@@ -47,31 +69,11 @@ export function computeEuer(
     (t) => propertyIds.has(t.propertyId) && inYear(t, year),
   );
 
-  // Einnahmen je Kategorie.
-  const income: EuerLine[] = [];
-  let incomeTotalCents = 0;
-  for (const cat of TRANSACTION_CATEGORIES) {
-    const sum = yearTx
-      .filter((t) => t.type === "income" && t.category === cat)
-      .reduce((s, t) => s + t.amountCents, 0);
-    if (sum > 0) {
-      income.push({ label: cat, amountCents: sum });
-      incomeTotalCents += sum;
-    }
-  }
-
-  // Ausgaben je Kategorie.
-  const expenses: EuerLine[] = [];
-  let expenseTotalCents = 0;
-  for (const cat of TRANSACTION_CATEGORIES) {
-    const sum = yearTx
-      .filter((t) => t.type === "expense" && t.category === cat)
-      .reduce((s, t) => s + t.amountCents, 0);
-    if (sum > 0) {
-      expenses.push({ label: cat, amountCents: sum });
-      expenseTotalCents += sum;
-    }
-  }
+  // Einnahmen und Ausgaben je Kategorie.
+  const income = linesByCategory(yearTx, "income");
+  const expenses = linesByCategory(yearTx, "expense");
+  const incomeTotalCents = income.reduce((s, l) => s + l.amountCents, 0);
+  let expenseTotalCents = expenses.reduce((s, l) => s + l.amountCents, 0);
 
   // AfA als zusaetzliche Ausgabe (Summe ueber alle Immobilien).
   const afaCents = properties.reduce(
@@ -79,7 +81,7 @@ export function computeEuer(
     0,
   );
   if (afaCents > 0) {
-    expenses.push({ label: "Abschreibung (AfA)", amountCents: afaCents });
+    expenses.push({ label: AFA_LABEL, amountCents: afaCents });
     expenseTotalCents += afaCents;
   }
 
@@ -103,7 +105,7 @@ export function computeEuer(
     .filter(
       (t) =>
         t.type === "expense" &&
-        t.category === "Finanzierungszins" &&
+        normalizeCategory(t.category) === "Finanzierungszins" &&
         loanPropertyIds.has(t.propertyId),
     )
     .reduce((s, t) => s + t.amountCents, 0);

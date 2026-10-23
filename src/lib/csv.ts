@@ -2,6 +2,8 @@
 
 import type { Euer, JournalRow } from "./euer";
 import { journalTotals } from "./euer";
+import type { AnlageV } from "./anlage-v";
+import { ANLAGE_V_QUELLE, ANLAGE_V_SUMMEN_ZEILEN, ANLAGE_V_ZEILEN_JAHR } from "./anlage-v";
 
 // Cent -> "1200,50" (Komma als Dezimaltrennzeichen, ohne Waehrungssymbol).
 function centsToPlain(cents: number): string {
@@ -63,6 +65,33 @@ export function journalToCsv(rows: JournalRow[], year: number, title: string): s
   out.push(["Summe Einnahmen", "", "", "", "", centsToPlain(t.incomeCents)]);
   out.push(["Summe Ausgaben (ohne AfA)", "", "", "", "", centsToPlain(t.expenseCents)]);
   out.push(["Summe Sondertilgungen (nicht in EÜR)", "", "", "", "", centsToPlain(t.repaymentCents)]);
+  return out.map((r) => r.map(cell).join(";")).join("\n");
+}
+
+// Anlage V (Entwurf) eines Objekts -> CSV.
+export function anlageVToCsv(av: AnlageV): string {
+  const z = av.year === ANLAGE_V_ZEILEN_JAHR ? ANLAGE_V_SUMMEN_ZEILEN : undefined;
+  const out: string[][] = [];
+  out.push([`Anlage V ${av.year} – ${av.property.name}`]);
+  out.push(["ENTWURF – vom Steuerberater zu bestätigen. Kein Steuerberater-Ersatz."]);
+  out.push([`Quelle Bereiche/Zeilen: ${ANLAGE_V_QUELLE}`]);
+  for (const h of av.hinweise) out.push([h]);
+  out.push([]);
+  out.push(["Art", "Bereich", `Zeile (${ANLAGE_V_ZEILEN_JAHR})`, "Betrag (EUR)", "EÜR-Positionen", "Hinweis"]);
+  for (const r of av.rows) {
+    out.push([
+      r.art,
+      r.bereich,
+      r.zeile ?? "",
+      centsToPlain(r.amountCents),
+      r.positionen.join(", "),
+      r.hinweis ?? "",
+    ]);
+  }
+  out.push([]);
+  out.push(["", "Summe der Einnahmen", z?.einnahmen ?? "", centsToPlain(av.einnahmenCents)]);
+  out.push(["", "Summe der Werbungskosten", z?.werbungskosten ?? "", centsToPlain(av.werbungskostenCents)]);
+  out.push(["", "Überschuss", z?.ueberschuss ?? "", centsToPlain(av.ueberschussCents)]);
   return out.map((r) => r.map(cell).join(";")).join("\n");
 }
 

@@ -21,28 +21,51 @@ export const RENTAL_TYPES: RentalType[] = [
   "Eigennutzung",
 ];
 
-// Kategorien fuer Buchungen (Phase 2b). Fest definiert, damit der
-// Jahresabschluss (Phase 4) sauber gruppieren kann.
-export type TransactionCategory =
-  | "Mieteinnahme"
-  | "Nebenkosten-Vorauszahlung"
-  | "Instandhaltung"
-  | "Grundsteuer"
-  | "Versicherung"
-  | "Verwaltung"
-  | "Finanzierungszins"
-  | "Sonstiges";
+// Kategorien fuer Buchungen (A5). Fest definiert, damit Jahresabschluss und
+// Anlage V (src/lib/anlage-v.ts) sauber gruppieren koennen.
+// ENTWURF – vom Steuerberater zu bestaetigen: Zuschnitt orientiert sich an den
+// Bereichen der Anlage V 2025 (ELSTER-Anleitung zur ESt-Erklaerung 2025, siehe anlage-v.ts).
+export const INCOME_CATEGORIES = [
+  "Mieteinnahme", // Mieteinnahmen ohne Umlagen
+  "Nebenkosten-Vorauszahlung", // = Umlagen (inkl. Nachzahlung der Mieter)
+  "Zuschuss", // Zuschuesse aus oeffentlichen Mitteln (Erhaltung, Zinsverbilligung)
+  "Sonstiges", // z.B. einbehaltene Kaution
+] as const;
 
-export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
-  "Mieteinnahme",
-  "Nebenkosten-Vorauszahlung",
-  "Instandhaltung",
+export const EXPENSE_CATEGORIES = [
+  "Finanzierungszins", // Schuldzinsen (ohne Tilgung)
+  "Geldbeschaffungskosten",
+  "Erhaltungsaufwand", // sofort abziehbar (frueher "Instandhaltung")
+  "Betriebskosten (umgelegt)", // auf Mieter umgelegte Neben-/Betriebskosten
+  "Betriebskosten (nicht umgelegt)",
   "Grundsteuer",
   "Versicherung",
   "Verwaltung",
-  "Finanzierungszins",
   "Sonstiges",
+] as const;
+
+export type TransactionCategory =
+  | (typeof INCOME_CATEGORIES)[number]
+  | (typeof EXPENSE_CATEGORIES)[number];
+
+// Alle aktuellen Kategorien (Reihenfolge = Anzeige in der EÜR).
+export const TRANSACTION_CATEGORIES: TransactionCategory[] = [
+  ...new Set<TransactionCategory>([...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES]),
 ];
+
+// Veraltete Kategorien -> neue Kategorie. Bestehende Buchungen in Firestore
+// behalten ihren alten String (keine Migration); EÜR/Anlage V zaehlen sie
+// ueber normalizeCategory unter der neuen Kategorie.
+export const LEGACY_CATEGORIES = {
+  Instandhaltung: "Erhaltungsaufwand",
+} as const satisfies Record<string, TransactionCategory>;
+
+export type LegacyCategory = keyof typeof LEGACY_CATEGORIES;
+
+// Alte Kategorie -> neue; unbekannte Strings bleiben unveraendert.
+export function normalizeCategory(category: string): string {
+  return LEGACY_CATEGORIES[category as LegacyCategory] ?? category;
+}
 
 // Einnahme, Ausgabe oder Sondertilgung. Der Betrag wird immer POSITIV
 // gespeichert; das Vorzeichen ergibt sich aus dem Typ.
@@ -57,7 +80,7 @@ export type Transaction = {
   type: TransactionType;
   amountCents: number; // immer positiv
   date: string; // ISO-Datum "YYYY-MM-DD"
-  category: TransactionCategory;
+  category: TransactionCategory | LegacyCategory; // Altdaten koennen veraltete Kategorien haben
   description?: string;
   createdBy: string;
   createdAt?: Timestamp;

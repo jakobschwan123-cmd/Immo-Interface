@@ -27,10 +27,12 @@ import {
 import { addTransaction } from "@/lib/transactions";
 import { euroInputToCents } from "@/lib/money";
 import {
-  TRANSACTION_CATEGORIES,
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
   type TransactionCategory,
   type TransactionType,
 } from "@/lib/types";
+import { anlageVBereich } from "@/lib/anlage-v";
 import { useAuth } from "@/lib/auth-context";
 
 const TODAY = () => new Date().toISOString().slice(0, 10);
@@ -51,6 +53,19 @@ export function TransactionDialog({
   const [date, setDate] = useState(TODAY());
   const [category, setCategory] = useState<TransactionCategory>("Mieteinnahme");
   const [description, setDescription] = useState("");
+
+  // Auswahl je Art (Einnahme/Ausgabe); veraltete Kategorien sind nicht mehr waehlbar,
+  // bestehende Buchungen behalten sie aber (keine Migration).
+  const options: readonly TransactionCategory[] =
+    type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const bereich = type === "repayment" ? null : anlageVBereich(type, category);
+
+  function changeType(next: TransactionType) {
+    setType(next);
+    const nextOptions: readonly TransactionCategory[] =
+      next === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    if (!nextOptions.includes(category)) setCategory(nextOptions[0]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,7 +117,7 @@ export function TransactionDialog({
                 <Label>Art</Label>
                 <Select
                   value={type}
-                  onValueChange={(v) => setType((v as TransactionType) ?? "income")}
+                  onValueChange={(v) => changeType((v as TransactionType) ?? "income")}
                 >
                   <SelectTrigger className="w-full max-sm:h-10!">
                     <SelectValue />
@@ -150,7 +165,7 @@ export function TransactionDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {TRANSACTION_CATEGORIES.map((c) => (
+                      {options.map((c) => (
                         <SelectItem key={c} value={c}>
                           {c}
                         </SelectItem>
@@ -160,6 +175,12 @@ export function TransactionDialog({
                 </div>
               )}
             </div>
+
+            {bereich && (
+              <p className="-mt-2 text-xs text-muted-foreground">
+                Anlage V: {bereich.label} (Entwurf – vom Steuerberater zu bestätigen)
+              </p>
+            )}
 
             <div className="grid gap-1.5">
               <Label htmlFor="description">Verwendungszweck</Label>
