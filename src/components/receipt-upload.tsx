@@ -5,7 +5,7 @@
 // per onExtracted(extraction, storagePath). Uebernehmen/Speichern entscheidet
 // der Nutzer im Buchungsdialog.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Camera, FileUp, Loader2 } from "lucide-react";
 
@@ -18,6 +18,7 @@ import {
   MAX_PARSE_BYTES,
   MAX_UPLOAD_BYTES,
   RECEIPT_MIME_TYPES,
+  isReceiptPath,
   normalizeReceiptExtraction,
   type ReceiptExtraction,
 } from "@/lib/receipts";
@@ -33,7 +34,7 @@ export async function uploadReceipt(propertyId: string, file: File): Promise<str
 // Beleg aus dem Storage loeschen (best effort: Fehler werden verschluckt, die Datei
 // bleibt dann liegen – kein Absturz, kein Abbruch der eigentlichen Aktion).
 export async function deleteReceiptFile(path: string | undefined): Promise<void> {
-  if (!path) return;
+  if (!path || !isReceiptPath(path)) return;
   try {
     await deleteObject(ref(storage, path));
   } catch (err) {
@@ -44,6 +45,7 @@ export async function deleteReceiptFile(path: string | undefined): Promise<void>
 // Beleg in neuem Tab oeffnen. Der Tab wird synchron geoeffnet (sonst blockt Safari
 // das Popup) und danach auf die Download-URL gesetzt; opener=null ~ noopener.
 export async function openReceipt(path: string): Promise<void> {
+  if (!isReceiptPath(path)) throw new Error("Ungültiger Beleg-Pfad");
   const tab = window.open("about:blank", "_blank");
   if (tab) tab.opener = null;
   try {
@@ -101,6 +103,15 @@ export function ReceiptUpload({
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ReceiptExtraction | null>(null);
+  // Dialog geschlossen oder gespeichert, während Upload/Auslesen lief -> Komponente ist
+  // weg; spätes Ergebnis verwerfen und Datei löschen, statt es der nächsten Buchung anzuhängen.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   async function handleFile(file: File | undefined) {
     if (!file || !user) return;
@@ -130,6 +141,11 @@ export function ReceiptUpload({
       return;
     }
 
+    if (!mountedRef.current) {
+      void deleteReceiptFile(storagePath);
+      return;
+    }
+
     // Ab hier ist der Beleg gespeichert. Scheitert das Auslesen, gibt es trotzdem
     // den Pfad (mit leerem Vorschlag) zurueck -> manuell erfassen.
     setStatus("parsing");
@@ -143,6 +159,10 @@ export function ReceiptUpload({
       setError(
         `${err instanceof Error && err.message !== "toBlob" && !(err instanceof TypeError) ? err.message : "Auslesen fehlgeschlagen."} Beleg ist gespeichert – bitte Werte manuell eintragen.`,
       );
+    }
+    if (!mountedRef.current) {
+      void deleteReceiptFile(storagePath);
+      return;
     }
     setStatus("done");
     onExtracted(extraction, storagePath);

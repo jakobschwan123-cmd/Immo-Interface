@@ -149,13 +149,21 @@ export function matchCategory(suggestion: string | null): TransactionCategory | 
 // Kategorie: nur wenn gueltig; passt sie nicht zur gewaehlten Art, wird die Art
 // gewechselt, aber nur wenn die Kategorie eindeutig Einnahme ODER Ausgabe ist
 // ("Sonstiges" gibt es bei beiden -> Art bleibt, Kategorie wird nur bei passender Art gesetzt).
+// Nur eigene Beleg-Pfade (receipts/<objekt>/<datei>) an Storage geben – keine gs://- oder
+// https://-URLs, keine "..". receiptPath kommt aus Firestore und ist dort nicht validiert.
+export function isReceiptPath(path: string): boolean {
+  return /^receipts\/[^/]+\/[^/]+$/.test(path) && !path.split("/").includes("..");
+}
+
 export function applyExtraction(form: ReceiptForm, extraction: ReceiptExtraction): ReceiptForm {
   const next = { ...form };
   if (extraction.amountCents !== null) next.amount = centsToEuroInput(extraction.amountCents);
   if (extraction.date) next.date = extraction.date;
   if (extraction.description) next.description = extraction.description;
 
-  const category = matchCategory(extraction.categorySuggestion);
+  // Sondertilgung hat keine EÜR-Kategorie: Art nie wechseln, sonst würde z. B. aus der
+  // Bankbestätigung einer Sondertilgung „Finanzierungszins" (Werbungskosten).
+  const category = form.type === "repayment" ? null : matchCategory(extraction.categorySuggestion);
   if (category) {
     const isIncome = (INCOME_CATEGORIES as readonly string[]).includes(category);
     const isExpense = (EXPENSE_CATEGORIES as readonly string[]).includes(category);

@@ -92,4 +92,7 @@ describe("A6: Anlage V (Entwurf)", () => {
     expect(computeAnlageV({ ...p, rentalType: "Ferienvermietung" }, [], 2025).hinweise[0]).toMatch(/Steuerberater klären/);
     expect(computeAnlageV({ ...p, rentalType: "Eigennutzung" }, [], 2025).hinweise[0]).toMatch(/Steuerberater klären/);
   });
+  it("GmbH: Hinweis, dass keine Anlage V gilt", () => {
+    expect(computeAnlageV({ ...p, legalForm: "GmbH" }, [], 2025).hinweise[0]).toMatch(/Keine Anlage V/);
+  });
 });

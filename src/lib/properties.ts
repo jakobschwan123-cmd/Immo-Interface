@@ -7,6 +7,7 @@ import {
   collection,
   addDoc,
   deleteDoc,
+  deleteField,
   updateDoc,
   doc,
   onSnapshot,
@@ -74,7 +75,12 @@ export async function updateProperty(
   id: string,
   patch: Partial<PropertyInput>,
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), patch);
+  // undefined = Feld geleert -> in Firestore löschen. (ignoreUndefinedProperties würde
+  // es sonst überspringen und der alte Wert bliebe stehen.)
+  const data = Object.fromEntries(
+    Object.entries(patch).map(([k, v]) => [k, v === undefined ? deleteField() : v]),
+  );
+  await updateDoc(doc(db, COLLECTION, id), data);
 }
 
 // Immobilie loeschen.

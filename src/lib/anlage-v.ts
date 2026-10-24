@@ -172,6 +172,11 @@ export function computeAnlageV(
 ): AnlageV {
   const euer = computeEuer([property], transactions, year);
   const hinweise: string[] = [];
+  if (property.legalForm === "GmbH") {
+    hinweise.push(
+      "GmbH: Keine Anlage V – Einkünfte sind gewerblich (Bilanz/Körperschaftsteuer). Übersicht nur zur Information.",
+    );
+  }
   if (property.rentalType === "Ferienvermietung") {
     hinweise.push(
       "Ferienvermietung: zusätzlich Anlage V-FeWo (Tage Selbstnutzung/Vermietung/Leerstand). Gesonderte Behandlung mit Steuerberater klären.",

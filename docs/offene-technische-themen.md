@@ -28,6 +28,9 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
   Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
 
+- **Beleg-Links (`getDownloadURL`):** liefern eine dauerhafte URL mit Token – öffnet den Beleg ohne Login,
+  landet im Browserverlauf. Entscheiden: so lassen oder `getBlob` + Object-URL (braucht CORS am Bucket).
+
 ## Produkt-Idee: Vermarktung als App/Website
 Idee: Programm über die Familie hinaus anbieten (erster Interessent: Bekannter mit mehreren Immobilien).
 Voraussetzungen, bevor das realistisch wird: Mandantenfähigkeit (heute ein gemeinsames

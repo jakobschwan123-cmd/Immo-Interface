@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   EMPTY_EXTRACTION,
   applyExtraction,
+  isReceiptPath,
   matchCategory,
   type ReceiptForm,
   normalizeReceiptExtraction,
@@ -134,5 +135,20 @@ describe("applyExtraction", () => {
   it("unbekannte Kategorie wird ignoriert", () => {
     expect(applyExtraction(form, { ...ex, categorySuggestion: "Blumen" })).toEqual(form);
     expect(matchCategory(null)).toBeNull();
+  });
+  it("Sondertilgung bleibt Sondertilgung, auch bei eindeutigem Vorschlag", () => {
+    const r = applyExtraction({ ...form, type: "repayment" }, { ...ex, categorySuggestion: "Finanzierungszins" });
+    expect(r.type).toBe("repayment");
+  });
+});
+
+describe("isReceiptPath", () => {
+  it("nur receipts/<objekt>/<datei>", () => {
+    expect(isReceiptPath("receipts/p1/1700000000-rechnung.pdf")).toBe(true);
+    expect(isReceiptPath("gs://bucket/receipts/p1/x.pdf")).toBe(false);
+    expect(isReceiptPath("https://example.com/x.pdf")).toBe(false);
+    expect(isReceiptPath("receipts/../x")).toBe(false);
+    expect(isReceiptPath("receipts/p1/a/b.pdf")).toBe(false);
+    expect(isReceiptPath("andere/p1/x.pdf")).toBe(false);
   });
 });

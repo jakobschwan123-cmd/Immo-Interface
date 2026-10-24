@@ -25,7 +25,8 @@ Namen mit den Werten aus deiner lokalen `.env.local` anlegen:
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
 - `NEXT_PUBLIC_ALLOWED_EMAILS`
 
-(`GEMINI_API_KEY` wird erst für Phase 3 gebraucht – kann weg bleiben.)
+(Für die Belegauslesung (Phase 3) zusätzlich server-only: `GEMINI_API_KEY`, `ALLOWED_EMAILS`, optional
+`GEMINI_MODEL` – ohne sie antwortet `/api/receipts/parse` mit 503. Siehe [`phase-3-belege.md`](phase-3-belege.md).)
 
 > Tipp: Vercel erlaubt das Einfügen einer kompletten `.env` auf einmal
 > ("Paste .env"). Einfach die relevanten Zeilen aus `.env.local` kopieren.
