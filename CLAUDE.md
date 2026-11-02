@@ -9,7 +9,7 @@ kein Steuerberater-Ersatz. Antworten/Kommentare auf **Deutsch**.
 
 ## Tech-Stack
 Next.js (App Router) + TypeScript · Tailwind + shadcn/ui (Style „base-nova", `@base-ui/react`) ·
-Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-Deploy bei `git push` auf `main`).
+Firebase (Firestore, Auth Google, Storage) · Gemini (serverseitig, Belegauslesung) · Deployment: Vercel (Auto-Deploy bei `git push` auf `main`).
 
 ## Konventionen (unbedingt beachten)
 - **Geld immer als Ganzzahl in Cent.** Umrechnung nur über `src/lib/money.ts`
@@ -29,18 +29,26 @@ Firebase (Firestore, Auth Google, Storage geplant) · Deployment: Vercel (Auto-D
 - `properties` — Stammdaten, Kaufpreis/Grund/Gebäude (AfA), Vermietungstyp (Dauer/Ferien/Eigennutzung),
   m²/Einheiten, Miete (`unitRents`), Kostenpositionen, Kredit (Restschuld berechnet in `src/lib/loan.ts`).
 - `transactions` — income/expense/**repayment** (Sondertilgung: senkt Restschuld, zählt NICHT in EÜR).
-- Logik: `src/lib/finance.ts` (Kennzahlen), `euer.ts` (EÜR, Journal), `csv.ts` (Export), `loan.ts`.
+- Logik: `src/lib/finance.ts` (Kennzahlen, AfA), `euer.ts` (EÜR, Journal), `anlage-v.ts` (Anlage-V-Mapping),
+  `valuation.ts` (Ertragswert), `receipts.ts` (Belegauslesung), `csv.ts` (Export), `loan.ts`.
 
 ## Stand
-- ✅ Phase 0–2b (Setup, Login, Datenmodell, Dashboard, Buchungen), Phase 4 (EÜR), Privacy-Modus, Deployment.
-- ✅ Steuer-Interface A1 (objektbezogene EÜR), A2 (zeitanteilige AfA, `afaForYear`) A4 (Buchungsjournal) und A3 teilweise (`loanInterestForYear`, nur Vergleich) auf `feature/steuer-interface`.
-- ⏸️ Phase 3 (Belege/Gemini/Storage) geparkt. 🟡 Phase 5 (Polish/Rollout) teilweise.
+- ✅ Phase 0–2b, Phase 4 (EÜR), Privacy-Modus, Deployment, Mobile-Optimierung.
+- ✅ Steuer-Interface: A1 objektbezogene EÜR, A2 zeitanteilige AfA (`afaForYear`), A4 Buchungsjournal;
+  A3 (`loanInterestForYear`, nur Vergleich), A5 (Kategorien) und A6 (`anlage-v.ts`, Zeilen nur 2025) als
+  **Entwurf** – Bestätigung durch den Steuerberater steht aus.
+- ✅ Ertragswertverfahren (`valuation.ts`).
+- 🟡 Phase 3 (Belege): Code fertig und im Buchungsdialog integriert (Storage-Upload + Gemini über
+  `/api/receipts/parse`). **Einrichtung offen:** Blaze, Storage, Gemini-Key, Env-Vars in Vercel
+  (Anleitung `docs/phase-3-belege.md`). Ohne Key antwortet die API mit 503.
+- 🟡 Phase 5: Mobile ✅; offen: Edge-Cases, Backup.
 
 ## Wegweiser: Doku
 - [`docs/backlog.md`](docs/backlog.md) — was noch gebaut werden soll, inkl. Status A1–A6
 - [`docs/offene-technische-themen.md`](docs/offene-technische-themen.md) — Entscheidungen, Absicherung, Tests, Fragen an den Steuerberater
 - [`docs/steuer-interface-aufgaben.md`](docs/steuer-interface-aufgaben.md) — Aufgabenplan Steuer-Interface (A1–A6)
 - [`docs/projektplan_immobilien_management.md`](docs/projektplan_immobilien_management.md) — Ursprungsplan, Phasen, Zeitplan
+- [`docs/phase-3-belege.md`](docs/phase-3-belege.md) — Belege (Storage + Gemini): Bausteine, Einrichtung, Integration
 - [`docs/phase-0-setup.md`](docs/phase-0-setup.md), [`docs/deployment.md`](docs/deployment.md), [`docs/master_prompt_ki_assistent.txt`](docs/master_prompt_ki_assistent.txt)
 
 Neue Wünsche → `backlog.md`; Unklarheiten/Entscheidungen → `offene-technische-themen.md`. Nicht hier eintragen.

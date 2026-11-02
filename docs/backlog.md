@@ -8,7 +8,7 @@ Legende: 🔥 hohe Priorität · ⏸️ geparkt/blockiert · ✅ erledigt
 
 ## 🔥 Jahresabschluss & Steuererklärung (Anlage V / Steuerberater)
 Ziel: Steuererklärung (Anlage V) selbst bei ELSTER abgeben können bzw. dem Steuerberater
-einen vollständigen, prüffähigen Vorab-Abschluss übergeben. Branch `feature/steuer-interface`.
+einen vollständigen, prüffähigen Vorab-Abschluss übergeben.
 
 | # | Punkt | Status |
 |---|---|---|

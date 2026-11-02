@@ -27,7 +27,6 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 - **AfA ohne gültiges Kaufdatum:** `afaForYear` setzt dann die volle AfA an – auch für Jahre
   vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
   Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
-
 - **Beleg-Links (`getDownloadURL`):** liefern eine dauerhafte URL mit Token – öffnet den Beleg ohne Login,
   landet im Browserverlauf. Entscheiden: so lassen oder `getBlob` + Object-URL (braucht CORS am Bucket).
 

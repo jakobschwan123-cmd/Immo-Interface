@@ -1,7 +1,7 @@
 # Phase 3: Belege (Storage + Gemini)
 
-Infrastruktur steht auf `feature/belege`: Upload nach Firebase Storage, serverseitiges Auslesen per
-Gemini, eigenständige Komponente. Noch **nicht** im Buchungsdialog eingebaut.
+Upload nach Firebase Storage, serverseitiges Auslesen per Gemini, eingebaut im Buchungsdialog
+(auf `main`). Die **Einrichtung** (siehe unten) ist Voraussetzung, damit es produktiv läuft.
 
 ## Bausteine
 - `storage.rules` – `receipts/{propertyId}/{fileName}`: nur eingeloggt + `email_verified` + E-Mail in
@@ -32,7 +32,7 @@ Gemini, eigenständige Komponente. Noch **nicht** im Buchungsdialog eingebaut.
    - `GEMINI_MODEL` – optional, Standard `gemini-3.8-flash`
    Danach neu deployen. Lokal dieselben Werte in `.env.local`.
 
-## Integration (Stand: umgesetzt, auf `feature/beleg-integration`)
+## Integration (umgesetzt)
 - ✅ `ReceiptUpload` im Buchungsdialog (einklappbar, „Beleg hinzufügen (optional)"). Vorschlag landet per
   `applyExtraction` (`src/lib/receipts.ts`) in den Feldern; Speichern bleibt Klick des Nutzers.
   Regeln: leere Felder überschreiben nichts; Kategorie nur bei gültigem Namen (ohne Groß-/Kleinschreibung,

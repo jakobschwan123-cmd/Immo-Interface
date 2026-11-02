@@ -1,6 +1,6 @@
 # Steuer-Interface – Aufgabenplan
 
-Branch: `feature/steuer-interface`. Quelle: Backlog „Jahresabschluss & Steuererklärung"
+Quelle: Backlog „Jahresabschluss & Steuererklärung"
 in `docs/projektplan_immobilien_management.md`. Ziel: prüffähige Vorbereitung für
 Steuerberater bzw. ELSTER (Anlage V) – **kein Steuerberater-Ersatz**.
 
@@ -49,7 +49,7 @@ Lückenloser Einzelnachweis pro Jahr: Datum, Immobilie, Kategorie, Text, Einnahm
 - UI: Button neben dem EÜR-Export; Druckansicht (`print:`-Styles wie EÜR).
 - Fertig, wenn: Summe der Journalzeilen = EÜR-Einnahmen/-Ausgaben (ohne AfA/Sondertilgung).
 
-### A5 – Kategorien für Anlage V verfeinern  `M` (Voraussetzung für A6)  🟡 ENTWURF auf `feature/anlage-v` (Steuerberater bestätigt noch)
+### A5 – Kategorien für Anlage V verfeinern  `M` (Voraussetzung für A6)  🟡 ENTWURF umgesetzt (Steuerberater bestätigt noch)
 Aktuelle Kategorien lassen sich nicht sauber auf Anlage-V-Zeilen abbilden (z. B. Umlagen,
 Erhaltungsaufwand, Verwaltung getrennt von Sonstigem).
 - Backend: `TRANSACTION_CATEGORIES` in `src/lib/types.ts` erweitern **abwärtskompatibel**
@@ -61,7 +61,7 @@ Erhaltungsaufwand, Verwaltung getrennt von Sonstigem).
   (`Instandhaltung` → `Erhaltungsaufwand`), keine Firestore-Migration. `computeEuer` zählt
   jetzt **alle** Kategorien (unbekannte am Ende) → EÜR und Journal stimmen immer überein.
 
-### A6 – ELSTER-Zeilen-Mapping Anlage V  `L`  🟡 ENTWURF auf `feature/anlage-v` (Steuerberater bestätigt noch)
+### A6 – ELSTER-Zeilen-Mapping Anlage V  `L`  🟡 ENTWURF umgesetzt (Steuerberater bestätigt noch)
 - Umgesetzt: `src/lib/anlage-v.ts` (`computeAnlageV` je Objekt/Jahr auf Basis `computeEuer`),
   `anlageVToCsv`, Ansicht „Anlage V (Entwurf)" im Jahresabschluss. Zuordnung über
   Feldbezeichnungen; Zeilennummern nur für **2025**, verifiziert in der ELSTER-Anleitung zur
