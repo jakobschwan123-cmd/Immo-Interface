@@ -41,6 +41,11 @@ mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in ei
 - Backup – entschieden: wöchentlicher Firestore-Export; Einrichtung offen (braucht Blaze)
 
 ## Später / Ideen
+- **Nachträgliche Herstellungskosten:** AfA hängt heute an genau einem Gebäudewert und Kaufdatum
+  (`afaForYear`). Sanierungen mit Standardhebung oder anschaffungsnahe Herstellungskosten (15 %-Grenze)
+  bräuchten eigene AfA-Posten mit Betrag und Startdatum – auch bei schon abgeschriebenem Gebäude.
+  Dazu passend: Verteilung von Erhaltungsaufwand auf 2–5 Jahre (§ 82b EStDV). Vorher Frage 6 an den
+  Steuerberater klären.
 - **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt. Wird leicht, sobald
   der Gemini-Endpoint aus Phase 3 steht.
 - **Bilder pro Immobilie** – nutzt denselben Storage wie die Belege.
