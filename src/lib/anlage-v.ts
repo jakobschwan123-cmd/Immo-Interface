@@ -15,7 +15,7 @@
 // enthalten und erscheinen daher auch hier nicht.
 
 import { AFA_LABEL, computeEuer, type EuerLine } from "./euer";
-import type { Property, Transaction } from "./types";
+import type { Property, Transaction, TransactionCategory } from "./types";
 
 export const ANLAGE_V_QUELLE =
   "ELSTER, Anleitung zur Einkommensteuererklärung 2025, Abschnitt Anlage V";
@@ -76,11 +76,17 @@ const BEREICHE = {
 
 export type BereichKey = keyof typeof BEREICHE;
 
+// An Mieter erstattetes Nebenkosten-Guthaben: gebucht als Ausgabe (Betraege sind immer
+// positiv), gehoert in der Anlage V aber mit Minuszeichen zu den Umlagen (Zeile 21).
+const NK_ERSTATTUNG: TransactionCategory = "Nebenkosten-Erstattung an Mieter";
+
 // ENTWURF: Kategorie -> Bereich, getrennt nach Einnahme/Ausgabe.
 // Kategorien sind bereits normalisiert (veraltete -> neue, siehe normalizeCategory).
 const INCOME_MAP: Record<string, BereichKey> = {
   Mieteinnahme: "mieteinnahmen",
   "Nebenkosten-Vorauszahlung": "umlagen",
+  "Nebenkosten-Nachzahlung": "umlagen",
+  [NK_ERSTATTUNG]: "umlagen", // als negative Einnahme, siehe computeAnlageV
   Zuschuss: "zuschuesse",
   Sonstiges: "sonstigeEinnahmen",
 };
@@ -92,6 +98,7 @@ const EXPENSE_MAP: Record<string, BereichKey> = {
   Erhaltungsaufwand: "erhaltung",
   "Betriebskosten (umgelegt)": "umgelegt",
   "Betriebskosten (nicht umgelegt)": "nichtUmgelegt",
+  [NK_ERSTATTUNG]: "umlagen", // nur fuer die Anzeige im Buchungsdialog
   Grundsteuer: "nichtUmgelegt",
   Versicherung: "nichtUmgelegt",
   Verwaltung: "nichtUmgelegt",
@@ -182,22 +189,24 @@ export function computeAnlageV(
       "Ferienvermietung: zusätzlich Anlage V-FeWo (Tage Selbstnutzung/Vermietung/Leerstand). Gesonderte Behandlung mit Steuerberater klären.",
     );
   }
-  if (property.rentalType === "Eigennutzung") {
-    hinweise.push(
-      "Eigennutzung: Für ausschließlich selbst genutzte Gebäude ist keine Anlage V auszufüllen. Gesonderte Behandlung mit Steuerberater klären.",
-    );
-  }
+  for (const e of euer.excluded) hinweise.push(`Nicht einbezogen: ${e.reason}.`);
   if (year !== ANLAGE_V_ZEILEN_JAHR) {
     hinweise.push(
       `Zeilennummern nur für ${ANLAGE_V_ZEILEN_JAHR} geprüft – für ${year} bitte im amtlichen Formular nachsehen.`,
     );
   }
+  // Erstattung an Mieter von den Werbungskosten zu den Einnahmen umhaengen (negativ).
+  const refundCents = euer.expenses.find((l) => l.label === NK_ERSTATTUNG)?.amountCents ?? 0;
+  const income = refundCents
+    ? [...euer.income, { label: NK_ERSTATTUNG, amountCents: -refundCents }]
+    : euer.income;
+  const expenses = euer.expenses.filter((l) => l.label !== NK_ERSTATTUNG);
   return {
     year,
     property,
-    rows: [...mapLines(euer.income, "income", year), ...mapLines(euer.expenses, "expense", year)],
-    einnahmenCents: euer.incomeTotalCents,
-    werbungskostenCents: euer.expenseTotalCents,
+    rows: [...mapLines(income, "income", year), ...mapLines(expenses, "expense", year)],
+    einnahmenCents: euer.incomeTotalCents - refundCents,
+    werbungskostenCents: euer.expenseTotalCents - refundCents,
     ueberschussCents: euer.surplusCents,
     hinweise,
   };

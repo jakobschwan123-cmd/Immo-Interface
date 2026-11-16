@@ -64,6 +64,15 @@ export function hasValidPurchaseDate(p: Property): boolean {
   return /^\d{4}-\d{2}/.test(p.purchaseDate ?? "") && m >= 1 && m <= 12;
 }
 
+// Pflichtangaben fuer den Jahresabschluss: fehlt eine, fliesst das Objekt NICHT in
+// EÜR/Anlage V ein (siehe euerExclusionReason in euer.ts). Rueckgabe = Feldnamen fuer die UI.
+export function missingRequiredFields(p: Property): string[] {
+  const missing: string[] = [];
+  if (!hasValidPurchaseDate(p)) missing.push("Kaufdatum");
+  // TODO(human): weitere Pflichtangaben pruefen und mit missing.push("…") melden.
+  return missing;
+}
+
 export function afaForYear(p: Property, year: number): number {
   if (!hasValidPurchaseDate(p)) return 0;
   const annual = Math.round((p.buildingValueCents * p.afaRatePercent) / 100);

@@ -26,12 +26,14 @@ import {
 } from "@/components/ui/select";
 
 import { ReceiptUpload, deleteReceiptFile } from "@/components/receipt-upload";
-import { addTransaction } from "@/lib/transactions";
+import { addTransaction, updateTransaction } from "@/lib/transactions";
 import { applyExtraction, parseIsoDate, type ReceiptExtraction } from "@/lib/receipts";
-import { euroInputToCents } from "@/lib/money";
+import { centsToEuroInput, euroInputToCents } from "@/lib/money";
 import {
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
+  normalizeCategory,
+  type Transaction,
   type TransactionCategory,
   type TransactionType,
 } from "@/lib/types";
@@ -49,20 +51,30 @@ export function TransactionDialog({
   open,
   onOpenChange,
   propertyId,
+  transaction,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   propertyId: string;
+  // Gesetzt = bestehende Buchung bearbeiten. Startwerte kommen per `key` am Dialog
+  // (Aufrufer setzt key = Buchungs-ID), kein Effekt noetig.
+  transaction?: Transaction | null;
 }) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
-  const [type, setType] = useState<TransactionType>("income");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(TODAY());
-  const [category, setCategory] = useState<TransactionCategory>("Mieteinnahme");
-  const [description, setDescription] = useState("");
+  const [type, setType] = useState<TransactionType>(transaction?.type ?? "income");
+  const [amount, setAmount] = useState(
+    transaction ? centsToEuroInput(transaction.amountCents) : "",
+  );
+  const [date, setDate] = useState(transaction?.date ?? TODAY());
+  const [category, setCategory] = useState<TransactionCategory>(
+    transaction ? (normalizeCategory(transaction.category) as TransactionCategory) : "Mieteinnahme",
+  );
+  const [description, setDescription] = useState(transaction?.description ?? "");
   const [showReceipt, setShowReceipt] = useState(false);
-  // Storage-Pfad des hochgeladenen Belegs; wird erst mit "Speichern" Teil der Buchung.
+  // Storage-Pfad eines NEU hochgeladenen Belegs; wird erst mit "Speichern" Teil der Buchung.
+  // Der bereits gespeicherte Beleg (transaction.receiptPath) steht bewusst nicht hier,
+  // sonst wuerde ihn "Abbrechen" loeschen.
   const [receiptPath, setReceiptPath] = useState<string | null>(null);
 
   // Auswahl je Art (Einnahme/Ausgabe); veraltete Kategorien sind nicht mehr waehlbar,
@@ -117,17 +129,22 @@ export function TransactionDialog({
     }
     setSaving(true);
     try {
-      await addTransaction({
-        propertyId,
+      const data = {
         type,
         amountCents,
         date: isoDate,
         // Sondertilgung braucht keine EÜR-Kategorie.
-        category: type === "repayment" ? "Sonstiges" : category,
+        category: type === "repayment" ? ("Sonstiges" as const) : category,
         description: description.trim() || undefined,
-        receiptPath: receiptPath ?? undefined,
-        createdBy: user.uid,
-      });
+        receiptPath: receiptPath ?? transaction?.receiptPath,
+      };
+      if (transaction) {
+        await updateTransaction(transaction.id, data);
+        // Neuer Beleg ersetzt den alten -> alte Datei nicht verwaisen lassen.
+        if (receiptPath) void deleteReceiptFile(transaction.receiptPath);
+      } else {
+        await addTransaction({ propertyId, ...data, createdBy: user.uid });
+      }
       toast.success("Buchung gespeichert.");
       // Felder fuer die naechste Buchung teils zuruecksetzen.
       setAmount("");
@@ -149,7 +166,7 @@ export function TransactionDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Neue Buchung</DialogTitle>
+            <DialogTitle>{transaction ? "Buchung bearbeiten" : "Neue Buchung"}</DialogTitle>
             <DialogDescription>
               Einnahme oder Ausgabe für diese Immobilie erfassen.
             </DialogDescription>
@@ -165,7 +182,8 @@ export function TransactionDialog({
                 className="max-sm:h-10"
                 onClick={() => setShowReceipt(true)}
               >
-                <Paperclip /> Beleg hinzufügen (optional)
+                <Paperclip />{" "}
+                {transaction?.receiptPath ? "Beleg ersetzen" : "Beleg hinzufügen (optional)"}
               </Button>
             )}
 

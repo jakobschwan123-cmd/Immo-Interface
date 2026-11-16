@@ -27,7 +27,8 @@ export const RENTAL_TYPES: RentalType[] = [
 // Bereichen der Anlage V 2025 (ELSTER-Anleitung zur ESt-Erklaerung 2025, siehe anlage-v.ts).
 export const INCOME_CATEGORIES = [
   "Mieteinnahme", // Mieteinnahmen ohne Umlagen
-  "Nebenkosten-Vorauszahlung", // = Umlagen (inkl. Nachzahlung der Mieter)
+  "Nebenkosten-Vorauszahlung", // = laufende Umlagen
+  "Nebenkosten-Nachzahlung", // Nachzahlung der Mieter aus der Abrechnung
   "Zuschuss", // Zuschuesse aus oeffentlichen Mitteln (Erhaltung, Zinsverbilligung)
   "Sonstiges", // z.B. einbehaltene Kaution
 ] as const;
@@ -38,6 +39,9 @@ export const EXPENSE_CATEGORIES = [
   "Erhaltungsaufwand", // sofort abziehbar (frueher "Instandhaltung")
   "Betriebskosten (umgelegt)", // auf Mieter umgelegte Neben-/Betriebskosten
   "Betriebskosten (nicht umgelegt)",
+  // Guthaben aus der Abrechnung, an Mieter ausgezahlt. In der EÜR eine Ausgabe, in der
+  // Anlage V eine negative Umlage (siehe NK_ERSTATTUNG in anlage-v.ts).
+  "Nebenkosten-Erstattung an Mieter",
   "Grundsteuer",
   "Versicherung",
   "Verwaltung",

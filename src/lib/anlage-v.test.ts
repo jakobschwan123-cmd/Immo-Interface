@@ -90,7 +90,19 @@ describe("A6: Anlage V (Entwurf)", () => {
     const later = computeAnlageV(p, [tx("income", 100, "Mieteinnahme")].map((t) => ({ ...t, date: "2026-01-01" })), 2026);
     expect(later.rows.every((r) => r.zeile === undefined)).toBe(true);
     expect(computeAnlageV({ ...p, rentalType: "Ferienvermietung" }, [], 2025).hinweise[0]).toMatch(/Steuerberater klären/);
-    expect(computeAnlageV({ ...p, rentalType: "Eigennutzung" }, [], 2025).hinweise[0]).toMatch(/Steuerberater klären/);
+    const selfUse = computeAnlageV({ ...p, rentalType: "Eigennutzung" }, txs, 2025);
+    expect(selfUse.hinweise[0]).toMatch(/keine Anlage V/);
+    expect(selfUse.rows).toEqual([]);
+  });
+  it("Erstattung an Mieter mindert die Umlagen (negativ), nicht die Werbungskosten", () => {
+    const refund = tx("expense", 20_000, "Nebenkosten-Erstattung an Mieter");
+    const withRefund = computeAnlageV(p, [...txs, refund], 2025);
+    const umlagen = withRefund.rows.find((r) => r.bereich.startsWith("Einnahmen aus umgelegten"));
+    expect(umlagen?.amountCents).toBe(180_000 - 20_000);
+    expect(withRefund.einnahmenCents).toBe(av.einnahmenCents - 20_000);
+    expect(withRefund.werbungskostenCents).toBe(av.werbungskostenCents);
+    expect(withRefund.ueberschussCents).toBe(av.ueberschussCents - 20_000);
+    expect(withRefund.rows.some((r) => r.art === "Werbungskosten" && r.positionen.includes(refund.category))).toBe(false);
   });
   it("GmbH: Hinweis, dass keine Anlage V gilt", () => {
     expect(computeAnlageV({ ...p, legalForm: "GmbH" }, [], 2025).hinweise[0]).toMatch(/Keine Anlage V/);

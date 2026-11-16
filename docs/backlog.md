@@ -51,6 +51,7 @@ mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in ei
 - **Bilder pro Immobilie** – nutzt denselben Storage wie die Belege.
 - **Ertragswert: weitere Pauschalen** nach Anlage 3 ImmoWertV (Verwaltung, Instandhaltung), falls nicht
   schon im Hausgeld enthalten.
+- **Verkaufsdatum:** AfA läuft nach einem Verkauf weiter; kein Verkauf geplant, daher nachrangig.
 - **Onboarding der Eltern.**
 - **Produkt / Vermarktung:** App/Website auch für andere anbieten. Vorbedingungen in
   [`offene-technische-themen.md`](offene-technische-themen.md) (Abschnitt „Produkt-Idee").

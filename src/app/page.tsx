@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { subscribeProperties, deleteProperty } from "@/lib/properties";
 import { subscribeEntities } from "@/lib/entities";
-import { subscribeAllTransactions } from "@/lib/transactions";
+import { subscribeAllTransactions, deleteTransaction } from "@/lib/transactions";
+import { deleteReceiptFile } from "@/components/receipt-upload";
 import { calculateKpis, sumKpis, effectiveMonthlyRentCents } from "@/lib/finance";
 import { computeLoan } from "@/lib/loan";
 import { formatEuro, formatPercent } from "@/lib/money";
@@ -107,6 +108,11 @@ function PropertyTable({
                   <Link href={`/immobilie/${p.id}`} className="hover:underline">
                     {p.name}
                   </Link>
+                  {p.rentalType === "Eigennutzung" && (
+                    <Badge variant="outline" className="ml-2">
+                      Eigennutzung
+                    </Badge>
+                  )}
                   {p.address && (
                     <span className="block text-xs text-muted-foreground">
                       {p.address}
@@ -243,8 +249,20 @@ export default function Dashboard() {
   }, [user]);
 
   async function handleDelete(p: Property) {
-    if (!confirm(`„${p.name}" wirklich löschen?`)) return;
+    const txs = transactions.filter((t) => t.propertyId === p.id);
+    const extra = txs.length
+      ? ` Dabei werden auch ${txs.length} Buchung(en) samt Belegen endgültig gelöscht.`
+      : "";
+    if (!confirm(`„${p.name}" wirklich löschen?${extra}`)) return;
     try {
+      // Erst Buchungen und Belege, dann das Objekt: bricht es ab, ist das Objekt noch da
+      // und das Löschen lässt sich wiederholen (keine unsichtbaren Reste).
+      await Promise.all(
+        txs.map(async (t) => {
+          await deleteTransaction(t.id);
+          await deleteReceiptFile(t.receiptPath);
+        }),
+      );
       await deleteProperty(p.id);
       toast.success("Immobilie gelöscht.");
     } catch (err) {

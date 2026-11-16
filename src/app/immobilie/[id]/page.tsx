@@ -69,6 +69,7 @@ export default function PropertyDetail() {
   const [dataLoading, setDataLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [txOpen, setTxOpen] = useState(false);
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -536,7 +537,19 @@ export default function PropertyDetail() {
                           >
                             {formatEuro(signed)}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="max-sm:size-10"
+                              onClick={() => {
+                                setEditingTx(t);
+                                setTxOpen(true);
+                              }}
+                              aria-label="Bearbeiten"
+                            >
+                              <Pencil className="text-muted-foreground" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -559,9 +572,14 @@ export default function PropertyDetail() {
       </div>
 
       <TransactionDialog
+        key={editingTx?.id ?? "new"}
         open={txOpen}
-        onOpenChange={setTxOpen}
+        onOpenChange={(next) => {
+          setTxOpen(next);
+          if (!next) setEditingTx(null);
+        }}
         propertyId={property.id}
+        transaction={editingTx}
       />
 
       <PropertyDialog

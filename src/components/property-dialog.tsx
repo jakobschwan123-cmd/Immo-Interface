@@ -31,6 +31,7 @@ import {
 
 import { addProperty, updateProperty } from "@/lib/properties";
 import { euroInputToCents, centsToEuroInput } from "@/lib/money";
+import { missingRequiredFields } from "@/lib/finance";
 import {
   LEGAL_FORMS,
   RENTAL_TYPES,
@@ -307,6 +308,12 @@ export function PropertyDialog({
       } else {
         await addProperty({ ...data, createdBy: user.uid });
         toast.success("Immobilie gespeichert.");
+      }
+      const missing = missingRequiredFields(data as Property);
+      if (missing.length > 0 && data.rentalType !== "Eigennutzung") {
+        toast.warning(
+          `Pflichtangaben fehlen (${missing.join(", ")}) – das Objekt fließt bis dahin nicht in den Jahresabschluss ein.`,
+        );
       }
       onOpenChange(false);
     } catch (err) {

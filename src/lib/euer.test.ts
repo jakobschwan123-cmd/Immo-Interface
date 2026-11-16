@@ -46,12 +46,28 @@ describe("A2: afaForYear (§ 7 Abs. 4 EStG)", () => {
     expect(afaForYear({ ...p, purchaseDate: "2025-01-31" }, 2025)).toBe(200_000);
     expect(afaForYear({ ...p, purchaseDate: "2025-12-01" }, 2025)).toBe(16_667);
   });
-  it("ungültiges Datum -> 0 und Warnung in der EÜR", () => {
+  it("ungültiges Datum -> AfA 0", () => {
     for (const purchaseDate of ["", "abc", "2025-7-15", "2025-13-01"]) {
-      const bad = { ...p, purchaseDate };
-      expect(afaForYear(bad, 2025)).toBe(0);
-      expect(computeEuer([bad, p], [], 2025).afaMissingDate).toEqual([bad.name]);
+      expect(afaForYear({ ...p, purchaseDate }, 2025)).toBe(0);
     }
+  });
+});
+
+describe("Ausschluss aus EÜR und Journal", () => {
+  const ok = prop("ok", 10_000_000);
+  const selfUse = { ...prop("eigen", 10_000_000), rentalType: "Eigennutzung" as const };
+  const noDate = { ...prop("ohneDatum", 10_000_000), purchaseDate: "" };
+  const all = [ok, selfUse, noDate];
+  const bookings = all.map((q, i) => tx(String(i), q.id, "expense", 1_000, "2025-03-01"));
+
+  it("Eigennutzung und fehlende Pflichtangaben zählen nicht – weder Buchungen noch AfA", () => {
+    const euer = computeEuer(all, bookings, 2025);
+    expect({ ...euer, excluded: [] }).toEqual(computeEuer([ok], bookings, 2025));
+    expect(euer.excluded.map((e) => e.name)).toEqual([selfUse.name, noDate.name]);
+    expect(euer.excluded[1].reason).toContain("Kaufdatum");
+  });
+  it("Journal enthält dieselben Objekte wie die EÜR", () => {
+    expect(journalRows(all, bookings, 2025).map((r) => r.id)).toEqual(["0"]);
   });
 });
 

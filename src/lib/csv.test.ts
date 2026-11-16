@@ -34,9 +34,10 @@ describe("CSV: Formel-Injection", () => {
     const line = journalToCsv([row], 2025, "T").split("\n")[3];
     expect(line).toBe("02.01.2025;Haus;Instandhaltung;'=HYPERLINK(1);Ausgabe;-123,45");
   });
-  it("EÜR: Hinweis auf fehlende AfA nur, wenn Objekte betroffen sind", () => {
+  it("EÜR: nennt nicht einbezogene Objekte mit Grund", () => {
     const euer = { year: 2025, income: [], incomeTotalCents: 0, expenses: [], expenseTotalCents: 0, surplusCents: 0, loanInterestCheck: null };
-    expect(euerToCsv({ ...euer, afaMissingDate: ["Haus A"] }, "T")).toContain("keine AfA angesetzt für Haus A");
-    expect(euerToCsv({ ...euer, afaMissingDate: [] }, "T")).not.toContain("AfA");
+    const excluded = [{ name: "Haus A", reason: "Eigennutzung" }];
+    expect(euerToCsv({ ...euer, excluded }, "T")).toContain("Nicht einbezogen: Haus A (Eigennutzung)");
+    expect(euerToCsv({ ...euer, excluded: [] }, "T")).not.toContain("Nicht einbezogen");
   });
 });

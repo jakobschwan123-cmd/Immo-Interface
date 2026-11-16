@@ -119,11 +119,15 @@ function EuerCard({
           </div>
         </div>
 
-        {euer.afaMissingDate.length > 0 && (
-          <p className="rounded-lg bg-muted p-3 text-xs text-amber-600">
-            Keine AfA angesetzt für {euer.afaMissingDate.join(", ")}: Kaufdatum fehlt. Bitte in
-            den Stammdaten nachtragen.
-          </p>
+        {euer.excluded.length > 0 && (
+          <div className="rounded-lg bg-muted p-3 text-xs text-amber-600">
+            <p className="font-medium">Nicht einbezogen (weder Buchungen noch AfA)</p>
+            {euer.excluded.map((e) => (
+              <p key={e.name} className="mt-1">
+                {e.name}: {e.reason}
+              </p>
+            ))}
+          </div>
         )}
 
         {/* Plausibilitaet Darlehenszins (nur Hinweis, nicht in den Summen) */}

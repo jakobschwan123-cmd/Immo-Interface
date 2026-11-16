@@ -28,24 +28,22 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 - **Tests:** ✅ Vitest eingerichtet (`npm test`). Abgedeckt: `money.ts`, EÜR-Summen (A1),
   Journal (A4), `loan.ts`, `finance.ts`. Neue Rechenlogik (A2, A3) immer mit Test.
 
-## Edge-Cases aus der Durchsicht 11/2026 (zu entscheiden)
-- **Eigennutzung in der EÜR:** `computeEuer` setzt AfA und Ausgaben auch für Objekte mit
-  `rentalType` „Eigennutzung" an und mindert so das Ergebnis des Rechtsträgers. Laut ELSTER-Anleitung
-  sind Aufwendungen für eigengenutzte Wohnungen keine Werbungskosten. Vorschlag: aus EÜR/Anlage V
-  ausschließen und Hinweis zeigen.
-- **Immobilie löschen:** `deleteProperty` löscht nur das Objekt; Buchungen und Belege bleiben unsichtbar
-  in Firestore/Storage liegen. Entscheiden: mitlöschen (mit Anzahl in der Rückfrage) oder Löschen
-  sperren, solange Buchungen existieren.
-- **Erstattung an Mieter (Anlage V Z. 21, negativ):** nicht buchbar – Beträge sind immer positiv, eine
-  Ausgabe landet im falschen Bereich.
-- **Hausgeld/Erhaltungsrücklage:** Rücklage ist erst bei Verwendung abziehbar; die App kann den Anteil
-  nicht abtrennen (wer das Hausgeld komplett bucht, zieht zu viel ab).
+## Edge-Cases aus der Durchsicht 11/2026
+Entschieden und umgesetzt (11/2026):
+- **Eigennutzung und fehlende Pflichtangaben:** solche Objekte fließen nicht in EÜR, Journal und
+  Anlage V ein (`euerExclusionReason` in `euer.ts`, Pflichtfelder in `missingRequiredFields` in
+  `finance.ts`); der Jahresabschluss nennt sie mit Grund. Dashboard-Kennzahlen bleiben unverändert.
+- **Immobilie löschen:** löscht Buchungen und Belege mit (Rückfrage nennt die Anzahl).
+- **Nebenkosten-Abrechnung:** neue Kategorien „Nebenkosten-Nachzahlung" (Einnahme) und
+  „Nebenkosten-Erstattung an Mieter" (Ausgabe; in der Anlage V negative Umlage, Z. 21).
+- **Buchungen bearbeitbar** (inkl. Beleg ersetzen).
+- **Hausgeld/Erhaltungsrücklage:** bewusst ignoriert (Entscheidung Jakob).
+- **Kredit:** unvollständige Kreditdaten und Sondertilgungen ohne Kredit werden weiter ignoriert (ok).
+
+Offen:
 - **Grundsteuer/Versicherung:** Anlage V kennt nur „umgelegt" (Z. 73–75) und „nicht umgelegt" (Z. 76–78).
-  Die App ordnet beide Kategorien fest „nicht umgelegt" zu; bei Dauervermietung werden sie meist umgelegt.
-- **Kein Verkaufsdatum:** AfA läuft nach einem Verkauf weiter.
-- **Buchungen nicht bearbeitbar:** Korrektur nur per Löschen und Neuanlegen (Beleg wird mitgelöscht).
-- **Kredit:** unvollständige Kreditdaten und Sondertilgungen vor Kreditbeginn bzw. ohne Kredit werden
-  stillschweigend ignoriert.
+  Die App ordnet beide fest „nicht umgelegt" zu. Vorschlag: Schalter je Objekt „Grundsteuer und
+  Versicherung werden umgelegt", Vorgabe aus dem Vermietungstyp (Dauervermietung = ja).
 
 ## Produkt-Idee: Vermarktung als App/Website
 Idee: Programm über die Familie hinaus anbieten (erster Interessent: Bekannter mit mehreren Immobilien).

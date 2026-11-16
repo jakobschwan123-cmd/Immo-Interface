@@ -4,6 +4,8 @@ import {
   collection,
   addDoc,
   deleteDoc,
+  deleteField,
+  updateDoc,
   doc,
   onSnapshot,
   query,
@@ -63,6 +65,17 @@ export async function addTransaction(input: TransactionInput): Promise<string> {
     createdAt: serverTimestamp(),
   });
   return ref.id;
+}
+
+// Buchung aendern. undefined = Feld geleert -> in Firestore loeschen (wie updateProperty).
+export async function updateTransaction(
+  id: string,
+  patch: Partial<TransactionInput>,
+): Promise<void> {
+  const data = Object.fromEntries(
+    Object.entries(patch).map(([k, v]) => [k, v === undefined ? deleteField() : v]),
+  );
+  await updateDoc(doc(db, COLLECTION, id), data);
 }
 
 export async function deleteTransaction(id: string): Promise<void> {

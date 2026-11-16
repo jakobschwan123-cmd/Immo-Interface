@@ -7,7 +7,7 @@
 // Hinweis: vereinfachte Darstellung als Vorbereitung fuer den Steuerberater,
 // KEIN Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau (Kaufmonat voll) angesetzt.
 
-import { afaForYear, hasValidPurchaseDate } from "./finance";
+import { afaForYear, missingRequiredFields } from "./finance";
 import { loanInterestForYear } from "./loan";
 import { normalizeCategory, TRANSACTION_CATEGORIES } from "./types";
 import type { Property, Transaction } from "./types";
@@ -21,9 +21,9 @@ export type Euer = {
   expenses: EuerLine[]; // Ausgaben je Kategorie + AfA (nur > 0)
   expenseTotalCents: number;
   surplusCents: number; // Ueberschuss (+) oder Verlust (-)
-  // Namen der Objekte mit Gebaeudewert, aber ohne gueltiges Kaufdatum: fuer sie ist
-  // KEINE AfA angesetzt (Beginn unbekannt). Die UI warnt.
-  afaMissingDate: string[];
+  // Objekte, die NICHT eingeflossen sind (Eigennutzung, fehlende Pflichtangaben) – weder
+  // Buchungen noch AfA. Die UI zeigt sie mit Grund an.
+  excluded: { name: string; reason: string }[];
   // Plausibilitaetsvergleich Darlehenszins: berechnet (Annuitaetenplan) vs. gebucht
   // (Kategorie "Finanzierungszins"). null, wenn kein Objekt einen Kredit hat.
   // Fliesst NICHT in die EÜR-Summen ein (kein Doppelansatz).
@@ -61,12 +61,25 @@ function inYear(t: Transaction, year: number): boolean {
   return t.date.startsWith(String(year));
 }
 
+// Warum ein Objekt NICHT in EÜR/Journal/Anlage V einfliesst (null = fliesst ein).
+// Eigengenutzte Objekte: Aufwendungen sind keine Werbungskosten (ELSTER-Anleitung Anlage V).
+export function euerExclusionReason(p: Property): string | null {
+  if (p.rentalType === "Eigennutzung") return "Eigennutzung – nicht absetzbar, keine Anlage V";
+  const missing = missingRequiredFields(p);
+  return missing.length > 0 ? `Pflichtangaben fehlen: ${missing.join(", ")}` : null;
+}
+
 // EÜR fuer eine Menge von Immobilien (z.B. eines Rechtsträgers) im Jahr `year`.
 export function computeEuer(
-  properties: Property[],
+  allProperties: Property[],
   transactions: Transaction[],
   year: number,
 ): Euer {
+  const excluded = allProperties.flatMap((p) => {
+    const reason = euerExclusionReason(p);
+    return reason ? [{ name: p.name, reason }] : [];
+  });
+  const properties = allProperties.filter((p) => !euerExclusionReason(p));
   const propertyIds = new Set(properties.map((p) => p.id));
   const yearTx = transactions.filter(
     (t) => propertyIds.has(t.propertyId) && inYear(t, year),
@@ -120,9 +133,7 @@ export function computeEuer(
     expenses,
     expenseTotalCents,
     surplusCents: incomeTotalCents - expenseTotalCents,
-    afaMissingDate: properties
-      .filter((p) => p.buildingValueCents > 0 && p.afaRatePercent > 0 && !hasValidPurchaseDate(p))
-      .map((p) => p.name),
+    excluded,
     loanInterestCheck: hasLoan
       ? { calculatedCents, bookedCents, diffCents: calculatedCents - bookedCents }
       : null,
@@ -160,7 +171,10 @@ export function journalRows(
   transactions: Transaction[],
   year: number,
 ): JournalRow[] {
-  const names = new Map(properties.map((p) => [p.id, p.name]));
+  // Gleiche Objekte wie in computeEuer, damit Journal und EÜR uebereinstimmen.
+  const names = new Map(
+    properties.filter((p) => !euerExclusionReason(p)).map((p) => [p.id, p.name]),
+  );
   return transactions
     .filter((t) => names.has(t.propertyId) && inYear(t, year))
     .map((t) => ({
