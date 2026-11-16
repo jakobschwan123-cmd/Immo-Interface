@@ -69,7 +69,9 @@ export function hasValidPurchaseDate(p: Property): boolean {
 export function missingRequiredFields(p: Property): string[] {
   const missing: string[] = [];
   if (!hasValidPurchaseDate(p)) missing.push("Kaufdatum");
-  // TODO(human): weitere Pflichtangaben pruefen und mit missing.push("…") melden.
+  // Ohne diese beiden waere die AfA stillschweigend 0. !(x > 0) faengt auch undefined/NaN.
+  if (!(p.buildingValueCents > 0)) missing.push("Gebäudeanteil");
+  if (!(p.afaRatePercent > 0)) missing.push("AfA-Satz");
   return missing;
 }
 

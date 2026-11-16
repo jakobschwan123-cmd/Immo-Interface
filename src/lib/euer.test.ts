@@ -69,6 +69,15 @@ describe("Ausschluss aus EÜR und Journal", () => {
   it("Journal enthält dieselben Objekte wie die EÜR", () => {
     expect(journalRows(all, bookings, 2025).map((r) => r.id)).toEqual(["0"]);
   });
+  it("Gebäudeanteil 0 oder AfA-Satz 0 schließen das Objekt aus", () => {
+    const noBuilding = { ...ok, id: "g", buildingValueCents: 0 };
+    const noRate = { ...ok, id: "r", afaRatePercent: 0 };
+    const euer = computeEuer([noBuilding, noRate], [], 2025);
+    expect(euer.excluded.map((e) => e.reason)).toEqual([
+      "Pflichtangaben fehlen: Gebäudeanteil",
+      "Pflichtangaben fehlen: AfA-Satz",
+    ]);
+  });
 });
 
 const props = [prop("a", 10_000_000), prop("b", 5_000_000)];
