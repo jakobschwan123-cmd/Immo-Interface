@@ -28,6 +28,25 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
 - **Tests:** ✅ Vitest eingerichtet (`npm test`). Abgedeckt: `money.ts`, EÜR-Summen (A1),
   Journal (A4), `loan.ts`, `finance.ts`. Neue Rechenlogik (A2, A3) immer mit Test.
 
+## Edge-Cases aus der Durchsicht 11/2026 (zu entscheiden)
+- **Eigennutzung in der EÜR:** `computeEuer` setzt AfA und Ausgaben auch für Objekte mit
+  `rentalType` „Eigennutzung" an und mindert so das Ergebnis des Rechtsträgers. Laut ELSTER-Anleitung
+  sind Aufwendungen für eigengenutzte Wohnungen keine Werbungskosten. Vorschlag: aus EÜR/Anlage V
+  ausschließen und Hinweis zeigen.
+- **Immobilie löschen:** `deleteProperty` löscht nur das Objekt; Buchungen und Belege bleiben unsichtbar
+  in Firestore/Storage liegen. Entscheiden: mitlöschen (mit Anzahl in der Rückfrage) oder Löschen
+  sperren, solange Buchungen existieren.
+- **Erstattung an Mieter (Anlage V Z. 21, negativ):** nicht buchbar – Beträge sind immer positiv, eine
+  Ausgabe landet im falschen Bereich.
+- **Hausgeld/Erhaltungsrücklage:** Rücklage ist erst bei Verwendung abziehbar; die App kann den Anteil
+  nicht abtrennen (wer das Hausgeld komplett bucht, zieht zu viel ab).
+- **Grundsteuer/Versicherung:** Anlage V kennt nur „umgelegt" (Z. 73–75) und „nicht umgelegt" (Z. 76–78).
+  Die App ordnet beide Kategorien fest „nicht umgelegt" zu; bei Dauervermietung werden sie meist umgelegt.
+- **Kein Verkaufsdatum:** AfA läuft nach einem Verkauf weiter.
+- **Buchungen nicht bearbeitbar:** Korrektur nur per Löschen und Neuanlegen (Beleg wird mitgelöscht).
+- **Kredit:** unvollständige Kreditdaten und Sondertilgungen vor Kreditbeginn bzw. ohne Kredit werden
+  stillschweigend ignoriert.
+
 ## Produkt-Idee: Vermarktung als App/Website
 Idee: Programm über die Familie hinaus anbieten (erster Interessent: Bekannter mit mehreren Immobilien).
 Voraussetzungen, bevor das realistisch wird: Mandantenfähigkeit (heute ein gemeinsames

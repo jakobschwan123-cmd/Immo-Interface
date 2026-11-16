@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cell, journalToCsv } from "./csv";
+import { cell, euerToCsv, journalToCsv } from "./csv";
 import type { JournalRow } from "./euer";
 
 describe("CSV: Formel-Injection", () => {
@@ -33,5 +33,10 @@ describe("CSV: Formel-Injection", () => {
     } as JournalRow;
     const line = journalToCsv([row], 2025, "T").split("\n")[3];
     expect(line).toBe("02.01.2025;Haus;Instandhaltung;'=HYPERLINK(1);Ausgabe;-123,45");
+  });
+  it("EÜR: Hinweis auf fehlende AfA nur, wenn Objekte betroffen sind", () => {
+    const euer = { year: 2025, income: [], incomeTotalCents: 0, expenses: [], expenseTotalCents: 0, surplusCents: 0, loanInterestCheck: null };
+    expect(euerToCsv({ ...euer, afaMissingDate: ["Haus A"] }, "T")).toContain("keine AfA angesetzt für Haus A");
+    expect(euerToCsv({ ...euer, afaMissingDate: [] }, "T")).not.toContain("AfA");
   });
 });

@@ -16,7 +16,7 @@ einen vollständigen, prüffähigen Vorab-Abschluss übergeben.
 | A4 | Buchungsjournal (Anzeige, Druck, CSV) | ✅ |
 | A2 | Zeitanteilige AfA im Kaufjahr (§ 7 Abs. 4 EStG, monatsgenau) | ✅ mit Annahme „Kaufmonat voll"; Bestätigung Steuerberater offen |
 | A3 | Schuldzinsen vs. Tilgung (berechneter Zins aus dem Annuitätenplan) | 🟡 Berechnung + Vergleichsanzeige fertig; offen: ersetzt der berechnete Zins die Buchungen? |
-| A5 | Kategorien für Anlage V verfeinern (abwärtskompatibel) | 🟡 Entwurf fertig (`LEGACY_CATEGORIES`, keine Migration); Bestätigung Steuerberater offen |
+| A5 | Kategorien für Anlage V verfeinern (abwärtskompatibel) | 🟡 Entwurf fertig (`LEGACY_CATEGORIES`, keine Migration); Bereiche und Zeilen 11/2026 gegen die ELSTER-Anleitung 2025 geprüft, stimmen; offen: Grundsteuer/Versicherung umgelegt?, Erhaltungsrücklage, Erstattung an Mieter |
 | A6 | ELSTER-Zeilen-Mapping Anlage V | 🟡 Entwurf fertig (`anlage-v.ts`, Zeilen nur für 2025 aus der ELSTER-Anleitung); Bestätigung Steuerberater offen |
 
 Zeilennummern der Anlage V ändern sich mit dem Formularjahrgang; hinterlegt ist nur 2025 (Quelle im Code).

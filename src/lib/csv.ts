@@ -35,6 +35,10 @@ export function euerToCsv(euer: Euer, title: string): string {
   rows.push(["Summe Ausgaben", centsToPlain(euer.expenseTotalCents)]);
   rows.push([]);
   rows.push(["Überschuss / Verlust", centsToPlain(euer.surplusCents)]);
+  if (euer.afaMissingDate.length > 0) {
+    rows.push([]);
+    rows.push([`Hinweis: keine AfA angesetzt für ${euer.afaMissingDate.join(", ")} (Kaufdatum fehlt)`]);
+  }
 
   return rows.map((r) => r.map(cell).join(";")).join("\n");
 }

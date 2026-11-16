@@ -270,15 +270,14 @@ export function PropertyDialog({
         ? euroInputToCents(form.costHausgeld)
         : undefined,
       hausgeldOwnerPercent: form.costHausgeld
-        ? Number(form.hausgeldOwnerPct.replace(",", ".")) || 50
+        ? (optionalNumber(form.hausgeldOwnerPct) ?? 50) // 0 % bleibt 0
         : undefined,
       costOtherCents: form.costOther ? euroInputToCents(form.costOther) : undefined,
       loanOriginalCents: form.loanOriginal
         ? euroInputToCents(form.loanOriginal)
         : undefined,
-      loanInterestRatePercent: form.loanRate
-        ? Number(form.loanRate.replace(",", ".")) || undefined
-        : undefined,
+      // 0 % bleibt erhalten (zinsloses Darlehen, z. B. von der Familie).
+      loanInterestRatePercent: optionalNumber(form.loanRate),
       loanMonthlyPaymentCents: form.loanMonthly
         ? euroInputToCents(form.loanMonthly)
         : undefined,
@@ -291,6 +290,14 @@ export function PropertyDialog({
         capRatePercent != null ? Math.round(capRatePercent * 100) : undefined,
       remainingLifeYears: optionalNumber(form.remainingLife),
     };
+
+    if (
+      Object.values(data).some((v) => typeof v === "number" && v < 0) ||
+      unitRentsClean.some((u) => u.rentCents < 0)
+    ) {
+      toast.error("Negative Werte sind nicht erlaubt.");
+      return;
+    }
 
     setSaving(true);
     try {

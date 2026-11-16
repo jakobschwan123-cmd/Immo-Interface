@@ -27,7 +27,7 @@ import {
 
 import { ReceiptUpload, deleteReceiptFile } from "@/components/receipt-upload";
 import { addTransaction } from "@/lib/transactions";
-import { applyExtraction, type ReceiptExtraction } from "@/lib/receipts";
+import { applyExtraction, parseIsoDate, type ReceiptExtraction } from "@/lib/receipts";
 import { euroInputToCents } from "@/lib/money";
 import {
   EXPENSE_CATEGORIES,
@@ -109,13 +109,19 @@ export function TransactionDialog({
       toast.error("Bitte einen Betrag größer 0 eingeben.");
       return;
     }
+    // Ohne gültiges Datum fiele die Buchung aus jedem Jahresabschluss (Jahresfilter per Datum).
+    const isoDate = parseIsoDate(date);
+    if (!isoDate || isoDate < "1991") {
+      toast.error("Bitte ein gültiges Datum eingeben.");
+      return;
+    }
     setSaving(true);
     try {
       await addTransaction({
         propertyId,
         type,
         amountCents,
-        date,
+        date: isoDate,
         // Sondertilgung braucht keine EÜR-Kategorie.
         category: type === "repayment" ? "Sonstiges" : category,
         description: description.trim() || undefined,
