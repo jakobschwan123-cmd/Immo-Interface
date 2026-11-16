@@ -57,19 +57,18 @@ export function effectiveMonthlyRentCents(p: Property): number {
 
 // AfA fuer ein bestimmtes Steuerjahr (§ 7 Abs. 4 EStG): im Anschaffungsjahr
 // monatsgenau ab dem Kaufmonat (Kaufmonat zaehlt voll, Kauf Juli = 6/12),
-// Jahre vor dem Kauf = 0, Folgejahre voll. Ungueltiges Kaufdatum -> voller Jahresbetrag.
+// Jahre vor dem Kauf = 0, Folgejahre voll. Ohne gueltiges Kaufdatum -> 0, weil der
+// AfA-Beginn unbekannt ist (die EÜR weist solche Objekte in `afaMissingDate` aus).
+export function hasValidPurchaseDate(p: Property): boolean {
+  const m = Number(p.purchaseDate?.slice(5, 7));
+  return /^\d{4}-\d{2}/.test(p.purchaseDate ?? "") && m >= 1 && m <= 12;
+}
+
 export function afaForYear(p: Property, year: number): number {
+  if (!hasValidPurchaseDate(p)) return 0;
   const annual = Math.round((p.buildingValueCents * p.afaRatePercent) / 100);
-  const purchaseYear = Number(p.purchaseDate?.slice(0, 4));
-  const purchaseMonth = Number(p.purchaseDate?.slice(5, 7));
-  if (
-    !Number.isInteger(purchaseYear) ||
-    !Number.isInteger(purchaseMonth) ||
-    purchaseMonth < 1 ||
-    purchaseMonth > 12
-  ) {
-    return annual;
-  }
+  const purchaseYear = Number(p.purchaseDate.slice(0, 4));
+  const purchaseMonth = Number(p.purchaseDate.slice(5, 7));
   if (year < purchaseYear) return 0;
   const firstYearCents = Math.round((annual * (13 - purchaseMonth)) / 12);
   if (year === purchaseYear) return firstYearCents;

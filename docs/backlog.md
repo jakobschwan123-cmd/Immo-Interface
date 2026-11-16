@@ -38,7 +38,7 @@ mit Bestätigung durch den Nutzer. Braucht Blaze-Plan und einen Gemini-Key in ei
 ## Phase 5: Polish & Rollout (teilweise)
 - ✅ Mobile-Optimierung (alle Seiten und Dialoge)
 - Fehlerbehandlung und Edge-Cases
-- Backup – Entscheidung offen: eigenes Skript (JSON lokal) oder Firestore-Export (mit Blaze jetzt möglich)
+- Backup – entschieden: wöchentlicher Firestore-Export; Einrichtung offen (braucht Blaze)
 
 ## Später / Ideen
 - **m²-Schnellschätzer** via Gemini: Marktwert ≈ Wohnfläche × Ø-m²-Preis der Stadt. Wird leicht, sobald

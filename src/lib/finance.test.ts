@@ -57,11 +57,11 @@ describe("afaForYear (§ 7 Abs. 4 EStG, Kaufmonat zählt voll)", () => {
     expect(afaForYear(odd, 2025)).toBe(16_461);
     expect(Number.isInteger(afaForYear(odd, 2025))).toBe(true);
   });
-  it("fehlendes/ungültiges purchaseDate -> voller Jahresbetrag (so im Code definiert)", () => {
+  it("fehlendes/ungültiges purchaseDate -> 0 (AfA-Beginn unbekannt)", () => {
     for (const purchaseDate of [undefined, "", "foo", "2025-13-01", "2025-00-10", "2025-7-15"]) {
       const q = { ...p, purchaseDate } as unknown as Property;
-      expect(afaForYear(q, 2025)).toBe(200_000);
-      expect(afaForYear(q, 1990)).toBe(200_000); // auch vor "Kauf" – es gibt keinen Kaufzeitpunkt
+      expect(afaForYear(q, 2025)).toBe(0);
+      expect(afaForYear(q, 1990)).toBe(0);
     }
   });
   it("AfA-Satz 0 oder Gebäudeanteil 0 -> 0", () => {

@@ -8,6 +8,12 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   Bestätigung durch den Nutzer, Blaze-Plan nötig. Details: [`backlog.md`](backlog.md) Phase 3.
 - **Onboarding/Nutzer:** final. Ein Google-Account, genutzt von zwei PCs (Claude Code und Antigravity).
 - **Rechtsträger:** aktuell keine Immobilie in einer GmbH, GmbH bleibt außerhalb des Scopes.
+- **AfA ohne gültiges Kaufdatum (11/2026):** EÜR setzt 0 an und warnt im Jahresabschluss
+  (`afaMissingDate`). Dashboard-KPI rechnet weiter bewusst mit voller Jahres-AfA.
+- **Backup (11/2026):** Firestore-Export statt eigenem Skript. Einrichtung offen, braucht Blaze.
+- **Beleg-Links (11/2026):** `getDownloadURL` bleibt (dauerhafte Token-URL, öffnet ohne Login). Neu
+  bewerten, falls mehr als ein Account die App nutzt – dann `getBlob` + Object-URL (braucht CORS).
+- **Dev-Whitelist (11/2026):** keine Build-Warnung, die Rules greifen ohnehin.
 
 ## Absicherung & Betrieb
 - **Firestore-Rules versionieren/deployen:** `firebase.json` + Firebase CLI statt `firestore.rules`
@@ -15,20 +21,12 @@ Features stehen in [`backlog.md`](backlog.md). Erledigtes wird hier gestrichen.
   per `firebase deploy --only firestore:rules` reproduzierbar (ggf. lokal testbar mit Emulator).
   Angelegt: `firebase.json` + `.firebaserc` (Projekt `immo-interface`), Anleitung in `docs/deployment.md`.
   Offen: `firebase login` und erster `firebase deploy --only firestore:rules` durch Jakob.
-- **Backup:** Automatischer Firestore-Export; wöchentlich passt zum Erfassungsrhythmus.
-  Firestore-Export braucht Blaze (Cloud Storage Bucket) → Alternative: eigenes Skript, das
-  wöchentlich JSON lokal sichert. Entscheiden.
-- **Dev-Whitelist:** Nur ein Account nutzt die App, Rules greifen ohnehin → niedrige Priorität.
-  Optional Build-Warnung bei leerer `NEXT_PUBLIC_ALLOWED_EMAILS`.
+- **Backup einrichten:** wöchentlicher Firestore-Export (passt zum Erfassungsrhythmus), sobald
+  Blaze aktiv ist (braucht Cloud Storage Bucket).
 
 ## Qualität
 - **Tests:** ✅ Vitest eingerichtet (`npm test`). Abgedeckt: `money.ts`, EÜR-Summen (A1),
   Journal (A4), `loan.ts`, `finance.ts`. Neue Rechenlogik (A2, A3) immer mit Test.
-- **AfA ohne gültiges Kaufdatum:** `afaForYear` setzt dann die volle AfA an – auch für Jahre
-  vor dem Kauf (auch bei `"2025-7-15"` ohne führende Null). Entscheiden: 0 + Warnung oder
-  Kaufdatum zur Pflicht machen. Dashboard-KPI rechnet bewusst immer mit voller Jahres-AfA.
-- **Beleg-Links (`getDownloadURL`):** liefern eine dauerhafte URL mit Token – öffnet den Beleg ohne Login,
-  landet im Browserverlauf. Entscheiden: so lassen oder `getBlob` + Object-URL (braucht CORS am Bucket).
 
 ## Produkt-Idee: Vermarktung als App/Website
 Idee: Programm über die Familie hinaus anbieten (erster Interessent: Bekannter mit mehreren Immobilien).

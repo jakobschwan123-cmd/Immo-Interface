@@ -46,8 +46,12 @@ describe("A2: afaForYear (§ 7 Abs. 4 EStG)", () => {
     expect(afaForYear({ ...p, purchaseDate: "2025-01-31" }, 2025)).toBe(200_000);
     expect(afaForYear({ ...p, purchaseDate: "2025-12-01" }, 2025)).toBe(16_667);
   });
-  it("ungültiges Datum -> voller Jahresbetrag", () => {
-    expect(afaForYear({ ...p, purchaseDate: "" }, 2025)).toBe(200_000);
+  it("ungültiges Datum -> 0 und Warnung in der EÜR", () => {
+    for (const purchaseDate of ["", "abc", "2025-7-15", "2025-13-01"]) {
+      const bad = { ...p, purchaseDate };
+      expect(afaForYear(bad, 2025)).toBe(0);
+      expect(computeEuer([bad, p], [], 2025).afaMissingDate).toEqual([bad.name]);
+    }
   });
 });
 

@@ -7,7 +7,7 @@
 // Hinweis: vereinfachte Darstellung als Vorbereitung fuer den Steuerberater,
 // KEIN Steuerberater-Ersatz. Die AfA wird im Kaufjahr monatsgenau (Kaufmonat voll) angesetzt.
 
-import { afaForYear } from "./finance";
+import { afaForYear, hasValidPurchaseDate } from "./finance";
 import { loanInterestForYear } from "./loan";
 import { normalizeCategory, TRANSACTION_CATEGORIES } from "./types";
 import type { Property, Transaction } from "./types";
@@ -21,6 +21,9 @@ export type Euer = {
   expenses: EuerLine[]; // Ausgaben je Kategorie + AfA (nur > 0)
   expenseTotalCents: number;
   surplusCents: number; // Ueberschuss (+) oder Verlust (-)
+  // Namen der Objekte mit Gebaeudewert, aber ohne gueltiges Kaufdatum: fuer sie ist
+  // KEINE AfA angesetzt (Beginn unbekannt). Die UI warnt.
+  afaMissingDate: string[];
   // Plausibilitaetsvergleich Darlehenszins: berechnet (Annuitaetenplan) vs. gebucht
   // (Kategorie "Finanzierungszins"). null, wenn kein Objekt einen Kredit hat.
   // Fliesst NICHT in die EÜR-Summen ein (kein Doppelansatz).
@@ -117,6 +120,9 @@ export function computeEuer(
     expenses,
     expenseTotalCents,
     surplusCents: incomeTotalCents - expenseTotalCents,
+    afaMissingDate: properties
+      .filter((p) => p.buildingValueCents > 0 && p.afaRatePercent > 0 && !hasValidPurchaseDate(p))
+      .map((p) => p.name),
     loanInterestCheck: hasLoan
       ? { calculatedCents, bookedCents, diffCents: calculatedCents - bookedCents }
       : null,
